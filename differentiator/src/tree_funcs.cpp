@@ -43,6 +43,12 @@ void  dtor_childs(Node* node_ptr)
 
 Node* create_node(Tree* tree_ptr, double node_value, int node_type, Node* left_child, Node* right_child)
 {
+    if(node_type == IS_VAL && (left_child != nullptr || right_child != nullptr))
+    {
+        printf("ERROR: value cannot have child nodes\n\n");
+        return nullptr;
+    }
+
     Node* new_node_ptr = (Node*)calloc(1, sizeof(Node));
 
     if(new_node_ptr == nullptr)
@@ -86,20 +92,49 @@ Node* create_node(Tree* tree_ptr, double node_value, int node_type, Node* left_c
 //     }
 // }
 
-// void  print_leaves(Node* node_ptr)
-// {
-//     if(node_ptr->left_child == nullptr && node_ptr->right_child == nullptr)
-//     {
-//         printf("%s ", node_ptr->node_value);
-//         return;
-//     }
-//     if(node_ptr->left_child != nullptr)
-//     {
-//         print_leaves(node_ptr->left_child);
-//     }
-//     if(node_ptr->right_child != nullptr)
-//     {
-//         print_leaves(node_ptr->right_child);
-//     }
-// }
+void print_leaves(Node* node_ptr)
+{
+    if(node_ptr->left_child == nullptr && node_ptr->right_child == nullptr && node_ptr->type == IS_VAL)
+    {
+        printf("%f ", node_ptr->value.node_value);
+        return;
+    }
+    if(node_ptr->left_child != nullptr)
+    {
+        print_leaves(node_ptr->left_child);
+    }
+    if(node_ptr->right_child != nullptr)
+    {
+        print_leaves(node_ptr->right_child);
+    }
+}
+
+
+void print_preorder()
+{
+
+
+
+}
+
+void print_inorder(Node* node_ptr)
+{
+    if(node_ptr == nullptr)
+    {
+        return;
+    }
+    printf("(");
+    print_inorder(node_ptr->left_child);
+    if(node_ptr->type == IS_VAL)
+    {
+        printf("%.3f", node_ptr->value.node_value);
+    }
+    else
+    {
+        printf("%c", node_ptr->value.op_number);
+    }
+    print_inorder(node_ptr->right_child);
+    printf(")");
+}
+
 

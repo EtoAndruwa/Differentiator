@@ -32,10 +32,10 @@ enum error_codes
 
 enum op_numbers
 {
-    ADD  = 1,
-    SUB  = 2,
-    DIV  = 3,
-    MUL  = 4,
+    ADD  = 43,
+    SUB  = 45,
+    DIV  = 58,
+    MUL  = 42,
 };
 
 enum node_type
@@ -78,5 +78,6 @@ void  link_node_left(Node* parent_ptr, Node* child_ptr);
 void  link_node_right(Node* parent_ptr, Node* child_ptr);
 Node* search_node(Node* node_ptr, Node_data search_value);
 void  print_leaves(Node* node_ptr);
+void print_inorder(Node* node_ptr);
 
 #endif
