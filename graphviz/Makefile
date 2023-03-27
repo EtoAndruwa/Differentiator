@@ -8,24 +8,28 @@ CFLAGS = -g -c -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal 
 EXE_FLAG = valgrind -s --leak-check=yes --show-leak-kinds=all --log-file="./logs/valgrind_log.txt"
 
 CC = g++
+TARGET = Dot
 
-DIR_GRAPHVIZ = ./graphviz
-DIR_DIFFERRENTIATOR = ./differentiator
+PREF_OBJ  = ./obj/
+PREF_SRC  = ./src/
 
 
-all:  Make_d
+SRC = $(wildcard $(PREF_SRC)*.cpp)
+OBJ = $(patsubst $(PREF_SRC)%.cpp, $(PREF_OBJ)%.o, $(SRC))
 
-clean_d: 
-	cd $(DIR_DIFFERRENTIATOR) && make clean 
+all : $(TARGET) run
 
-clean_gf:
-	cd $(DIR_GRAPHVIZ) && make clean_files
+$(TARGET) : $(OBJ) 
+	$(CC) $(OBJ) -o $(TARGET).exe
 
-clean_g:
-	cd $(DIR_GRAPHVIZ) && make clean
+$(PREF_OBJ)%.o : $(PREF_SRC)%.cpp
+	$(CC) $(CFLAGS) -c $< -o $@
 
-Make_g: 
-	cd $(DIR_GRAPHVIZ) && make
+clean: 
+	rm $(TARGET).exe $(PREF_OBJ)*.o ./graph_dumps/images/*.jpg ./graph_dumps/txt/*.txt ./graph_dumps/html_output.html ./graph_dumps/image_list.txt 	
+clean_files:
+	rm ./graph_dumps/images/*.jpg ./graph_dumps/txt/*.txt ./graph_dumps/html_output.html ./graph_dumps/image_list.txt
 
-Make_d: 
-	cd $(DIR_DIFFERRENTIATOR) && make
+run:
+	$(EXE_FLAG) ./dot.exe 
+
