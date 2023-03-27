@@ -4,7 +4,7 @@ static size_t number_of_images = 0; // global variable in order to count the num
 
 size_t graph_start(char* file_name) // writes the start of the .txt file
 {
-    FILE* graph_txt = fopen(file_name, "a+");
+    FILE* graph_txt = fopen(file_name, "w");
     if(graph_txt == nullptr)
     {
         printf("ERROR_TO_OPEN");
@@ -57,7 +57,7 @@ size_t html_end(char* file_name) // writes the end of the html file
 
 size_t hmtl_start(char* file_name) // writes the start of the html file
 {
-    FILE* graph_txt = fopen(file_name, "a+");
+    FILE* graph_txt = fopen(file_name, "w");
     if(graph_txt == nullptr)
     {
 
@@ -82,7 +82,17 @@ size_t print_tree_data(Tree* tree_struct, Node* node_ptr, const char* file_name)
 
     if(node_ptr != nullptr)
     {
-        fprintf(graph_txt, "\tnode_%d[shape = Mrecord, label =\" { <f0> left_child = %p } | { <here> value = %s \\n} | { <f1> right_child = %p } \"];\n", node_ptr->node_value, node_ptr->left_child, node_ptr->node_value, node_ptr->right_child);
+        if(node_ptr->type == IS_VAL)
+        {
+            printf("1\n");
+            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, label =\" { <f0> left_child = %p } | { <here> value = %f \\n} | { <f1> right_child = %p } \"];\n", node_ptr, node_ptr->left_child, node_ptr->value.node_value, node_ptr->right_child);
+        }
+        else
+        {
+            printf("\n2\n\n");
+            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, label =\" { <f0> left_child = %p } | { <here> value = %ld \\n} | { <f1> right_child = %p } \"];\n", node_ptr, node_ptr->left_child, node_ptr->value.op_number, node_ptr->right_child);
+        }
+        
         
         if(node_ptr->left_child != nullptr)
         {
@@ -114,12 +124,12 @@ size_t print_tree_links(Tree* tree_struct, Node* node_ptr, const char* file_name
 
     if(node_ptr->left_child != nullptr)
     {
-        fprintf(graph_txt, "\tnode_%d:f0 -> node_%d:here[color=\"blue\", label = \"left_child\"];\n", node_ptr->node_value, node_ptr->left_child->node_value);
+        fprintf(graph_txt, "\tnode_%p:f0 -> node_%p:here[color=\"blue\", label = \"left_child\"];\n", node_ptr, node_ptr->left_child);
         print_tree_links(tree_struct, node_ptr->left_child, file_name);
     }
     if(node_ptr->right_child != nullptr)
     {
-        fprintf(graph_txt, "\tnode_%d:f1 -> node_%d:here[color=\"red\", label = \"right_child\"];\n", node_ptr->node_value, node_ptr->right_child->node_value);
+        fprintf(graph_txt, "\tnode_%p:f1 -> node_%p:here[color=\"red\", label = \"right_child\"];\n", node_ptr, node_ptr->right_child);
         print_tree_links(tree_struct, node_ptr->right_child, file_name);
     }
 

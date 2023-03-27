@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tree.h"
-
+#include "../../graphviz/src/graphviz.h"
 
 
 #endif

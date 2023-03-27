@@ -8,7 +8,7 @@ CFLAGS = -g -c -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal 
 EXE_FLAG = valgrind -s --leak-check=yes --show-leak-kinds=all --log-file="./logs/valgrind_log.txt"
 
 CC = g++
-TARGET = Differentiator run
+TARGET = Differentiator
 
 PREF_OBJ = ./obj/
 PREF_SRC = ./src/
@@ -22,7 +22,7 @@ GRV_OBJ = $(patsubst $(PREF_GRV)%.cpp, $(PREF_OBJ)%.o, $(GRV_CPP))
 
 OBJ = $(GRV_OBJ) $(DIFF_OBJ)
 
-all : $(TARGET) 
+all : $(TARGET) run
 
 $(TARGET) : $(OBJ) 
 	$(CC) $(OBJ) -o $(TARGET).exe
