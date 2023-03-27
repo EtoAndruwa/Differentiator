@@ -45,4 +45,13 @@ typedef struct Tree
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+Tree* tree_ctor();
+void  tree_dtor(Tree* tree_ptr);
+void  dtor_childs(Node* node_ptr);
+Node* create_node(Tree* tree_ptr, Node_data node_value);
+void  link_node_left(Node* parent_ptr, Node* child_ptr);
+void  link_node_right(Node* parent_ptr, Node* child_ptr);
+Node* search_node(Node* node_ptr, Node_data search_value);
+void  print_leaves(Node* node_ptr);
+
 #endif

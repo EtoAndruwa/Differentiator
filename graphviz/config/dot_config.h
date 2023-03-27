@@ -13,7 +13,7 @@
 #define OUTPUT_FORMAT        ".jpg"
 #define INPUT_FORMAT         ".txt"
 #define HTML                 ".html"
-#define OUTPUT_NAME          "tree"
+#define OUTPUT_NAME          "diff_tree"
 #define DEFAULT_LEGEND_TEXT  "Empty legend"
 #define SPLINES_DOT          "true"
 
