@@ -79,5 +79,8 @@ void  link_node_right(Node* parent_ptr, Node* child_ptr);
 Node* search_node(Node* node_ptr, Node_data search_value);
 void  print_leaves(Node* node_ptr);
 void print_inorder(Node* node_ptr);
+void print_preorder(Node* node_ptr);
+void print_postorder(Node* node_ptr);
+
 
 #endif

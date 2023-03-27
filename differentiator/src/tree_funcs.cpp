@@ -109,12 +109,24 @@ void print_leaves(Node* node_ptr)
     }
 }
 
-
-void print_preorder()
+void print_preorder(Node* node_ptr)
 {
-
-
-
+    if(node_ptr == nullptr)
+    {
+        return;
+    }
+    printf("(");
+    if(node_ptr->type == IS_VAL)
+    {
+        printf("%.3f", node_ptr->value.node_value);
+    }
+    else
+    {
+        printf("%c", node_ptr->value.op_number);
+    }
+    print_preorder(node_ptr->left_child);
+    print_preorder(node_ptr->right_child);
+    printf(")");
 }
 
 void print_inorder(Node* node_ptr)
@@ -134,6 +146,26 @@ void print_inorder(Node* node_ptr)
         printf("%c", node_ptr->value.op_number);
     }
     print_inorder(node_ptr->right_child);
+    printf(")");
+}
+
+void print_postorder(Node* node_ptr)
+{
+    if(node_ptr == nullptr)
+    {
+        return;
+    }
+    printf("(");
+    print_postorder(node_ptr->left_child);
+    print_postorder(node_ptr->right_child);
+    if(node_ptr->type == IS_VAL)
+    {
+        printf("%.3f", node_ptr->value.node_value);
+    }
+    else
+    {
+        printf("%c", node_ptr->value.op_number);
+    }
     printf(")");
 }
 
