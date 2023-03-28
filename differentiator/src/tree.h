@@ -69,12 +69,13 @@ typedef struct Node
  */
 typedef struct Tree
 {
-    Node*  root        = nullptr;
-    size_t error_code  = TREE_OK;
-    char*  tree_buff   = nullptr;
-    char   size        = 0;
-    char   num_of_toks = 1;
-    tokens* toks       = nullptr;
+    Node*   root        = nullptr;
+    size_t  error_code  = TREE_OK;
+    char*   tree_buff   = nullptr;
+    char    size        = 0;
+    char    num_of_toks = 1;
+    tokens* toks        = nullptr;
+    size_t cur_tok      =0;
 }Tree;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/

@@ -60,7 +60,6 @@ double eval(const Node* const node_ptr)
         printf("\n\nUNKNOWN COMMAND\n\n");
         break;
     }
-
 }
 
 double func_Add(double value_1, double value_2)
@@ -135,71 +134,36 @@ void print_recur_code(const Node* const node_ptr, FILE* file_ptr)
     default:
         printf("\n\nNEW CMD\n\n");
         break;
-
     }
 }
 
-// size_t input_tree(Tree* tree_ptr)
-// {
-//     FILE* file_ptr = fopen("input_tree.txt", "rb");
-//     if(file_ptr == nullptr)
-//     {
-//         return ERR_CANNOT_OPEN_INPUT;
-//     }
+Node* input_tree(Tree* tree_ptr)
+{
+    if(tree_ptr->cur_tok < tree_ptr->num_of_toks)
+    {
+        if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
+        {   
+            printf("%d ", tree_ptr->toks[tree_ptr->cur_tok].value);
+            size_t cur_tok = tree_ptr->cur_tok;
+            tree_ptr->cur_tok++;
+            return create_node(tree_ptr, tree_ptr->toks[cur_tok].value);
+        }
 
-//     tree_ptr->root = get_node(file_ptr, tree_ptr);
+        Node* left  = nullptr;
+        Node* right = nullptr;
+        switch(tree_ptr->toks[tree_ptr->cur_tok].value)
+        {
 
-//     if(fclose(file_ptr) == EOF)
-//     {
-//         return ERR_CANNOT_CLOSE_INPUT;
-//     }
-//     free(file_ptr);
-//     file_ptr = nullptr;
-// }
+        #define DEF_CMD(code, int_val, ...) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); right = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_OP, left, right);
+        #include "DSL.h"
+        #undef DEF_CMD
 
-// Node* get_node(FILE* file_ptr, Tree* tree_ptr)
-// {
-//     char node_value[MAX_LEN_FSCANF];
-//     char brack;
-
-//     brack = fgetc(file_ptr);
-//     printf("\n%c\n", brack);
-
-//     if(brack == ')')
-//     {
-//         return nullptr;
-//     }
-
-//     if(brack == '(')
-//     {
-//         fscanf(file_ptr, "%s", brack);
-
-//         if(check_is_number(brack) == NOT_ALL_DIGITS)
-//         {
-//             node_value = (int)brack[0];
-
-//             switch(node_value)
-//             {
-            
-//             #define DEF_CMD(code, ...) case code: create_node(tree_ptr, code, IS_OP, get_node(file_ptr, tree_ptr), get_node(file_ptr, tree_ptr)); break;  
-//             #include "DSL.h"
-//             #undef DEF_CMD
-            
-//             default:
-//                 break;
-//             }
-//         }
-//         else
-//         {
-//             node_value = atoi(brack);
-//             fscanf(file_ptr, "%c ", brack);
-//         }
-//     }
-//     if(brack == ' )')
-//     {
-//         return create_node(tree_ptr, node_value);
-//     }
-// }
+        default:
+            printf("\n\nUNKNOWN COMMAND\n\n");
+            break;
+        }
+    }
+}
 
 size_t check_is_number(char* num_text) 
 {
