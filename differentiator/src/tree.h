@@ -32,10 +32,9 @@ enum error_codes
 
 enum op_numbers
 {
-    ADD  = 43,
-    SUB  = 45,
-    DIV  = 58,
-    MUL  = 42,
+    #define DEF_CMD(name, code) name = code,
+    #include "DSL.h"
+    #undef DEF_CMD
 };
 
 enum node_type

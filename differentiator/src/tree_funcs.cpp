@@ -72,26 +72,6 @@ Node* create_node(Tree* tree_ptr, double node_value, int node_type, Node* left_c
     return new_node_ptr;
 }
 
-// Node* search_node(Node* node_ptr, Node_data search_value)
-// {
-//     if(node_ptr->node_value == search_value)
-//     {
-//         return node_ptr;
-//     }
-//     else if(node_ptr->node_value > search_value && node_ptr->left_child != nullptr)
-//     {
-//         search_node(node_ptr->left_child, search_value);
-//     }
-//     else if(node_ptr->node_value < search_value && node_ptr->right_child != nullptr)
-//     {
-//         search_node(node_ptr->right_child, search_value);
-//     }
-//     else    
-//     {   
-//         return nullptr;
-//     }
-// }
-
 void print_leaves(Node* node_ptr)
 {
     if(node_ptr->left_child == nullptr && node_ptr->right_child == nullptr && node_ptr->type == IS_VAL)

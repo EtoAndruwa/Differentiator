@@ -7,6 +7,7 @@ int main()
     Node* node_1 = create_node(tree_ptr, 9);
     Node* node_2 = create_node(tree_ptr, 2.1);
     tree_ptr->root = create_node(tree_ptr, ADD, IS_OP, node_1, node_2);
+    printf("\nvalue: %f\n", eval(tree_ptr->root));
 
     // print_leaves(tree_ptr->root);
     // printf("\n");

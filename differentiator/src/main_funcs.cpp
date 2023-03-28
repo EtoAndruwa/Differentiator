@@ -1,6 +1,6 @@
 #include "Differentiator.h"
 
-size_t print_recur_tree(const Node* node_ptr, FILE* file_ptr)
+size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr)
 {
     if(node_ptr == nullptr)
     {
@@ -30,7 +30,7 @@ size_t print_recur_tree(const Node* node_ptr, FILE* file_ptr)
     fprintf(file_ptr, ")");
 }
 
-size_t output_tree(const Node* root_node_ptr)
+size_t output_tree(const Node* const root_node_ptr)
 {
     FILE* file_ptr = fopen("output_tree.txt", "w");
     if(file_ptr == nullptr)
@@ -48,6 +48,49 @@ size_t output_tree(const Node* root_node_ptr)
     file_ptr = nullptr;
 }
 
+double eval(const Node* const node_ptr)
+{
+    if(node_ptr->type == IS_VAL)
+    {
+        return node_ptr->value.node_value;
+    }
 
+    switch (node_ptr->value.op_number)
+    {
+
+    #define DEF_CMD(code, ...) case code:return func_ ## code(eval(node_ptr->left_child), eval(node_ptr->right_child)); break;
+    #include "DSL.h"
+    #undef DEF_CMD
+
+    default:
+        printf("\n\nUNKNOWN COMMAND\n\n");
+        break;
+    }
+
+}
+
+double func_ADD(double value_1, double value_2)
+{
+    return value_1 + value_2;
+}
+
+double func_SUB(double value_1, double value_2)
+{
+    return value_1 - value_2;
+}
+
+double func_MUL(double value_1, double value_2)
+{
+    return value_1 * value_2;
+}
+
+double func_DIV(double value_1, double value_2)
+{
+    if(fabs(value_2) <= EPS)
+    {
+        return NAN;
+    }
+    return value_1 / value_2;
+}
 
 
