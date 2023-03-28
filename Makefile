@@ -11,9 +11,10 @@ CC = g++
 
 DIR_GRAPHVIZ = ./graphviz
 DIR_DIFFERRENTIATOR = ./differentiator
+DIR_CPU = ./CPU
 
 
-all:  Make_d
+all:  Make_d Make_c
 
 clean_d: 
 	cd $(DIR_DIFFERRENTIATOR) && make clean 
@@ -24,8 +25,14 @@ clean_gf:
 clean_g:
 	cd $(DIR_GRAPHVIZ) && make clean
 
+clean_c:
+	cd $(DIR_GRAPHVIZ) && make clean_obj
+
 Make_g: 
 	cd $(DIR_GRAPHVIZ) && make
 
 Make_d: 
 	cd $(DIR_DIFFERRENTIATOR) && make
+
+Make_c:
+	cd $(DIR_CPU) && make

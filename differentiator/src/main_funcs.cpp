@@ -7,11 +7,6 @@ size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr)
         return NULL_PTR_NODE;
     }
 
-    if(file_ptr == nullptr)
-    {
-        return ERR_CANNOT_OPEN_OUTPUT;
-    }
-
     fprintf(file_ptr, "(");
 
     if(node_ptr->type == IS_VAL)
@@ -25,7 +20,6 @@ size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr)
 
     print_recur_tree(node_ptr->left_child, file_ptr);
     print_recur_tree(node_ptr->right_child, file_ptr);
-
 
     fprintf(file_ptr, ")");
 }
@@ -55,7 +49,7 @@ double eval(const Node* const node_ptr)
         return node_ptr->value.node_value;
     }
 
-    switch (node_ptr->value.op_number)
+    switch(node_ptr->value.op_number)
     {
 
     #define DEF_CMD(code, ...) case code:return func_ ## code(eval(node_ptr->left_child), eval(node_ptr->right_child)); break;
@@ -93,4 +87,54 @@ double func_DIV(double value_1, double value_2)
     return value_1 / value_2;
 }
 
+size_t generate_cpu_code(const Node* const root_node_ptr)
+{
+    FILE* file_ptr = fopen("../CPU/ASM/asm_code.txt", "w");
+    if(file_ptr == nullptr)
+    {
+        return ERR_CANNOT_OPEN_OUTPUT;
+    }
 
+    print_recur_code(root_node_ptr, file_ptr);
+    fprintf(file_ptr, "OUT\n");
+    fprintf(file_ptr, "HLT\n");
+
+    if(fclose(file_ptr) == EOF)
+    {
+        return ERR_CANNOT_CLOSE_OUTPUT;
+    }
+    free(file_ptr);
+    file_ptr = nullptr;
+}
+
+void print_recur_code(const Node* const node_ptr, FILE* file_ptr)
+{
+    if(node_ptr == nullptr)
+    {
+        return;
+    }
+
+    print_recur_code(node_ptr->left_child, file_ptr);
+    print_recur_code(node_ptr->right_child, file_ptr);
+
+    int op_number = node_ptr->value.op_number;
+
+    if(node_ptr->type == IS_VAL)
+    {
+        fprintf(file_ptr, "PUSH %d\n", (int)node_ptr->value.node_value);
+        return;
+    }
+
+    switch(op_number)
+    {
+
+    #define DEF_CMD(code, ...) case code: fprintf(file_ptr, "%s\n", #code); break;
+    #include "DSL.h"
+    #undef DEF_CMD
+
+    default:
+        printf("\n\nNEW CMD\n\n");
+        break;
+
+    }
+}
