@@ -44,5 +44,6 @@ size_t get_size(Tree* tree_ptr);
 size_t get_tokens(Tree* tree_ptr);
 size_t realloc_toks(Tree* tree_ptr, size_t i);
 void   print_toks(Tree* tree_ptr);
+Node*  diff_tree(Tree* tree_ptr);
 
 #endif

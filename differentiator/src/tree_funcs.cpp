@@ -58,14 +58,17 @@ Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, 
 
     if(node_type == IS_VAL)
     {
+        printf("%f\n", node_value);
         new_node_ptr->value.node_value = node_value;
     }
     else if(node_type == IS_OP)
     {
+        printf("IS_OP\n", text);
         new_node_ptr->value.op_number = int(node_value);
     }
     else
     {
+        printf("%s\n", text);
         strncpy(new_node_ptr->value.text, text, 4); 
     }
     
@@ -125,9 +128,13 @@ void print_inorder(Node* node_ptr)
     {
         printf("%.3f", node_ptr->value.node_value);
     }
-    else
+    else if(node_ptr->type == IS_OP)
     {
         printf("%c", node_ptr->value.op_number);
+    }
+    else
+    {
+        printf("%s", node_ptr->value.text);
     }
     print_inorder(node_ptr->right_child);
     printf(")");

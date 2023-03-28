@@ -319,7 +319,7 @@ size_t realloc_toks(Tree* tree_ptr, size_t i)
     }
 }
 
-void print_toks(Tree* tree_ptr)
+void  print_toks(Tree* tree_ptr)
 {
     for(size_t tok_id = 0; tok_id < tree_ptr->num_of_toks; tok_id++)
     {
@@ -338,5 +338,38 @@ void print_toks(Tree* tree_ptr)
     }
 }
 
+Node* diff_tree(Tree* tree_ptr)
+{
+    if(tree_ptr->cur_tok < tree_ptr->num_of_toks)
+    {
+        if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
+        {   
+            //printf("%d ", tree_ptr->toks[tree_ptr->cur_tok].value);
+            size_t cur_tok = tree_ptr->cur_tok;
+            tree_ptr->cur_tok++;
+            return create_node(tree_ptr, 0.0);
+        }
+        if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAR)
+        {
+            printf("%s ", tree_ptr->toks[tree_ptr->cur_tok].text);
+            size_t cur_tok = tree_ptr->cur_tok;
+            tree_ptr->cur_tok++;
+            return create_node(tree_ptr, 0.0, IS_VAR, "dx\0");
+        }
 
+        Node* left  = nullptr;
+        Node* right = nullptr;
+        switch(tree_ptr->toks[tree_ptr->cur_tok].value)
+        {
+
+        #define DEF_CMD(code, int_val, ...) case code: tree_ptr->cur_tok++; left = diff_tree(tree_ptr); right = diff_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_OP, nullptr, left, right);
+        #include "DSL.h"
+        #undef DEF_CMD
+
+        default:
+            printf("\n\nUNKNOWN COMMAND\n\n");
+            break;
+        }
+    }
+}
 
