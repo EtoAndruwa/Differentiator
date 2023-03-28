@@ -15,6 +15,7 @@ typedef union Node_data
 {
     int     op_number;
     double  node_value;
+    char    text[4];
 }Node_data;
 
 /**
@@ -41,6 +42,7 @@ enum node_type
 {
     IS_OP  = 1,
     IS_VAL = 2,
+    IS_VAR = 3,
 };
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -49,6 +51,7 @@ typedef struct tokens
 {
     int    value = 0;         /// \brief The value reponsible for asm code of the token
     size_t type  = 0;         /// \brief The value responsible for type of token ('cmd','reg', 'val', 'flg')
+    char   text[4];
 }tokens;
 
 /**
@@ -75,7 +78,7 @@ typedef struct Tree
     char    size        = 0;
     char    num_of_toks = 1;
     tokens* toks        = nullptr;
-    size_t cur_tok      =0;
+    size_t  cur_tok      = 0;
 }Tree;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -83,7 +86,7 @@ typedef struct Tree
 Tree* tree_ctor();
 void  tree_dtor(Tree* tree_ptr);
 void  dtor_childs(Node* node_ptr);
-Node* create_node(Tree* tree_ptr, double node_value, int node_type = IS_VAL, Node* left_child = nullptr, Node* right_child = nullptr);
+Node* create_node(Tree* tree_ptr, double node_value, int node_type = IS_VAL, char* text = nullptr, Node* left_child = nullptr, Node* right_child = nullptr);
 void  link_node_left(Node* parent_ptr, Node* child_ptr);
 void  link_node_right(Node* parent_ptr, Node* child_ptr);
 Node* search_node(Node* node_ptr, Node_data search_value);

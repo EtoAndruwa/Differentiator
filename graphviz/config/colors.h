@@ -12,5 +12,6 @@
 #define HEAD_NODE_COLOR   "#C295FD"
 #define TAIL_NODE_COLOR   "#F3A32B"
 #define FREE_NODE_COLOR   "#3BD473"
+#define ORAN_BG_COLOR_DOT "#FAAC71"
 
 #endif

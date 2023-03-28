@@ -143,10 +143,17 @@ Node* input_tree(Tree* tree_ptr)
     {
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
         {   
-            printf("%d ", tree_ptr->toks[tree_ptr->cur_tok].value);
+            // printf("%d ", tree_ptr->toks[tree_ptr->cur_tok].value);
             size_t cur_tok = tree_ptr->cur_tok;
             tree_ptr->cur_tok++;
             return create_node(tree_ptr, tree_ptr->toks[cur_tok].value);
+        }
+        if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAR)
+        {
+            // printf("%d ", tree_ptr->toks[tree_ptr->cur_tok].value);
+            size_t cur_tok = tree_ptr->cur_tok;
+            tree_ptr->cur_tok++;
+            return create_node(tree_ptr, 0, IS_VAR, tree_ptr->toks[cur_tok].text);
         }
 
         Node* left  = nullptr;
@@ -154,7 +161,7 @@ Node* input_tree(Tree* tree_ptr)
         switch(tree_ptr->toks[tree_ptr->cur_tok].value)
         {
 
-        #define DEF_CMD(code, int_val, ...) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); right = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_OP, left, right);
+        #define DEF_CMD(code, int_val, ...) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); right = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_OP, "",left, right);
         #include "DSL.h"
         #undef DEF_CMD
 
@@ -275,6 +282,12 @@ size_t get_tokens(Tree* tree_ptr)
             tree_ptr->toks[toks_num].value = atoi(token_val);
             tree_ptr->toks[toks_num].type  = IS_VAL;
         }
+        else if(token_val[0] == 'x')
+        {
+            tree_ptr->toks[toks_num].text[0] = 'x';
+            tree_ptr->toks[toks_num].text[1] = '\0';
+            tree_ptr->toks[toks_num].type = IS_VAR;
+        }
         else
         {
             #define DEF_CMD(name, int_val, char_val) if(token_val[0] == char_val){tree_ptr->toks[toks_num].value = int_val;}
@@ -314,10 +327,16 @@ void print_toks(Tree* tree_ptr)
         {
             printf("index: %ld, type = %ld, val = %d\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
         }
-        else
+        else if(tree_ptr->toks[tok_id].type == IS_OP)
         {
             printf("index: %ld, type = %ld, val = %c\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
         }
+        else
+        {
+            printf("index: %ld, type = %ld, val = %s\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].text);
+        }
     }
 }
+
+
 

@@ -31,7 +31,7 @@ enum error_codes_diff
 size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr);
 size_t output_tree(const Node* const root_node_ptr);
 double eval(const Node* const node_ptr);
-void print_recur_code(const Node* const node_ptr, FILE* file_ptr);
+void   print_recur_code(const Node* const node_ptr, FILE* file_ptr);
 size_t generate_cpu_code(const Node* const root_node_ptr);
 double func_Add(double value_1, double value_2);
 double func_Sub(double value_1, double value_2);
