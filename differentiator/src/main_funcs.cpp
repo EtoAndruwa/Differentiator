@@ -63,22 +63,22 @@ double eval(const Node* const node_ptr)
 
 }
 
-double func_ADD(double value_1, double value_2)
+double func_Add(double value_1, double value_2)
 {
     return value_1 + value_2;
 }
 
-double func_SUB(double value_1, double value_2)
+double func_Sub(double value_1, double value_2)
 {
     return value_1 - value_2;
 }
 
-double func_MUL(double value_1, double value_2)
+double func_Mul(double value_1, double value_2)
 {
     return value_1 * value_2;
 }
 
-double func_DIV(double value_1, double value_2)
+double func_Div(double value_1, double value_2)
 {
     if(fabs(value_2) <= EPS)
     {
@@ -138,3 +138,222 @@ void print_recur_code(const Node* const node_ptr, FILE* file_ptr)
 
     }
 }
+
+// size_t input_tree(Tree* tree_ptr)
+// {
+//     FILE* file_ptr = fopen("input_tree.txt", "rb");
+//     if(file_ptr == nullptr)
+//     {
+//         return ERR_CANNOT_OPEN_INPUT;
+//     }
+
+//     tree_ptr->root = get_node(file_ptr, tree_ptr);
+
+//     if(fclose(file_ptr) == EOF)
+//     {
+//         return ERR_CANNOT_CLOSE_INPUT;
+//     }
+//     free(file_ptr);
+//     file_ptr = nullptr;
+// }
+
+// Node* get_node(FILE* file_ptr, Tree* tree_ptr)
+// {
+//     char node_value[MAX_LEN_FSCANF];
+//     char brack;
+
+//     brack = fgetc(file_ptr);
+//     printf("\n%c\n", brack);
+
+//     if(brack == ')')
+//     {
+//         return nullptr;
+//     }
+
+//     if(brack == '(')
+//     {
+//         fscanf(file_ptr, "%s", brack);
+
+//         if(check_is_number(brack) == NOT_ALL_DIGITS)
+//         {
+//             node_value = (int)brack[0];
+
+//             switch(node_value)
+//             {
+            
+//             #define DEF_CMD(code, ...) case code: create_node(tree_ptr, code, IS_OP, get_node(file_ptr, tree_ptr), get_node(file_ptr, tree_ptr)); break;  
+//             #include "DSL.h"
+//             #undef DEF_CMD
+            
+//             default:
+//                 break;
+//             }
+//         }
+//         else
+//         {
+//             node_value = atoi(brack);
+//             fscanf(file_ptr, "%c ", brack);
+//         }
+//     }
+//     if(brack == ' )')
+//     {
+//         return create_node(tree_ptr, node_value);
+//     }
+// }
+
+size_t check_is_number(char* num_text) 
+{
+    size_t is_digits = ALL_DIGITS; 
+
+    size_t length_text = strlen(num_text);
+    for(size_t i  = 0; i < length_text; i++)
+    {
+        if(isdigit(num_text[i]) == 0) // If the character is not a digit
+        {
+            is_digits = NOT_ALL_DIGITS;
+        }
+    }
+
+    return is_digits; // Returns 1 if all characters are digits (word is an integer)
+}
+
+size_t get_size(Tree* tree_ptr) 
+{
+    FILE* file_inp_ptr = fopen("input_tree.txt", "rb");
+    if(file_inp_ptr == nullptr)
+    {
+        return ERR_CANNOT_OPEN_INPUT;
+    }
+
+    fseek(file_inp_ptr, 0, SEEK_END); // Puts the pointer inside the file to the end of it
+    tree_ptr->size = ftell(file_inp_ptr); // Get the size of the file with '\r'!
+
+    if(tree_ptr->size == 0) 
+    {
+        // tree_ptr->err_code = ERR_EMPTY_ASM_FILE; 
+        // dump_asm(tree_ptr, FUNC_NAME, FUNC_LINE, FUNC_FILE);
+        // dtor_asm(tree_ptr);  
+        // return tree_ptr->err_code;
+    } 
+
+    // printf("size: %ld\n\n", tree_ptr->size);
+    if(fclose(file_inp_ptr) == EOF)
+    {   
+        return ERR_CANNOT_CLOSE_INPUT;
+    }
+    free(file_inp_ptr);
+    file_inp_ptr = nullptr;
+}
+
+size_t get_into_buff(Tree* tree_ptr) 
+{
+    FILE* file_inp_ptr = fopen("input_tree.txt", "rb");
+    if(file_inp_ptr == nullptr)
+    {
+        return ERR_CANNOT_OPEN_INPUT;
+    }
+
+    tree_ptr->tree_buff = (char*)calloc(1, sizeof(char) * (tree_ptr->size + 1)); // Allocates enough memmory for the buffer of chars  
+
+    if(tree_ptr->tree_buff == nullptr)
+    {
+        // tree_ptr->err_code = ERR_TO_CALLOC_ASM_BUF;
+        // dump_asm(tree_ptr, FUNC_NAME, FUNC_LINE, FUNC_FILE);
+        // dtor_asm(tree_ptr);
+        // return tree_ptr->err_code;
+    }
+
+    int num_read = fread(tree_ptr->tree_buff, sizeof(char), tree_ptr->size, file_inp_ptr); // Reads the file into the buffer
+    
+    if((num_read <= 0) && (num_read > tree_ptr->size))
+    {
+        // tree_ptr->err_code = ERR_READ_TO_ASM_BUF;
+        // dump_asm(tree_ptr, FUNC_NAME, FUNC_LINE, FUNC_FILE);
+        // dtor_asm(tree_ptr);
+        // return tree_ptr->err_code;       
+    }
+    tree_ptr->tree_buff[tree_ptr->size] = '\0'; // Makes form the file null-terminated string
+
+    // printf("buff: %s\n", tree_ptr->tree_buff);
+    if(fclose(file_inp_ptr) == EOF)
+    {   
+        return ERR_CANNOT_CLOSE_INPUT;
+    }
+    free(file_inp_ptr);
+    file_inp_ptr = nullptr;
+}
+
+size_t get_tokens(Tree* tree_ptr) 
+{
+    char* token_val = strtok(tree_ptr->tree_buff,"( ) \n\r");
+    tree_ptr->toks = (tokens*)calloc(1, sizeof(tokens));
+    
+    // if(tree_ptr->toks == nullptr)
+    // {
+    //     tree_ptr->err_code = ERR_TO_CALLOC_TOKS;
+    //     dump_asm(tree_ptr, FUNC_NAME, FUNC_LINE, FUNC_FILE);
+    //     dtor_asm(tree_ptr);
+    //     return tree_ptr->err_code;
+    // }
+
+    size_t toks_num = 0;
+    while(token_val != NULL)                        
+    {   
+        realloc_toks(tree_ptr, toks_num); // Reallocs the struct with tokens
+
+        // if(tree_ptr->err_code != STRUCT_OK)
+        // {
+        //     return tree_ptr->err_code;
+        // }
+        
+        if(check_is_number(token_val) == ALL_DIGITS)
+        {
+            tree_ptr->toks[toks_num].value = atoi(token_val);
+            tree_ptr->toks[toks_num].type  = IS_VAL;
+        }
+        else
+        {
+            #define DEF_CMD(name, int_val, char_val) if(token_val[0] == char_val){tree_ptr->toks[toks_num].value = int_val;}
+            #include "DSL.h"
+            #undef DEF_CMD
+
+            tree_ptr->toks[toks_num].type  = IS_OP;
+        }
+
+        token_val = strtok(NULL, "( ) \n\r");
+        toks_num++;
+    }
+}
+
+size_t realloc_toks(Tree* tree_ptr, size_t i) 
+{
+    if(tree_ptr->num_of_toks == i)
+    {
+        tree_ptr->num_of_toks++;
+        tree_ptr->toks = (tokens*)realloc(tree_ptr->toks, tree_ptr->num_of_toks * sizeof(tokens)); // The pointer to the array of structs
+
+        // if(tree_ptr->toks == nullptr)
+        // {
+        //     tree_ptr->err_code = ERR_TO_REALLOC_TOKS;
+        //     dump_asm(tree_ptr, FUNC_NAME, FUNC_LINE, FUNC_FILE);
+        //     dtor_asm(tree_ptr);
+        //     return tree_ptr->err_code;
+        // }
+    }
+}
+
+void print_toks(Tree* tree_ptr)
+{
+    for(size_t tok_id = 0; tok_id < tree_ptr->num_of_toks; tok_id++)
+    {
+        if(tree_ptr->toks[tok_id].type == IS_VAL)
+        {
+            printf("index: %ld, type = %ld, val = %d\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
+        }
+        else
+        {
+            printf("index: %ld, type = %ld, val = %c\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
+        }
+    }
+}
+

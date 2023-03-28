@@ -1,5 +1,5 @@
-DEF_CMD(ADD, (int)'+') 
-DEF_CMD(SUB, (int)'-')
-DEF_CMD(MUL, (int)'*')
-DEF_CMD(DIV, (int)'/')
+DEF_CMD(Add, (int)'+', '+') 
+DEF_CMD(Sub, (int)'-', '-')
+DEF_CMD(Mul, (int)'*', '*')
+DEF_CMD(Div, (int)'/', '/')
 

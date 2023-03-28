@@ -14,7 +14,7 @@ DIR_DIFFERRENTIATOR = ./differentiator
 DIR_CPU = ./CPU
 
 
-all:  Make_d Make_c
+all:  Make_d
 
 clean_d: 
 	cd $(DIR_DIFFERRENTIATOR) && make clean 

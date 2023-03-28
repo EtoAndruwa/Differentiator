@@ -32,7 +32,7 @@ enum error_codes
 
 enum op_numbers
 {
-    #define DEF_CMD(name, code) name = code,
+    #define DEF_CMD(name, code, ...) name = code,
     #include "DSL.h"
     #undef DEF_CMD
 };
@@ -44,6 +44,12 @@ enum node_type
 };
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+typedef struct tokens
+{
+    int    value = 0;         /// \brief The value reponsible for asm code of the token
+    size_t type  = 0;         /// \brief The value responsible for type of token ('cmd','reg', 'val', 'flg')
+}tokens;
 
 /**
  * @brief The struct of the node 
@@ -63,8 +69,12 @@ typedef struct Node
  */
 typedef struct Tree
 {
-    Node*  root = nullptr;
-    size_t error_code = TREE_OK;
+    Node*  root        = nullptr;
+    size_t error_code  = TREE_OK;
+    char*  tree_buff   = nullptr;
+    char   size        = 0;
+    char   num_of_toks = 1;
+    tokens* toks       = nullptr;
 }Tree;
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
@@ -77,9 +87,9 @@ void  link_node_left(Node* parent_ptr, Node* child_ptr);
 void  link_node_right(Node* parent_ptr, Node* child_ptr);
 Node* search_node(Node* node_ptr, Node_data search_value);
 void  print_leaves(Node* node_ptr);
-void print_inorder(Node* node_ptr);
-void print_preorder(Node* node_ptr);
-void print_postorder(Node* node_ptr);
+void  print_inorder(Node* node_ptr);
+void  print_preorder(Node* node_ptr);
+void  print_postorder(Node* node_ptr);
 
 
 #endif
