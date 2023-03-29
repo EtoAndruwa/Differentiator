@@ -358,71 +358,93 @@ Node* diff_tree(Tree* tree_ptr)
 
         Node* left  = nullptr;
         Node* right = nullptr;
+
         switch(tree_ptr->toks[tree_ptr->cur_tok].value)
         {
         case Mul: 
-            tree_ptr->cur_tok++;                 
-            left = diff_tree(tree_ptr);                         
-            right = diff_tree(tree_ptr);  
-
-            if(left->type == IS_VAL && right->type == IS_VARIB) 
-            {                                                                          
-                left->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 2].value;           
-                strcpy(right->value.text, "dx");                                                                               
-            }                                                                                  
-            else if(left->type == IS_VARIB && right->type == IS_VAL)           
-            {                                                 
-                right->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 1].value;          
-                strcpy(left->value.text, "dx");                                                            
-            }                                                               
-            else if(left->type == IS_VARIB && right->type == IS_VARIB)        
-            {                                                                                                                                      
-                strncpy(right->value.text, "dx", 4);                                              
-                strncpy(left->value.text, "2x", 4);                                              
-            }   
-
-            return create_node(tree_ptr, Mul, IS_OP, nullptr, left, right); 
-        case Sub: 
-            tree_ptr->cur_tok++;                 
-            left = diff_tree(tree_ptr);                         
-            right = diff_tree(tree_ptr);  
-                                                             
-            return create_node(tree_ptr, Sub, IS_OP, nullptr, left, right); 
-        case Add: 
-            tree_ptr->cur_tok++;                 
-            left = diff_tree(tree_ptr);                         
-            right = diff_tree(tree_ptr);  
-                                                                             
-            return create_node(tree_ptr, Add, IS_OP, nullptr, left, right);
-        case Div: 
-            tree_ptr->cur_tok++;                 
-            left = diff_tree(tree_ptr);                         
-            right = diff_tree(tree_ptr);
-
-            if(left->type == IS_VARIB && right->type == IS_VARIB)
             {
-                Node* node_1  = create_node(tree_ptr, 0, IS_VARIB, "dx");
-                Node* node_2  = create_node(tree_ptr, 0, IS_VARIB, "x");
-                Node* node_3  = create_node(tree_ptr, Mul, IS_OP, nullptr, node_1, node_2);
+                tree_ptr->cur_tok++;                 
+                left = diff_tree(tree_ptr);                         
+                right = diff_tree(tree_ptr);  
 
-                Node* node_4  = create_node(tree_ptr, 0, IS_VARIB, "dx");
-                Node* node_5  = create_node(tree_ptr, 0, IS_VARIB, "x");
-                Node* node_6  = create_node(tree_ptr, Mul, IS_OP, nullptr, node_5, node_4);
+                if(left->type == IS_VAL && right->type == IS_VARIB) 
+                {                                                                          
+                    left->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 2].value;           
+                    strcpy(right->value.text, "dx");                                                                               
+                }                                                                                  
+                else if(left->type == IS_VARIB && right->type == IS_VAL)           
+                {                                                 
+                    right->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 1].value;          
+                    strcpy(left->value.text, "dx");                                                            
+                }                                                               
+                else if(left->type == IS_VARIB && right->type == IS_VARIB)        
+                {                                                                                                                                      
+                    strncpy(right->value.text, "dx", 4);                                              
+                    strncpy(left->value.text, "2x", 4);                                              
+                }   
+                return create_node(tree_ptr, Mul, IS_OP, nullptr, left, right); 
+            }
+        case Sub: 
+            {
+                tree_ptr->cur_tok++;                 
+                left = diff_tree(tree_ptr);                         
+                right = diff_tree(tree_ptr);                                                
+                return create_node(tree_ptr, Sub, IS_OP, nullptr, left, right); 
+            }
+        case Add: 
+            {
+                tree_ptr->cur_tok++;                 
+                left = diff_tree(tree_ptr);                         
+                right = diff_tree(tree_ptr);                                                                   
+                return create_node(tree_ptr, Add, IS_OP, nullptr, left, right);
+            }
+        case Div: 
+            {
+                tree_ptr->cur_tok++;                 
+                left = diff_tree(tree_ptr);                         
+                right = diff_tree(tree_ptr);
+                Node* left_pre_diff  = nullptr;
+                Node* right_pre_diff = nullptr;
 
-                Node* node_7  = create_node(tree_ptr, Sub, IS_OP, nullptr, node_3, node_6);
+                if(left->type == IS_VAL)
+                {
+                    left_pre_diff = create_node(tree_ptr, tree_ptr->toks[tree_ptr->cur_tok - 2].value);
+                }
+                if(left->type == IS_VARIB)
+                {
+                    left_pre_diff = create_node(tree_ptr, 0, IS_VARIB, "x");
+                }
 
-                Node* node_8  = create_node(tree_ptr, 0, IS_VARIB, "x");
-                Node* node_9  = create_node(tree_ptr, 0, IS_VARIB, "x");
-                Node* node_10 = create_node(tree_ptr, Mul, IS_OP, nullptr, node_8, node_9);
+                if(right->type == IS_VAL)
+                {
+                    right_pre_diff = create_node(tree_ptr, tree_ptr->toks[tree_ptr->cur_tok - 1].value);
+                }
+                if(right->type == IS_VARIB)
+                {
+                    right_pre_diff = create_node(tree_ptr, 0, IS_VARIB, "x");
+                }
 
-                free(left);
-                free(right);
-                left = node_7;
-                right = node_10;
-            }  
-                                                                             
-            return create_node(tree_ptr, Div, IS_OP, nullptr, left, right); 
+                Node* left_top  = create_node(tree_ptr, Mul, IS_OP, nullptr, left, right_pre_diff);
+                Node* right_top  = create_node(tree_ptr, Mul, IS_OP, nullptr, left_pre_diff, right);
+                Node* top  = create_node(tree_ptr, Sub, IS_OP, nullptr, left_top, right_top);
 
+                Node* bottom_1 = nullptr;
+                Node* bottom_2 = nullptr;
+                if(right_pre_diff->type == IS_VARIB)
+                {
+                    bottom_1  = create_node(tree_ptr, 0, IS_VARIB, "x");
+                    bottom_2  = create_node(tree_ptr, 0, IS_VARIB, "x");
+                }
+                if(right_pre_diff->type == IS_VAL)
+                {
+                    bottom_1  = create_node(tree_ptr, tree_ptr->toks[tree_ptr->cur_tok - 1].value);
+                    bottom_2  = create_node(tree_ptr, tree_ptr->toks[tree_ptr->cur_tok - 1].value);
+                }
+
+                Node* bottom = create_node(tree_ptr, Mul, IS_OP, nullptr, bottom_1, bottom_2);
+                                                                                
+                return create_node(tree_ptr, Div, IS_OP, nullptr, top, bottom); 
+            }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
             break;
