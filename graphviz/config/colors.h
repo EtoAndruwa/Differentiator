@@ -13,5 +13,6 @@
 #define TAIL_NODE_COLOR   "#F3A32B"
 #define FREE_NODE_COLOR   "#3BD473"
 #define ORAN_BG_COLOR_DOT "#FAAC71"
+#define PURP_BG_COLOR_DOT "#9370DB"
 
 #endif

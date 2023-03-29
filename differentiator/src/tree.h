@@ -33,9 +33,11 @@ enum error_codes
 
 enum op_numbers
 {
-    #define DEF_CMD(name, code, ...) name = code,
-    #include "DSL.h"
-    #undef DEF_CMD
+    #define DEF_OP(name, code, ...) name = code,
+    #define DEF_FUNC(name, code, ...) name = code,
+    #include "def_cmd.h"
+    #undef DEF_OP
+    #undef DEF_FUNC
 };
 
 enum node_type
@@ -52,7 +54,7 @@ typedef struct tokens
 {
     int    value = 0;         /// \brief The value reponsible for asm code of the token
     size_t type  = 0;         /// \brief The value responsible for type of token ('cmd','reg', 'val', 'flg')
-    char   text[4];
+    char   text[6];
 }tokens;
 
 /**
@@ -88,9 +90,6 @@ Tree* tree_ctor();
 void  tree_dtor(Tree* tree_ptr);
 void  dtor_childs(Node* node_ptr);
 Node* create_node(Tree* tree_ptr, double node_value, int node_type = IS_VAL, char* text = nullptr, Node* left_child = nullptr, Node* right_child = nullptr);
-void  link_node_left(Node* parent_ptr, Node* child_ptr);
-void  link_node_right(Node* parent_ptr, Node* child_ptr);
-Node* search_node(Node* node_ptr, Node_data search_value);
 void  print_leaves(Node* node_ptr);
 void  print_inorder(Node* node_ptr);
 void  print_preorder(Node* node_ptr);

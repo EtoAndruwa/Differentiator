@@ -52,10 +52,30 @@ double eval(const Node* const node_ptr)
     switch(node_ptr->value.op_number)
     {
 
-    #define DEF_CMD(code, ...) case code:return func_ ## code(eval(node_ptr->left_child), eval(node_ptr->right_child)); break;
-    #include "DSL.h"
-    #undef DEF_CMD
-
+    case Add:
+        {
+            return func_Add(eval(node_ptr->left_child), eval(node_ptr->right_child));
+        }
+    case Sub:
+        {
+            return func_Sub(eval(node_ptr->left_child), eval(node_ptr->right_child));
+        }
+    case Mul:
+        {
+            return func_Mul(eval(node_ptr->left_child), eval(node_ptr->right_child));
+        }
+    case Div:
+        {
+            return func_Div(eval(node_ptr->left_child), eval(node_ptr->right_child));
+        }
+    case Sin:
+        {
+            return func_Sin(eval(node_ptr->left_child));
+        }
+    case Cos:
+        {
+            return func_Cos(eval(node_ptr->left_child));
+        }
     default:
         printf("\n\nUNKNOWN COMMAND\n\n");
         break;
@@ -84,6 +104,16 @@ double func_Div(double value_1, double value_2)
         return NAN;
     }
     return value_1 / value_2;
+}
+
+double func_Cos(double value_1)
+{
+    return cos(value_1);
+}
+
+double func_Sin(double value_1)
+{
+    return sin(value_1);
 }
 
 size_t generate_cpu_code(const Node* const root_node_ptr)
@@ -127,9 +157,9 @@ void print_recur_code(const Node* const node_ptr, FILE* file_ptr)
     switch(op_number)
     {
 
-    #define DEF_CMD(code, ...) case code: fprintf(file_ptr, "%s\n", #code); break;
-    #include "DSL.h"
-    #undef DEF_CMD
+    // #define DEF_CMD(code, ...) case code: fprintf(file_ptr, "%s\n", #code); break;
+    // #include "def_cmd.h"
+    // #undef DEF_CMD
 
     default:
         printf("\n\nNEW CMD\n\n");
@@ -143,14 +173,13 @@ Node* input_tree(Tree* tree_ptr)
     {
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
         {   
-            // printf("%d ", tree_ptr->toks[tree_ptr->cur_tok].value);
             size_t cur_tok = tree_ptr->cur_tok;
             tree_ptr->cur_tok++;
             return create_node(tree_ptr, tree_ptr->toks[cur_tok].value);
         }
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
         {
-            // printf("%d ", tree_ptr->toks[tree_ptr->cur_tok].value);
+
             size_t cur_tok = tree_ptr->cur_tok;
             tree_ptr->cur_tok++;
             return create_node(tree_ptr, 0, IS_VARIB, tree_ptr->toks[cur_tok].text);
@@ -161,9 +190,11 @@ Node* input_tree(Tree* tree_ptr)
         switch(tree_ptr->toks[tree_ptr->cur_tok].value)
         {
 
-        #define DEF_CMD(code, int_val, ...) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); right = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_OP, "",left, right);
-        #include "DSL.h"
-        #undef DEF_CMD
+        #define DEF_OP(code, int_val, ...) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); right = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_OP, "", left, right);
+        #define DEF_FUNC(code, int_val, str_val) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); return create_node(tree_ptr, 0, IS_FUNC, str_val, left);
+        #include "def_cmd.h"
+        #undef DEF_OP
+        #undef DEF_FUNC
 
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
@@ -290,11 +321,12 @@ size_t get_tokens(Tree* tree_ptr)
         }
         else
         {
-            #define DEF_CMD(name, int_val, char_val) if(token_val[0] == char_val){tree_ptr->toks[toks_num].value = int_val;}
-            #include "DSL.h"
-            #undef DEF_CMD
+            #define DEF_OP(name, int_val, char_val) if(token_val[0] == char_val){tree_ptr->toks[toks_num].value = int_val; tree_ptr->toks[toks_num].type  = IS_OP;}
+            #define DEF_FUNC(name, int_val, str_val) if(strcmp(token_val, str_val) == 0){tree_ptr->toks[toks_num].value = int_val; tree_ptr->toks[toks_num].type  = IS_FUNC;}
+            #include "def_cmd.h"
+            #undef DEF_OP
+            #undef DEF_FUNC
 
-            tree_ptr->toks[toks_num].type  = IS_OP;
         }
 
         token_val = strtok(NULL, "( ) \n\r");
@@ -444,6 +476,14 @@ Node* diff_tree(Tree* tree_ptr)
                 Node* bottom = create_node(tree_ptr, Mul, IS_OP, nullptr, bottom_1, bottom_2);
                                                                                 
                 return create_node(tree_ptr, Div, IS_OP, nullptr, top, bottom); 
+            }
+        case Cos:
+            {
+                tree_ptr->cur_tok++; 
+            }
+        case Sin:
+            {
+                tree_ptr->cur_tok++; 
             }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
