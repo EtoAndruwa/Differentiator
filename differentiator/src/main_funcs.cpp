@@ -52,32 +52,17 @@ double eval(const Node* const node_ptr)
     switch(node_ptr->value.op_number)
     {
 
-    case Add:
-        {
-            return func_Add(eval(node_ptr->left_child), eval(node_ptr->right_child));
-        }
-    case Sub:
-        {
-            return func_Sub(eval(node_ptr->left_child), eval(node_ptr->right_child));
-        }
-    case Mul:
-        {
-            return func_Mul(eval(node_ptr->left_child), eval(node_ptr->right_child));
-        }
-    case Div:
-        {
-            return func_Div(eval(node_ptr->left_child), eval(node_ptr->right_child));
-        }
-    case Sin:
-        {
-            return func_Sin(eval(node_ptr->left_child));
-        }
-    case Cos:
-        {
-            return func_Cos(eval(node_ptr->left_child));
-        }
+    #define DEF_OP(code, ...) case code: return func_ ## code(eval(node_ptr->left_child), eval(node_ptr->right_child));
+    #define DEF_FUNC(code, ...) case code: return func_ ## code(eval(node_ptr->left_child));
+
+    #include "def_cmd.h"
+
+    #undef DEF_OP
+    #undef DEF_FUNC
+
     default:
-        printf("\n\nUNKNOWN COMMAND\n\n");
+        printf("cmd: %s\n", node_ptr->value.text);
+        printf("\n\nUNKNOWN cmd\n\n");
         break;
     }
 }
@@ -108,13 +93,44 @@ double func_Div(double value_1, double value_2)
 
 double func_Cos(double value_1)
 {
-    return cos(value_1);
+    return cos(value_1 * PI / 180.0);
 }
 
 double func_Sin(double value_1)
 {
-    return sin(value_1);
+    return sin(value_1 * PI / 180.0);
 }
+
+double func_Tan(double value_1)
+{
+    return tan(value_1 * PI / 180.0);
+}
+
+double func_Asin(double value_1)
+{
+    return (asin(value_1) * 180.0) / PI;
+}
+
+double func_Acos(double value_1)
+{
+    return (acos(value_1) * 180.0) / PI;
+}
+
+double func_Sqrt(double value_1)
+{
+    return acos(value_1);
+}
+
+double func_Exp(double value_1)
+{
+    return exp(value_1);
+}
+
+double func_Log(double value_1)
+{
+    return log(value_1);
+}
+
 
 size_t generate_cpu_code(const Node* const root_node_ptr)
 {
@@ -191,13 +207,13 @@ Node* input_tree(Tree* tree_ptr)
         {
 
         #define DEF_OP(code, int_val, ...) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); right = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_OP, "", left, right);
-        #define DEF_FUNC(code, int_val, str_val) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); return create_node(tree_ptr, 0, IS_FUNC, str_val, left);
+        #define DEF_FUNC(code, int_val, ...) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_FUNC, "", left);
         #include "def_cmd.h"
         #undef DEF_OP
         #undef DEF_FUNC
 
         default:
-            printf("\n\nUNKNOWN COMMAND\n\n");
+            printf("\n\nUNKNOWN token\n\n");
             break;
         }
     }

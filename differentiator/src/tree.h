@@ -33,8 +33,8 @@ enum error_codes
 
 enum op_numbers
 {
-    #define DEF_OP(name, code, ...) name = code,
-    #define DEF_FUNC(name, code, ...) name = code,
+    #define DEF_OP(name_op, code_op, ...) name_op = code_op,
+    #define DEF_FUNC(name_func, code_func, ...) name_func = code_func,
     #include "def_cmd.h"
     #undef DEF_OP
     #undef DEF_FUNC

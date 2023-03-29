@@ -10,4 +10,5 @@ DEF_FUNC(Asin, 4, "asin")
 DEF_FUNC(Acos, 5, "acos")
 DEF_FUNC(Sqrt, 6, "sqrt")
 DEF_FUNC(Exp, 7, "exp")
-DEF_FUNC(Ln, 8, "ln")
+DEF_FUNC(Log, 8, "log")
+

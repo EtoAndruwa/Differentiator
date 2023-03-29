@@ -55,18 +55,17 @@ Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, 
     {   
         tree_ptr->error_code = ERR_TO_CALLOC_NODE;
     }
-
     if(node_type == IS_VAL)
     {
         new_node_ptr->value.node_value = node_value;
     }
-    else if(node_type == IS_OP)
+    else if(node_type == IS_VARIB)
     {
-        new_node_ptr->value.op_number = int(node_value);
+        strcpy(new_node_ptr->value.text, text); 
     }
     else
     {
-        strncpy(new_node_ptr->value.text, text, 4); 
+        new_node_ptr->value.op_number = int(node_value);
     }
     
     new_node_ptr->type = node_type;

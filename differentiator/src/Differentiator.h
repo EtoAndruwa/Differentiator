@@ -10,6 +10,7 @@
 #include "../../graphviz/src/graphviz.h"
 
 #define EPS 1e-7
+#define PI  3.14159265
 
 const int MAX_LEN_FSCANF = 11;
 
@@ -33,10 +34,21 @@ size_t output_tree(const Node* const root_node_ptr);
 double eval(const Node* const node_ptr);
 void   print_recur_code(const Node* const node_ptr, FILE* file_ptr);
 size_t generate_cpu_code(const Node* const root_node_ptr);
+
 double func_Add(double value_1, double value_2);
 double func_Sub(double value_1, double value_2);
 double func_Mul(double value_1, double value_2);
 double func_Div(double value_1, double value_2);
+
+double func_Cos(double value_1);
+double func_Sin(double value_1);
+double func_Tan(double value_1);
+double func_Asin(double value_1);
+double func_Acos(double value_1);
+double func_Sqrt(double value_1);
+double func_Exp(double value_1);
+double func_Log(double value_1);
+
 Node*  input_tree(Tree* tree_ptr);
 size_t check_is_number(char* num_text);
 size_t get_into_buff(Tree* tree_ptr);
@@ -45,7 +57,5 @@ size_t get_tokens(Tree* tree_ptr);
 size_t realloc_toks(Tree* tree_ptr, size_t i);
 void   print_toks(Tree* tree_ptr);
 Node*  diff_tree(Tree* tree_ptr);
-double func_Cos(double value_1);
-double func_Sin(double value_1);
 
 #endif
