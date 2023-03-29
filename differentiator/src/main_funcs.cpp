@@ -148,12 +148,12 @@ Node* input_tree(Tree* tree_ptr)
             tree_ptr->cur_tok++;
             return create_node(tree_ptr, tree_ptr->toks[cur_tok].value);
         }
-        if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAR)
+        if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
         {
             // printf("%d ", tree_ptr->toks[tree_ptr->cur_tok].value);
             size_t cur_tok = tree_ptr->cur_tok;
             tree_ptr->cur_tok++;
-            return create_node(tree_ptr, 0, IS_VAR, tree_ptr->toks[cur_tok].text);
+            return create_node(tree_ptr, 0, IS_VARIB, tree_ptr->toks[cur_tok].text);
         }
 
         Node* left  = nullptr;
@@ -286,7 +286,7 @@ size_t get_tokens(Tree* tree_ptr)
         {
             tree_ptr->toks[toks_num].text[0] = 'x';
             tree_ptr->toks[toks_num].text[1] = '\0';
-            tree_ptr->toks[toks_num].type = IS_VAR;
+            tree_ptr->toks[toks_num].type = IS_VARIB;
         }
         else
         {
@@ -349,11 +349,11 @@ Node* diff_tree(Tree* tree_ptr)
             tree_ptr->cur_tok++;
             return create_node(tree_ptr, 0.0);
         }
-        if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAR)
+        if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
         {
             size_t cur_tok = tree_ptr->cur_tok;
             tree_ptr->cur_tok++;
-            return create_node(tree_ptr, 0.0, IS_VAR, "dx");
+            return create_node(tree_ptr, 0.0, IS_VARIB, "dx");
         }
 
         Node* left  = nullptr;
@@ -365,17 +365,17 @@ Node* diff_tree(Tree* tree_ptr)
             left = diff_tree(tree_ptr);                         
             right = diff_tree(tree_ptr);  
 
-            if(left->type == IS_VAL && right->type == IS_VAR) 
+            if(left->type == IS_VAL && right->type == IS_VARIB) 
             {                                                                          
                 left->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 2].value;           
                 strcpy(right->value.text, "dx");                                                                               
             }                                                                                  
-            else if(left->type == IS_VAR && right->type == IS_VAL)           
+            else if(left->type == IS_VARIB && right->type == IS_VAL)           
             {                                                 
                 right->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 1].value;          
                 strcpy(left->value.text, "dx");                                                            
             }                                                               
-            else if(left->type == IS_VAR && right->type == IS_VAR)        
+            else if(left->type == IS_VARIB && right->type == IS_VARIB)        
             {                                                                                                                                      
                 strncpy(right->value.text, "dx", 4);                                              
                 strncpy(left->value.text, "2x", 4);                                              
@@ -397,7 +397,29 @@ Node* diff_tree(Tree* tree_ptr)
         case Div: 
             tree_ptr->cur_tok++;                 
             left = diff_tree(tree_ptr);                         
-            right = diff_tree(tree_ptr);  
+            right = diff_tree(tree_ptr);
+
+            if(left->type == IS_VARIB && right->type == IS_VARIB)
+            {
+                Node* node_1  = create_node(tree_ptr, 0, IS_VARIB, "dx");
+                Node* node_2  = create_node(tree_ptr, 0, IS_VARIB, "x");
+                Node* node_3  = create_node(tree_ptr, Mul, IS_OP, nullptr, node_1, node_2);
+
+                Node* node_4  = create_node(tree_ptr, 0, IS_VARIB, "dx");
+                Node* node_5  = create_node(tree_ptr, 0, IS_VARIB, "x");
+                Node* node_6  = create_node(tree_ptr, Mul, IS_OP, nullptr, node_5, node_4);
+
+                Node* node_7  = create_node(tree_ptr, Sub, IS_OP, nullptr, node_3, node_6);
+
+                Node* node_8  = create_node(tree_ptr, 0, IS_VARIB, "x");
+                Node* node_9  = create_node(tree_ptr, 0, IS_VARIB, "x");
+                Node* node_10 = create_node(tree_ptr, Mul, IS_OP, nullptr, node_8, node_9);
+
+                free(left);
+                free(right);
+                left = node_7;
+                right = node_10;
+            }  
                                                                              
             return create_node(tree_ptr, Div, IS_OP, nullptr, left, right); 
 
