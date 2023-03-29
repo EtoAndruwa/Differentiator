@@ -131,7 +131,6 @@ double func_Log(double value_1)
     return log(value_1);
 }
 
-
 size_t generate_cpu_code(const Node* const root_node_ptr)
 {
     FILE* file_ptr = fopen("../CPU/ASM/asm_code.txt", "w");
@@ -411,10 +410,28 @@ Node* diff_tree(Tree* tree_ptr)
         {
         case Mul: 
             {
-                tree_ptr->cur_tok++;                 
-                left = diff_tree(tree_ptr);                         
-                right = diff_tree(tree_ptr);  
+                tree_ptr->cur_tok++;
+                double right_val = 0.0; //coef
+                double left_val  = 0.0; //coef
+                size_t left_type = tree_ptr->toks[tree_ptr->cur_tok].type; // saved type before diff
 
+                if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
+                {   
+                    printf("left\n\n");
+                    left_val = tree_ptr->toks[tree_ptr->cur_tok].value;
+                    printf("\n%lf\n", left_val);
+                }                 
+                left = diff_tree(tree_ptr);
+
+                int right_index = tree_ptr->cur_tok; //after left recur
+                size_t right_type = tree_ptr->toks[right_index].type; // saved type before diff
+                right = diff_tree(tree_ptr);
+
+                if(tree_ptr->toks[right_index].type == IS_VAL)
+                {   
+                    right_val = tree_ptr->toks[right_index].value;
+                }   
+                
                 if(left->type == IS_VAL && right->type == IS_VARIB) 
                 {                                                                          
                     left->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 2].value;           
@@ -430,6 +447,17 @@ Node* diff_tree(Tree* tree_ptr)
                     strncpy(right->value.text, "dx", 4);                                              
                     strncpy(left->value.text, "2x", 4);                                              
                 }   
+                else if(left_type == IS_VAL && right_type == IS_FUNC)        
+                {               
+                    printf("left is val\n");                                                                                                                       
+                    left->value.node_value = left_val;                                                                                         
+                }
+                else if(left_type == IS_FUNC && right_type == IS_VAL)        
+                {      
+                    printf("right is val\n");                                                                                                                                 
+                    right->value.node_value = right_val;                                                                                         
+                }
+
                 return create_node(tree_ptr, Mul, IS_OP, nullptr, left, right); 
             }
         case Sub: 
@@ -496,10 +524,46 @@ Node* diff_tree(Tree* tree_ptr)
         case Cos:
             {
                 tree_ptr->cur_tok++; 
+                if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
+                {
+                    right = diff_tree(tree_ptr);
+                    Node* minus = create_node(tree_ptr, -1);
+                    Node* x = create_node(tree_ptr, 0, IS_VARIB, "x");
+                    Node* sin = create_node(tree_ptr, Sin, IS_FUNC, nullptr, x);
+                    Node* mul = create_node(tree_ptr, Mul, IS_OP, nullptr, minus, sin);
+
+                    return create_node(tree_ptr, Mul, IS_OP, nullptr, mul, right);
+                }
+
+                left = diff_tree(tree_ptr);
+                Node* minus = create_node(tree_ptr, -1);
+                Node* sin   = create_node(tree_ptr, Sin, IS_FUNC, nullptr, left);
+                return create_node(tree_ptr, Mul, IS_OP, nullptr, minus, sin);
             }
         case Sin:
             {
                 tree_ptr->cur_tok++; 
+                if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
+                {
+                    right = diff_tree(tree_ptr);
+                    Node* x = create_node(tree_ptr, 0, IS_VARIB, "x");
+                    Node* cos = create_node(tree_ptr, Cos, IS_FUNC, nullptr, x);
+
+                    return create_node(tree_ptr, Mul, IS_OP, nullptr, cos, right);
+                }
+                // if(left->type == IS_FUNC)
+                // {
+                //     Node* diff_sin = create_node(tree_ptr, Cos, IS_FUNC, nullptr, left);
+                //     Node* mul = create_node(tree_ptr, Mul, IS_OP, );
+                // }
+                // // else
+                // return create_node(tree_ptr, Cos, IS_FUNC, nullptr, left);
+            }
+        case Log:
+            {
+                tree_ptr->cur_tok++; 
+                left = diff_tree(tree_ptr);  
+                return create_node(tree_ptr, Div, IS_FUNC, nullptr, left);
             }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
