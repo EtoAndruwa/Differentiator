@@ -400,7 +400,7 @@ Node* diff_tree(Tree* tree_ptr)
         {
             size_t cur_tok = tree_ptr->cur_tok;
             tree_ptr->cur_tok++;
-            return create_node(tree_ptr, 0.0, IS_VARIB, "dx");
+            return create_node(tree_ptr, 1.0);
         }
 
         Node* left  = nullptr;
@@ -411,15 +411,14 @@ Node* diff_tree(Tree* tree_ptr)
         case Mul: 
             {
                 tree_ptr->cur_tok++;
-                double right_val = 0.0; //coef
-                double left_val  = 0.0; //coef
+                size_t saved_frst_tok_num = tree_ptr->cur_tok; // stores hte cur tok for creation of sub trees
+                double right_val = 0.0; //coef right
+                double left_val  = 0.0; //coef left
                 size_t left_type = tree_ptr->toks[tree_ptr->cur_tok].type; // saved type before diff
 
                 if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
                 {   
-                    printf("left\n\n");
                     left_val = tree_ptr->toks[tree_ptr->cur_tok].value;
-                    printf("\n%lf\n", left_val);
                 }                 
                 left = diff_tree(tree_ptr);
 
@@ -436,25 +435,45 @@ Node* diff_tree(Tree* tree_ptr)
                 {                                                                          
                     left->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 2].value;           
                     strcpy(right->value.text, "dx");                                                                               
+                }
+                else if(left->type == IS_VAL && right->type == IS_OP)        
+                {                                                                                                                                   
+                    left->value.node_value = left_val;                                                                                         
+                }
+                else if(left->type == IS_OP && right->type == IS_VAL)        
+                {                                                                                                                                      
+                    right->value.node_value = right_val;                                                                                         
                 }                                                                                  
-                else if(left->type == IS_VARIB && right->type == IS_VAL)           
+                else if(left_type == IS_VARIB && right->type == IS_VAL)           
                 {                                                 
-                    right->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 1].value;          
-                    strcpy(left->value.text, "dx");                                                            
+                    right->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 1].value;                                                                    
+                }
+                else if(left->type == IS_VAL && right_type == IS_VARIB)           
+                {                                                 
+                    left->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 2].value;                                                                    
                 }                                                               
                 else if(left->type == IS_VARIB && right->type == IS_VARIB)        
                 {                                                                                                                                      
                     strncpy(right->value.text, "dx", 4);                                              
                     strncpy(left->value.text, "2x", 4);                                              
+                }
+                else if(left->type == IS_OP && right->type == IS_OP)
+                {
+                    size_t saved_lst_tok_num = tree_ptr->cur_tok; // for future diff
+                    tree_ptr->cur_tok = saved_frst_tok_num; // to get first sub_tree
+                    Node* left_pre_diff = input_tree(tree_ptr);
+                    Node* right_pre_diff = input_tree(tree_ptr);
+                    Node* mul1 = create_node(tree_ptr, Mul, IS_OP, nullptr, left, right_pre_diff);
+                    Node* mul2 = create_node(tree_ptr, Mul, IS_OP, nullptr, left_pre_diff, right);
+
+                    return create_node(tree_ptr, Add, IS_OP, nullptr, mul1, mul2);
                 }   
                 else if(left_type == IS_VAL && right_type == IS_FUNC)        
-                {               
-                    printf("left is val\n");                                                                                                                       
+                {                                                                                                                                   
                     left->value.node_value = left_val;                                                                                         
                 }
                 else if(left_type == IS_FUNC && right_type == IS_VAL)        
-                {      
-                    printf("right is val\n");                                                                                                                                 
+                {                                                                                                                                      
                     right->value.node_value = right_val;                                                                                         
                 }
 

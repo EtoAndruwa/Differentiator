@@ -59,7 +59,7 @@ Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, 
     {
         new_node_ptr->value.node_value = node_value;
     }
-    else if(node_type == IS_VARIB)
+    else if(node_type == IS_VARIB && text != nullptr)
     {
         strcpy(new_node_ptr->value.text, text); 
     }
