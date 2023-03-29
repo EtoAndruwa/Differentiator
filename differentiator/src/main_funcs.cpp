@@ -351,20 +351,55 @@ Node* diff_tree(Tree* tree_ptr)
         }
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAR)
         {
-            printf("%s ", tree_ptr->toks[tree_ptr->cur_tok].text);
             size_t cur_tok = tree_ptr->cur_tok;
             tree_ptr->cur_tok++;
-            return create_node(tree_ptr, 0.0, IS_VAR, "dx\0");
+            return create_node(tree_ptr, 0.0, IS_VAR, "dx");
         }
 
         Node* left  = nullptr;
         Node* right = nullptr;
         switch(tree_ptr->toks[tree_ptr->cur_tok].value)
         {
+        case Mul: 
+            tree_ptr->cur_tok++;                 
+            left = diff_tree(tree_ptr);                         
+            right = diff_tree(tree_ptr);  
 
-        #define DEF_CMD(code, int_val, ...) case code: tree_ptr->cur_tok++; left = diff_tree(tree_ptr); right = diff_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_OP, nullptr, left, right);
-        #include "DSL.h"
-        #undef DEF_CMD
+            if(left->type == IS_VAL && right->type == IS_VAR) 
+            {                                                                          
+                left->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 2].value;           
+                strcpy(right->value.text, "dx");                                                                               
+            }                                                                                  
+            else if(left->type == IS_VAR && right->type == IS_VAL)           
+            {                                                 
+                right->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 1].value;          
+                strcpy(left->value.text, "dx");                                                            
+            }                                                               
+            else if(left->type == IS_VAR && right->type == IS_VAR)        
+            {                                                                                                                                      
+                strncpy(right->value.text, "dx", 4);                                              
+                strncpy(left->value.text, "2x", 4);                                              
+            }   
+
+            return create_node(tree_ptr, Mul, IS_OP, nullptr, left, right); 
+        case Sub: 
+            tree_ptr->cur_tok++;                 
+            left = diff_tree(tree_ptr);                         
+            right = diff_tree(tree_ptr);  
+                                                             
+            return create_node(tree_ptr, Sub, IS_OP, nullptr, left, right); 
+        case Add: 
+            tree_ptr->cur_tok++;                 
+            left = diff_tree(tree_ptr);                         
+            right = diff_tree(tree_ptr);  
+                                                                             
+            return create_node(tree_ptr, Add, IS_OP, nullptr, left, right);
+        case Div: 
+            tree_ptr->cur_tok++;                 
+            left = diff_tree(tree_ptr);                         
+            right = diff_tree(tree_ptr);  
+                                                                             
+            return create_node(tree_ptr, Div, IS_OP, nullptr, left, right); 
 
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");

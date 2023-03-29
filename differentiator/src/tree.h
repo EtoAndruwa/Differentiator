@@ -15,7 +15,7 @@ typedef union Node_data
 {
     int     op_number;
     double  node_value;
-    char    text[4];
+    char    text[4] = {};
 }Node_data;
 
 /**
