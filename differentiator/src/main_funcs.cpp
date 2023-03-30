@@ -566,9 +566,17 @@ Node* diff_tree(Tree* tree_ptr)
 
                 size_t saved_exp_id = tree_ptr->cur_tok;
                 Node* exp = input_tree(tree_ptr);
+                size_t last_id = tree_ptr->cur_tok;
 
-                if(base->type == IS_VAL)
+                if(base->type == IS_VAL && exp->type == IS_VAL)
                 {
+                    return create_node(tree_ptr, 0);
+                    free(base);
+                    free(exp);
+                }
+                else if(base->type == IS_VAL)
+                {
+                    free(exp);
                     tree_ptr->cur_tok = saved_frst_tok_num;
                     Node* pre_dif_pow = input_tree(tree_ptr);
                     Node* ln = create_node(tree_ptr, Log, IS_FUNC, nullptr, base);
@@ -579,8 +587,29 @@ Node* diff_tree(Tree* tree_ptr)
                     Node* mul_1 = create_node(tree_ptr, Mul, IS_OP, nullptr, pre_dif_pow, ln);
                     return create_node(tree_ptr, Mul, IS_OP, nullptr, mul_1, left);
                 }
-                 
-                // return create_node(tree_ptr, Mul, IS_OP, nullptr, left_pre_diff, left);
+                else if(base->type == IS_FUNC && exp->type == IS_VAL)
+                {
+                    tree_ptr->cur_tok = saved_frst_tok_num;
+                    Node* pre_dif_pow = input_tree(tree_ptr);
+
+                    double new_exp_val = exp->value.node_value - 1; // deacresing exp val
+                    Node* coef = create_node(tree_ptr, exp->value.node_value);
+                    exp->value.node_value = new_exp_val; // changing old exp val
+
+                    Node* new_pow = create_node(tree_ptr, Pow, IS_FUNC, nullptr, base, exp);
+                    Node* mul = create_node(tree_ptr, Mul, IS_OP, nullptr, coef, new_pow);
+
+                    tree_ptr->cur_tok = saved_frst_tok_num + 1;
+                    left = diff_tree(tree_ptr);
+                    tree_ptr->cur_tok = last_id;
+
+                    return create_node(tree_ptr, Mul, IS_OP, nullptr, mul, left);
+                }
+                // else
+                // {
+
+
+                // }
             }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
