@@ -7,9 +7,10 @@ DEF_FUNC(Cos, 1, "cos") // ok
 DEF_FUNC(Sin, 2, "sin") // ok
 DEF_FUNC(Tan, 3, "tan") // ok
 DEF_FUNC(Asin, 4, "asin") // ok
-DEF_FUNC(Acos, 5, "acos")
+DEF_FUNC(Acos, 5, "acos") // ok
 DEF_FUNC(Sqrt, 6, "sqrt") // ok
 DEF_FUNC(Exp, 7, "exp") // ok
 DEF_FUNC(Log, 8, "log") // ok
 DEF_FUNC(Cot, 9, "cot") // ok
 DEF_FUNC(Log10, 10, "log10") // ok
+DEF_FUNC(Pow, 11, "pow") 

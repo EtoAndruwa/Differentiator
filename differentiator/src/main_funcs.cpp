@@ -42,18 +42,26 @@ size_t output_tree(const Node* const root_node_ptr)
     file_ptr = nullptr;
 }
 
-double eval(const Node* const node_ptr)
+double eval(const Node* const node_ptr, double var_value)
 {
+    if(node_ptr == nullptr)
+    {
+        return 0;
+    }
     if(node_ptr->type == IS_VAL)
     {
         return node_ptr->value.node_value;
+    }
+    if(node_ptr->type == IS_VARIB)
+    {
+        return var_value;
     }
 
     switch(node_ptr->value.op_number)
     {
 
-    #define DEF_OP(code, ...) case code: return func_ ## code(eval(node_ptr->left_child), eval(node_ptr->right_child));
-    #define DEF_FUNC(code, ...) case code: return func_ ## code(eval(node_ptr->left_child));
+    #define DEF_OP(code, ...) case code: return func_ ## code(eval(node_ptr->left_child, var_value), eval(node_ptr->right_child, var_value));
+    #define DEF_FUNC(code, ...) case code: return func_ ## code(eval(node_ptr->left_child, var_value), eval(node_ptr->right_child, var_value));
 
     #include "def_cmd.h"
 
@@ -65,80 +73,6 @@ double eval(const Node* const node_ptr)
         printf("\n\nUNKNOWN cmd\n\n");
         break;
     }
-}
-
-double func_Add(double value_1, double value_2)
-{
-    return value_1 + value_2;
-}
-
-double func_Sub(double value_1, double value_2)
-{
-    return value_1 - value_2;
-}
-
-double func_Mul(double value_1, double value_2)
-{
-    return value_1 * value_2;
-}
-
-double func_Div(double value_1, double value_2)
-{
-    if(fabs(value_2) <= EPS)
-    {
-        return NAN;
-    }
-    return value_1 / value_2;
-}
-
-double func_Cos(double value_1)
-{
-    return cos(value_1 * PI / 180.0);
-}
-
-double func_Sin(double value_1)
-{
-    return sin(value_1 * PI / 180.0);
-}
-
-double func_Tan(double value_1)
-{
-    return tan(value_1 * PI / 180.0);
-}
-
-double func_Cot(double value_1)
-{
-    return 1 - tan(value_1 * PI / 180.0);
-}
-
-double func_Asin(double value_1)
-{
-    return (asin(value_1) * 180.0) / PI;
-}
-
-double func_Acos(double value_1)
-{
-    return (acos(value_1) * 180.0) / PI;
-}
-
-double func_Sqrt(double value_1)
-{
-    return acos(value_1);
-}
-
-double func_Exp(double value_1)
-{
-    return exp(value_1);
-}
-
-double func_Log(double value_1)
-{
-    return log(value_1);
-}
-
-double func_Log10(double value_1)
-{
-    return log10(value_1);
 }
 
 size_t generate_cpu_code(const Node* const root_node_ptr)
@@ -216,7 +150,7 @@ Node* input_tree(Tree* tree_ptr)
         {
 
         #define DEF_OP(code, int_val, ...) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); right = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_OP, "", left, right);
-        #define DEF_FUNC(code, int_val, ...) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_FUNC, "", left);
+        #define DEF_FUNC(code, int_val, ...) case code: tree_ptr->cur_tok++; if(code == Pow){left = input_tree(tree_ptr); right = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_FUNC, "", left, right);}left = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_FUNC, "", left);
         #include "def_cmd.h"
         #undef DEF_OP
         #undef DEF_FUNC
@@ -622,6 +556,31 @@ Node* diff_tree(Tree* tree_ptr)
                 Node* top = create_node(tree_ptr, Mul, IS_OP, nullptr, min_one, left);
 
                 return create_node(tree_ptr, Div, IS_OP, nullptr, top, srt);
+            }
+        case Pow:
+            {
+                size_t saved_frst_tok_num = tree_ptr->cur_tok;
+
+                tree_ptr->cur_tok++;
+                Node* base = input_tree(tree_ptr);
+
+                size_t saved_exp_id = tree_ptr->cur_tok;
+                Node* exp = input_tree(tree_ptr);
+
+                if(base->type == IS_VAL)
+                {
+                    tree_ptr->cur_tok = saved_frst_tok_num;
+                    Node* pre_dif_pow = input_tree(tree_ptr);
+                    Node* ln = create_node(tree_ptr, Log, IS_FUNC, nullptr, base);
+
+                    tree_ptr->cur_tok = saved_exp_id;
+                    left = diff_tree(tree_ptr);
+
+                    Node* mul_1 = create_node(tree_ptr, Mul, IS_OP, nullptr, pre_dif_pow, ln);
+                    return create_node(tree_ptr, Mul, IS_OP, nullptr, mul_1, left);
+                }
+                 
+                // return create_node(tree_ptr, Mul, IS_OP, nullptr, left_pre_diff, left);
             }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
