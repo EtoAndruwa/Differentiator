@@ -408,96 +408,21 @@ Node* diff_tree(Tree* tree_ptr)
 
         switch(tree_ptr->toks[tree_ptr->cur_tok].value)
         {
-        case Mul: 
+        case Mul:  // ok 
             {
                 tree_ptr->cur_tok++;
                 size_t saved_frst_tok_num = tree_ptr->cur_tok; // stores hte cur tok for creation of sub trees
-                double right_val = 0.0; //coef right
-                double left_val  = 0.0; //coef left
-                size_t left_type = tree_ptr->toks[tree_ptr->cur_tok].type; // saved type before diff
 
-                if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
-                {   
-                    left_val = tree_ptr->toks[tree_ptr->cur_tok].value;
-                }                 
                 left = diff_tree(tree_ptr);
-
-                int right_index = tree_ptr->cur_tok; //after left recur
-                size_t right_type = tree_ptr->toks[right_index].type; // saved type before diff
                 right = diff_tree(tree_ptr);
 
-                if(tree_ptr->toks[right_index].type == IS_VAL)
-                {   
-                    right_val = tree_ptr->toks[right_index].value;
-                }   
-                                                                        // logic starts from here
-                if(left_type== IS_VARIB && right_type == IS_VARIB)        // varib & varib
-                {                     
-                    Node* coef = create_node(tree_ptr, 2);
-                    Node* x    = create_node(tree_ptr, 0, IS_VARIB, "x");                                                                                                                 
-                    free(left);
-                    free(right);
-                    return create_node(tree_ptr, Mul, IS_OP, nullptr, coef, x);                                           
-                }
+                tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
+                Node* left_pre_diff = input_tree(tree_ptr);
+                Node* right_pre_diff = input_tree(tree_ptr);
+                Node* mul1 = create_node(tree_ptr, Mul, IS_OP, nullptr, left, right_pre_diff);
+                Node* mul2 = create_node(tree_ptr, Mul, IS_OP, nullptr, left_pre_diff, right);
 
-                else if((left_type == IS_OP && right_type == IS_OP) ||(left_type == IS_VARIB && right_type == IS_OP) || 
-                            (left_type == IS_OP && right_type == IS_VARIB) || (left_type == IS_VARIB && right_type == IS_FUNC) || 
-                                    (left_type == IS_FUNC && right_type == IS_VARIB))   // func & var
-                {
-                    tree_ptr->cur_tok = saved_frst_tok_num; // to get first sub_tree
-                    Node* left_pre_diff = input_tree(tree_ptr);
-                    Node* right_pre_diff = input_tree(tree_ptr);
-                    Node* mul1 = create_node(tree_ptr, Mul, IS_OP, nullptr, left, right_pre_diff);
-                    Node* mul2 = create_node(tree_ptr, Mul, IS_OP, nullptr, left_pre_diff, right);
-
-                    return create_node(tree_ptr, Add, IS_OP, nullptr, mul1, mul2);
-                }
-
-                // else if(left_type == IS_VARIB && right_type == IS_OP)
-                // {
-                //     tree_ptr->cur_tok = saved_frst_tok_num;
-
-                // }
-
-                else if(left->type == IS_VAL && right->type == IS_OP)       // const & op
-                {                                                                                                                                   
-                    left->value.node_value = left_val;                                                                                         
-                }
-                else if(left->type == IS_OP && right->type == IS_VAL)        
-                {                                                                                                                                      
-                    right->value.node_value = right_val;                                                                                         
-                }
-
-                else if(left_type == IS_VARIB && right->type == IS_VAL)          // varib & const
-                {                                                 
-                    right->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 1].value;                                                                    
-                }
-                else if(left->type == IS_VAL && right_type == IS_VARIB)           
-                {                                                 
-                    left->value.node_value = tree_ptr->toks[tree_ptr->cur_tok - 2].value;                                                                    
-                }
-
-                else if(left->type == IS_OP && right->type == IS_OP)            // func & func
-                {
-                    tree_ptr->cur_tok = saved_frst_tok_num; // to get first sub_tree
-                    Node* left_pre_diff = input_tree(tree_ptr);
-                    Node* right_pre_diff = input_tree(tree_ptr);
-                    Node* mul1 = create_node(tree_ptr, Mul, IS_OP, nullptr, left, right_pre_diff);
-                    Node* mul2 = create_node(tree_ptr, Mul, IS_OP, nullptr, left_pre_diff, right);
-
-                    return create_node(tree_ptr, Add, IS_OP, nullptr, mul1, mul2);
-                } 
-
-                else if(left_type == IS_VAL && right_type == IS_FUNC)        // const & func
-                {                                                                                                                                   
-                    left->value.node_value = left_val;                                                                                         
-                }
-                else if(left_type == IS_FUNC && right_type == IS_VAL)        
-                {                                                                                                                                      
-                    right->value.node_value = right_val;                                                                                         
-                }
-
-                return create_node(tree_ptr, Mul, IS_OP, nullptr, left, right); 
+                return create_node(tree_ptr, Add, IS_OP, nullptr, mul1, mul2);
             }
         case Sub:  // full
             {
@@ -562,47 +487,44 @@ Node* diff_tree(Tree* tree_ptr)
             }
         case Cos:
             {
-                tree_ptr->cur_tok++; 
-                if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
-                {
-                    right = diff_tree(tree_ptr);
-                    Node* minus = create_node(tree_ptr, -1);
-                    Node* x = create_node(tree_ptr, 0, IS_VARIB, "x");
-                    Node* sin = create_node(tree_ptr, Sin, IS_FUNC, nullptr, x);
-                    Node* mul = create_node(tree_ptr, Mul, IS_OP, nullptr, minus, sin);
-
-                    return create_node(tree_ptr, Mul, IS_OP, nullptr, mul, right);
-                }
-
+                size_t saved_frst_tok_num = tree_ptr->cur_tok;
+                tree_ptr->cur_tok++;
                 left = diff_tree(tree_ptr);
+
+                tree_ptr->cur_tok = saved_frst_tok_num + 1; // to get first pre dif sub_tree
+                Node* left_pre_diff_inner = input_tree(tree_ptr); 
+                Node* sin = create_node(tree_ptr, Sin, IS_FUNC, nullptr, left_pre_diff_inner);
                 Node* minus = create_node(tree_ptr, -1);
-                Node* sin   = create_node(tree_ptr, Sin, IS_FUNC, nullptr, left);
-                return create_node(tree_ptr, Mul, IS_OP, nullptr, minus, sin);
+                Node* mul = create_node(tree_ptr, Mul, IS_OP, nullptr, minus, sin);
+                 
+                return create_node(tree_ptr, Mul, IS_OP, nullptr, mul, left);
             }
         case Sin:
             {
-                tree_ptr->cur_tok++; 
-                if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
-                {
-                    right = diff_tree(tree_ptr);
-                    Node* x = create_node(tree_ptr, 0, IS_VARIB, "x");
-                    Node* cos = create_node(tree_ptr, Cos, IS_FUNC, nullptr, x);
+                // tree_ptr->cur_tok++;
+                // left = create_node();
 
-                    return create_node(tree_ptr, Mul, IS_OP, nullptr, cos, right);
-                }
-                // if(left->type == IS_FUNC)
-                // {
-                //     Node* diff_sin = create_node(tree_ptr, Cos, IS_FUNC, nullptr, left);
-                //     Node* mul = create_node(tree_ptr, Mul, IS_OP, );
-                // }
-                // // else
-                // return create_node(tree_ptr, Cos, IS_FUNC, nullptr, left);
+                // tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
+                // Node* left_pre_diff = input_tree(tree_ptr); 
+                 
+                // return create_node(tree_ptr, Mul, IS_OP, nullptr, left_pre_diff, left);
             }
         case Log:
             {
                 tree_ptr->cur_tok++; 
                 left = diff_tree(tree_ptr);  
                 return create_node(tree_ptr, Div, IS_FUNC, nullptr, left);
+            }
+        case Exp: // ok
+            {
+                size_t saved_frst_tok_num = tree_ptr->cur_tok;
+                tree_ptr->cur_tok++;
+                left = diff_tree(tree_ptr);
+
+                tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
+                Node* left_pre_diff = input_tree(tree_ptr); 
+                 
+                return create_node(tree_ptr, Mul, IS_OP, nullptr, left_pre_diff, left);
             }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
