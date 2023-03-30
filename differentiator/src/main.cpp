@@ -17,8 +17,6 @@ int main()
     get_tokens(tree_ptr_2);
     tree_ptr_2->root = diff_tree(tree_ptr_2);
     create_graph_jpg(tree_ptr_2, "tree_ptr_2");
-    
-
 
     
     create_html(OUTPUT_NAME);

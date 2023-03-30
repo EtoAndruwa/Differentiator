@@ -602,6 +602,27 @@ Node* diff_tree(Tree* tree_ptr)
 
                 return create_node(tree_ptr, Div, IS_OP, nullptr, left, srt);
             }
+        case Acos:
+            {
+                tree_ptr->cur_tok++; 
+                size_t saved_frst_tok_num = tree_ptr->cur_tok; 
+                left = diff_tree(tree_ptr);
+
+                tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
+                Node* left_pre_diff_1 = input_tree(tree_ptr);
+                tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
+                Node* left_pre_diff_2 = input_tree(tree_ptr);
+
+                Node* one = create_node(tree_ptr, 1);
+                Node* mul = create_node(tree_ptr, Mul, IS_OP, nullptr, left_pre_diff_1, left_pre_diff_2);
+                Node* sub = create_node(tree_ptr, Sub, IS_OP, nullptr, one, mul);
+                Node* srt = create_node(tree_ptr, Sqrt, IS_FUNC, nullptr, sub);
+
+                Node* min_one = create_node(tree_ptr, -1);
+                Node* top = create_node(tree_ptr, Mul, IS_OP, nullptr, min_one, left);
+
+                return create_node(tree_ptr, Div, IS_OP, nullptr, top, srt);
+            }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
             break;
