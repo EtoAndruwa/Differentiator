@@ -136,6 +136,11 @@ double func_Log(double value_1)
     return log(value_1);
 }
 
+double func_Log10(double value_1)
+{
+    return log10(value_1);
+}
+
 size_t generate_cpu_code(const Node* const root_node_ptr)
 {
     FILE* file_ptr = fopen("../CPU/ASM/asm_code.txt", "w");
@@ -529,7 +534,7 @@ Node* diff_tree(Tree* tree_ptr)
                  
                 return create_node(tree_ptr, Div, IS_OP, nullptr, left, mul);
             }
-        case Tan:
+        case Tan: //ok
             {
                 tree_ptr->cur_tok++;
                 size_t saved_frst_tok_num = tree_ptr->cur_tok;
@@ -546,7 +551,7 @@ Node* diff_tree(Tree* tree_ptr)
                  
                 return create_node(tree_ptr, Div, IS_OP, nullptr, left, bottom);
             }
-        case Cot:
+        case Cot: // ok
             {
                 tree_ptr->cur_tok++;
                 size_t saved_frst_tok_num = tree_ptr->cur_tok;
@@ -565,6 +570,19 @@ Node* diff_tree(Tree* tree_ptr)
 
                  
                 return create_node(tree_ptr, Div, IS_OP, nullptr, top, bottom);
+            }
+        case Log10:
+            {
+                tree_ptr->cur_tok++;
+                size_t saved_frst_tok_num = tree_ptr->cur_tok; 
+                left = diff_tree(tree_ptr); 
+
+                tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
+                Node* left_pre_diff = input_tree(tree_ptr);
+                Node* coef = create_node(tree_ptr, 10);
+                Node* bottom = create_node(tree_ptr, Mul, IS_OP, nullptr, coef, left_pre_diff);
+
+                return create_node(tree_ptr, Div, IS_OP, nullptr, left, bottom);
             }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");

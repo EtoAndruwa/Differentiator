@@ -49,6 +49,7 @@ double func_Sqrt(double value_1);
 double func_Exp(double value_1);
 double func_Log(double value_1);
 double func_Cot(double value_1);
+double func_Log10(double value_1);
 
 Node*  input_tree(Tree* tree_ptr);
 size_t check_is_number(char* num_text);

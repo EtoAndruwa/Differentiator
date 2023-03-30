@@ -54,7 +54,7 @@ typedef struct tokens
 {
     int    value = 0;         /// \brief The value reponsible for asm code of the token
     size_t type  = 0;         /// \brief The value responsible for type of token ('cmd','reg', 'val', 'flg')
-    char   text[6];
+    char   text[8];
 }tokens;
 
 /**

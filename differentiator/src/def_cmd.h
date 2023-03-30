@@ -11,4 +11,5 @@ DEF_FUNC(Acos, 5, "acos")
 DEF_FUNC(Sqrt, 6, "sqrt") // ok
 DEF_FUNC(Exp, 7, "exp") // ok
 DEF_FUNC(Log, 8, "log") // ok
-DEF_FUNC(Cot, 9, "cot")
+DEF_FUNC(Cot, 9, "cot") // ok
+DEF_FUNC(Log10, 10, "log10")
