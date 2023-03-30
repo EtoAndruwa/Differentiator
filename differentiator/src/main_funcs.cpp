@@ -498,7 +498,6 @@ Node* diff_tree(Tree* tree_ptr)
                 tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
                 Node* left_pre_diff = input_tree(tree_ptr);
 
-
                 return create_node(tree_ptr, Div, IS_OP, nullptr, left, left_pre_diff);
             }
         case Exp: // ok
@@ -511,6 +510,19 @@ Node* diff_tree(Tree* tree_ptr)
                 Node* left_pre_diff = input_tree(tree_ptr); 
                  
                 return create_node(tree_ptr, Mul, IS_OP, nullptr, left_pre_diff, left);
+            }
+        case Sqrt:
+            {
+                size_t saved_frst_tok_num = tree_ptr->cur_tok;
+                tree_ptr->cur_tok++;
+                left = diff_tree(tree_ptr);
+
+                tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
+                Node* left_pre_diff = input_tree(tree_ptr);
+                Node* coef = create_node(tree_ptr, 2);
+                Node* mul = create_node(tree_ptr, Mul, IS_OP, nullptr, coef, left_pre_diff);
+                 
+                return create_node(tree_ptr, Div, IS_OP, nullptr, left, mul);
             }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
