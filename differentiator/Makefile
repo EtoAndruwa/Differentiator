@@ -28,10 +28,10 @@ $(TARGET) : $(OBJ)
 	$(CC) $(OBJ) -o $(TARGET).exe
 
 $(PREF_OBJ)%.o : $(PREF_SRC)%.cpp
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC)  -c $< -o $@
 
 $(PREF_OBJ)%.o : $(PREF_GRV)%.cpp
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC)  -c $< -o $@
 
 clean: 
 	rm $(TARGET).exe $(PREF_OBJ)*.o

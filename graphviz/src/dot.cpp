@@ -84,7 +84,7 @@ size_t print_tree_data(Tree* tree_struct, Node* node_ptr, const char* file_name)
     {  
         if(node_ptr->type == IS_VAL)
         {
-            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\" { <f0> left_child = %p } | {{<here> type = VALUE} | { value = %f \\n }} | { <f1> right_child = %p } \"];\n", node_ptr, RED_BG_COLOR_DOT, node_ptr->left_child, node_ptr->value.node_value, node_ptr->right_child);
+            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\" { <f0> left_child = %p } | {{<here> type = VALUE} | { value = %lf \\n }} | { <f1> right_child = %p } \"];\n", node_ptr, RED_BG_COLOR_DOT, node_ptr->left_child, node_ptr->value.node_value, node_ptr->right_child);
         }
         else if(node_ptr->type == IS_OP)
         {

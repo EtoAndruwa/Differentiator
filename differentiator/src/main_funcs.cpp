@@ -169,7 +169,7 @@ size_t check_is_number(char* num_text)
     size_t length_text = strlen(num_text);
     for(size_t i  = 0; i < length_text; i++)
     {
-        if(isdigit(num_text[i]) == 0) // If the character is not a digit
+        if(isdigit(num_text[i]) == 0 && num_text[0] != '-') // If the character is not a digit
         {
             is_digits = NOT_ALL_DIGITS;
         }
@@ -587,12 +587,13 @@ Node* diff_tree(Tree* tree_ptr)
                     Node* mul_1 = create_node(tree_ptr, Mul, IS_OP, nullptr, pre_dif_pow, ln);
                     return create_node(tree_ptr, Mul, IS_OP, nullptr, mul_1, left);
                 }
-                else if(base->type == IS_FUNC && exp->type == IS_VAL)
+                else if((base->type == IS_FUNC || base->type == IS_VARIB) && exp->type == IS_VAL)
                 {
                     tree_ptr->cur_tok = saved_frst_tok_num;
                     Node* pre_dif_pow = input_tree(tree_ptr);
 
-                    double new_exp_val = exp->value.node_value - 1; // deacresing exp val
+                    double new_exp_val = exp->value.node_value - 1.0; // decreasing exp val
+                    printf("\n\n%lf\n\n", new_exp_val);
                     Node* coef = create_node(tree_ptr, exp->value.node_value);
                     exp->value.node_value = new_exp_val; // changing old exp val
 
@@ -605,11 +606,9 @@ Node* diff_tree(Tree* tree_ptr)
 
                     return create_node(tree_ptr, Mul, IS_OP, nullptr, mul, left);
                 }
-                // else
-                // {
 
 
-                // }
+
             }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
