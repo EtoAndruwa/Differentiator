@@ -8,7 +8,7 @@ DEF_FUNC(Sin, 2, "sin") // ok
 DEF_FUNC(Tan, 3, "tan")
 DEF_FUNC(Asin, 4, "asin")
 DEF_FUNC(Acos, 5, "acos")
-DEF_FUNC(Sqrt, 6, "sqrt")
+DEF_FUNC(Sqrt, 6, "sqrt") // ok
 DEF_FUNC(Exp, 7, "exp") // ok
-DEF_FUNC(Log, 8, "log")
-
+DEF_FUNC(Log, 8, "log") // ok
+DEF_FUNC(Cot, 9, "cot")
