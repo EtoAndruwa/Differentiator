@@ -424,14 +424,14 @@ Node* diff_tree(Tree* tree_ptr)
 
                 return create_node(tree_ptr, Add, IS_OP, nullptr, mul1, mul2);
             }
-        case Sub:  // full
+        case Sub:  // ok
             {
                 tree_ptr->cur_tok++;                 
                 left = diff_tree(tree_ptr);                         
                 right = diff_tree(tree_ptr);                                                
                 return create_node(tree_ptr, Sub, IS_OP, nullptr, left, right); 
             }
-        case Add: // full
+        case Add: // ok
             {
                 tree_ptr->cur_tok++;                 
                 left = diff_tree(tree_ptr);                         
@@ -489,11 +489,17 @@ Node* diff_tree(Tree* tree_ptr)
                  
                 return create_node(tree_ptr, Mul, IS_OP, nullptr, cos, left);
             }
-        case Log: 
+        case Log: // ok
             {
-                tree_ptr->cur_tok++; 
-                left = diff_tree(tree_ptr);  
-                return create_node(tree_ptr, Div, IS_FUNC, nullptr, left);
+                tree_ptr->cur_tok++;
+                size_t saved_frst_tok_num = tree_ptr->cur_tok; 
+                left = diff_tree(tree_ptr); 
+
+                tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
+                Node* left_pre_diff = input_tree(tree_ptr);
+
+
+                return create_node(tree_ptr, Div, IS_OP, nullptr, left, left_pre_diff);
             }
         case Exp: // ok
             {
