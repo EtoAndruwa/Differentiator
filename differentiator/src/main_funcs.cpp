@@ -607,8 +607,32 @@ Node* diff_tree(Tree* tree_ptr)
                     return create_node(tree_ptr, Mul, IS_OP, nullptr, mul, left);
                 }
 
+                Node* one = create_node(tree_ptr, 1); // 1
+                Node* new_exp_base = create_node(tree_ptr, Sub, IS_OP, nullptr, exp, one); // v - 1
+                Node* new_pow = create_node(tree_ptr, Pow, IS_FUNC, nullptr, base, new_exp_base); // u^(v-1)
 
+                tree_ptr->cur_tok = saved_exp_id;
+                Node* old_exp = input_tree(tree_ptr); // v
+                tree_ptr->cur_tok = saved_frst_tok_num + 1; 
+                Node* diff_base = diff_tree(tree_ptr); // du/dx
 
+                Node* mul_1 = create_node(tree_ptr, Mul, IS_OP, nullptr, old_exp, new_pow); // v * u^(v-1) 
+                Node* mul_2 = create_node(tree_ptr, Mul, IS_OP, nullptr, mul_1, diff_base);  // v * u^(v-1) * (du/dx)
+
+                tree_ptr->cur_tok = saved_frst_tok_num;
+                Node* old_pow = input_tree(tree_ptr); // u^v
+                tree_ptr->cur_tok = saved_frst_tok_num + 1;
+                Node* old_base = input_tree(tree_ptr); // u
+                Node* ln_base = create_node(tree_ptr, Log, IS_FUNC, nullptr, old_base); // ln(u)
+
+                Node* mul_3 = create_node(tree_ptr, Mul, IS_OP, nullptr, old_pow, ln_base); // u^v * ln(u)
+
+                tree_ptr->cur_tok = saved_exp_id;
+                Node* diff_exp = diff_tree(tree_ptr); // (dv/dx)
+                Node* mul_4 = create_node(tree_ptr, Mul, IS_OP, nullptr, mul_3, diff_exp); // u^v * ln(u) * (dv/dx)
+
+                return create_node(tree_ptr, Add, IS_OP, nullptr, mul_2, mul_4);
+                
             }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
