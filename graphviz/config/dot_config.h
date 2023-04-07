@@ -9,6 +9,7 @@
 #define DIR_TO_DUMPS         "../graphviz/graph_dumps/" 
 #define IMAGE_FOLDER         "../graphviz/graph_dumps/images/"
 #define TXT_FOLDER           "../graphviz/graph_dumps/txt/"
+#define IMAGE_LIST_NAME      "image_list.txt"
 #define OUTPUT_FORMAT_FLAG   " -Tjpg "
 #define OUTPUT_FORMAT        ".jpg"
 #define INPUT_FORMAT         ".txt"
