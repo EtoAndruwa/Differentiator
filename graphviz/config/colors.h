@@ -14,5 +14,6 @@
 #define FREE_NODE_COLOR   "#3BD473"
 #define ORAN_BG_COLOR_DOT "#FAAC71"
 #define PURP_BG_COLOR_DOT "#9370DB"
+#define L_BLUE_BG_COLOR_DOT "#72EDFF"
 
 #endif

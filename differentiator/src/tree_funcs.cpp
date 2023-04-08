@@ -43,7 +43,7 @@ void  dtor_childs(Node* node_ptr)
 
 Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, Node* left_child, Node* right_child)
 {
-    if((node_type == IS_VAL || node_type == IS_VARIB) && (left_child != nullptr || right_child != nullptr))
+    if((node_type == IS_VAL || node_type == IS_VARIB || node_type == IS_CNST_VAR) && (left_child != nullptr || right_child != nullptr))
     {
         printf("ERROR: value/variable cannot have child nodes\n\n");
         return nullptr;
@@ -59,7 +59,7 @@ Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, 
     {
         new_node_ptr->value.node_value = node_value;
     }
-    else if(node_type == IS_VARIB && text != nullptr)
+    else if((node_type == IS_VARIB || node_type == IS_CNST_VAR) && text != nullptr)
     {
         strcpy(new_node_ptr->value.text, text); 
     }

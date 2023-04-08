@@ -19,14 +19,18 @@ enum return_codes
     NULL_PTR_NODE  = 1,
     ALL_DIGITS     = 2,
     NOT_ALL_DIGITS = 3,
+
 };
 
 enum error_codes_diff
 {
-    ERR_CANNOT_OPEN_OUTPUT  = 1,
-    ERR_CANNOT_CLOSE_OUTPUT = 2, 
-    ERR_CANNOT_OPEN_INPUT   = 3,
-    ERR_CANNOT_CLOSE_INPUT  = 4,
+    ERR_CANNOT_OPEN_OUTPUT  = -1,
+    ERR_CANNOT_CLOSE_OUTPUT = -2, 
+    ERR_CANNOT_OPEN_INPUT   = -3,
+    ERR_CANNOT_CLOSE_INPUT  = -4,
+    ERR_INVALID_VAR_NUM     = -5,
+    ERR_CALLOC_VARS         = -6,
+    ERR_INVALID_VAR_TEXT    = -7,
 };
 
 size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr);
@@ -60,5 +64,6 @@ size_t get_tokens(Tree* tree_ptr);
 size_t realloc_toks(Tree* tree_ptr, size_t i);
 void   print_toks(Tree* tree_ptr);
 Node*  diff_tree(Tree* tree_ptr);
+int get_vars(Tree* tree_ptr);
 
 #endif
