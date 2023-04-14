@@ -7,6 +7,7 @@
 #include <math.h>
 #include <ctype.h>
 #include "tree.h"
+#include "DSL.h"
 #include "../../graphviz/src/graphviz.h"
 
 #define EPS 1e-7
