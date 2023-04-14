@@ -9,6 +9,8 @@ int main()
     get_tokens(tree_ptr_1);
     tree_ptr_1->root = input_tree(tree_ptr_1);
     create_graph_jpg(tree_ptr_1, "tree_ptr_1");
+    double result = eval(tree_ptr_1, tree_ptr_1->root);
+    printf("\nresult of eval = %lf\n", result);
     // printf("\n\nResult: %lf\n\n", eval(tree_ptr_1->root));
 
     // Tree* tree_ptr_2 = tree_ctor();

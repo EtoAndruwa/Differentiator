@@ -42,7 +42,7 @@ size_t output_tree(const Node* const root_node_ptr)
     file_ptr = nullptr;
 }
 
-double eval(const Node* const node_ptr, double var_value)
+double eval(const Tree* const tree_ptr, const Node* const node_ptr)
 {
     if(node_ptr == nullptr)
     {
@@ -54,14 +54,21 @@ double eval(const Node* const node_ptr, double var_value)
     }
     if(node_ptr->type == IS_VARIB)
     {
-        return var_value;
+        for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
+        {
+            if(node_ptr->value.text[0] == tree_ptr->vars[cur_var].var_text[0])
+            {
+                printf("returned: %lf \n", tree_ptr->vars[cur_var].var_value);
+                return tree_ptr->vars[cur_var].var_value;
+            }
+        }
     }
 
     switch(node_ptr->value.op_number)
     {
 
-    #define DEF_OP(code, ...) case code: return func_ ## code(eval(node_ptr->left_child, var_value), eval(node_ptr->right_child, var_value));
-    #define DEF_FUNC(code, ...) case code: return func_ ## code(eval(node_ptr->left_child, var_value), eval(node_ptr->right_child, var_value));
+    #define DEF_OP(code, ...) case code: return func_ ## code(eval(tree_ptr, node_ptr->left_child), eval(tree_ptr, node_ptr->right_child));
+    #define DEF_FUNC(code, ...) case code: return func_ ## code(eval(tree_ptr, node_ptr->left_child), eval(tree_ptr, node_ptr->right_child));
 
     #include "def_cmd.h"
 
@@ -113,21 +120,22 @@ void print_recur_code(const Node* const node_ptr, FILE* file_ptr)
         return;
     }
 
-    switch(op_number)
-    {
+    // switch(op_number)
+    // {
 
-    // #define DEF_CMD(code, ...) case code: fprintf(file_ptr, "%s\n", #code); break;
-    // #include "def_cmd.h"
-    // #undef DEF_CMD
+    // // #define DEF_CMD(code, ...) case code: fprintf(file_ptr, "%s\n", #code); break;
+    // // #include "def_cmd.h"
+    // // #undef DEF_CMD
 
-    default:
-        printf("\n\nNEW CMD\n\n");
-        break;
-    }
+    // default:
+    //     printf("\n\nNEW CMD\n\n");
+    //     break;
+    // }
 }
 
 Node* input_tree(Tree* tree_ptr)
 {
+    printf("\nNumber of toks: %ld\n", tree_ptr->num_of_toks);
     if(tree_ptr->cur_tok < tree_ptr->num_of_toks)
     {
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
@@ -185,9 +193,13 @@ size_t check_is_int(char* num_text)
     size_t is_digits = IS_INT; 
 
     size_t length_text = strlen(num_text);
+    if(num_text[0] == '-' && length_text == 1)
+    {
+        return NOT_ALL_DIGITS;
+    }
     if(num_text[0] != '-' && isdigit(num_text[0]) == 0)
     {   
-        printf("\nChecking char: %c\n", num_text[0]);
+        // printf("\nChecking char: %c\n", num_text[0]);
         return NOT_ALL_DIGITS;
     }
     for(size_t i  = 1; i < length_text; i++)
@@ -206,6 +218,10 @@ size_t check_is_float(char* num_text)
     size_t is_digits = IS_FLOAT; 
 
     size_t length_text = strlen(num_text);
+    if(num_text[0] == '-' && length_text == 1)
+    {
+        return NOT_ALL_DIGITS;
+    }
     if(num_text[0] != '-' && isdigit(num_text[0]) == 0)
     {   
         // printf("\nChecking char: %c\n", num_text[0]);
@@ -312,13 +328,13 @@ size_t get_tokens(Tree* tree_ptr) // ok
         
         if(check_is_int(token_val) == IS_INT)
         {
-            // printf("\nINT\n");
+            printf("\nINT\n");
             tree_ptr->toks[toks_num].value.flt_val = (float)atoi(token_val);
             tree_ptr->toks[toks_num].type  = IS_VAL;
         }
         else if(check_is_float(token_val) == IS_FLOAT)
         {   
-            // printf("\nFLOAT\n");
+            printf("\nFLOAT\n");
             tree_ptr->toks[toks_num].value.flt_val = atof(token_val);
             tree_ptr->toks[toks_num].type  = IS_VAL;
         }
@@ -333,6 +349,7 @@ size_t get_tokens(Tree* tree_ptr) // ok
                     tree_ptr->toks[toks_num].text[1] = '\0';
                     tree_ptr->toks[toks_num].type = IS_VARIB;
                     is_const = IS_VARIB;
+                    printf("\nVAR\n");
                     break;   
                 }
             }
@@ -754,7 +771,7 @@ int get_vars(Tree* tree_ptr)
 
     for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
     {
-        printf("\nEnter the %ld varible:", cur_var);
+        printf("\nEnter the %ld variable:", cur_var);
         scanf(" %c", &(tree_ptr->vars[cur_var].var_text));
         tree_ptr->vars[cur_var].var_text[1] = '\0';
 
@@ -764,15 +781,14 @@ int get_vars(Tree* tree_ptr)
             return ERR_INVALID_VAR_TEXT;
         }
 
-        printf("\nhere2\n");
-        printf("\nEnter the value of varible '%s':", tree_ptr->vars[cur_var].var_text);
+        printf("\nEnter the value of variable '%s':", tree_ptr->vars[cur_var].var_text);
         scanf(" %lf", &(tree_ptr->vars[cur_var].var_value));
     }
 
-    for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
-    {
-        printf("\nVariable '%s' = %lf\n", tree_ptr->vars[cur_var].var_text, tree_ptr->vars[cur_var].var_value);
-    }
+    // for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
+    // {
+    //     printf("\nVariable '%s' = %lf\n", tree_ptr->vars[cur_var].var_text, tree_ptr->vars[cur_var].var_value);
+    // }
     // printf("\nVar string: %s\n", tree_ptr->vars);
 
     return RETURN_OK;

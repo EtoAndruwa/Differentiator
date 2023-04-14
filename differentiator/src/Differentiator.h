@@ -40,7 +40,7 @@ enum error_codes_diff
 
 size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr);
 size_t output_tree(const Node* const root_node_ptr);
-double eval(const Node* const node_ptr, double var_value);
+double eval(const Tree* const tree_ptr, const Node* const node_ptr);
 void   print_recur_code(const Node* const node_ptr, FILE* file_ptr);
 size_t generate_cpu_code(const Node* const root_node_ptr);
 
@@ -49,17 +49,17 @@ double func_Sub(double value_1, double value_2);
 double func_Mul(double value_1, double value_2);
 double func_Div(double value_1, double value_2);
 
-double func_Cos(double value_1, double value_2 = 0);
-double func_Sin(double value_1, double value_2 = 0);
-double func_Tan(double value_1, double value_2 = 0);
-double func_Asin(double value_1, double value_2 = 0);
-double func_Acos(double value_1, double value_2 = 0);
-double func_Sqrt(double value_1, double value_2 = 0);
-double func_Exp(double value_1, double value_2 = 0);
-double func_Log(double value_1, double value_2 = 0);
-double func_Cot(double value_1, double value_2 = 0);
-double func_Log10(double value_1, double value_2 = 0);
-double func_Pow(double value_1, double value_2);
+double func_Cos(double value_1, double value_2 = 0); // ok
+double func_Sin(double value_1, double value_2 = 0); // ok
+double func_Tan(double value_1, double value_2 = 0); // ok
+double func_Asin(double value_1, double value_2 = 0); // ok
+double func_Acos(double value_1, double value_2 = 0); // ok
+double func_Sqrt(double value_1, double value_2 = 0); // ok
+double func_Exp(double value_1, double value_2 = 0); // ok
+double func_Log(double value_1, double value_2 = 0); // ok
+double func_Cot(double value_1, double value_2 = 0); // ok
+double func_Log10(double value_1, double value_2 = 0); // ok
+double func_Pow(double value_1, double value_2); // ok
 
 Node*  input_tree(Tree* tree_ptr);
 size_t check_is_int(char* num_text);
@@ -70,6 +70,6 @@ size_t get_tokens(Tree* tree_ptr);
 size_t realloc_toks(Tree* tree_ptr, size_t i);
 void   print_toks(Tree* tree_ptr);
 Node*  diff_tree(Tree* tree_ptr);
-int get_vars(Tree* tree_ptr);
+int    get_vars(Tree* tree_ptr);
 
 #endif

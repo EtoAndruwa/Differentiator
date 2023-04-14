@@ -26,11 +26,13 @@ double func_Div(double value_1, double value_2)
 
 double func_Cos(double value_1, double value_2)
 {
+    printf("\ncos: %lf\n", value_1);
     return cos(value_1 * PI / 180.0);
 }
 
 double func_Sin(double value_1, double value_2)
 {
+    printf("\nsin: %lf\n", value_1);
     return sin(value_1 * PI / 180.0);
 }
 
@@ -41,22 +43,30 @@ double func_Tan(double value_1, double value_2)
 
 double func_Cot(double value_1, double value_2)
 {
-    return 1 - tan(value_1 * PI / 180.0);
+    return cos(value_1 * PI / 180.0) / sin(value_1 * PI / 180.0);
 }
 
 double func_Asin(double value_1, double value_2)
 {
+    if(fabs(value_1) - 1 > 0.0)
+    {
+        return 0;
+    }
     return (asin(value_1) * 180.0) / PI;
 }
 
 double func_Acos(double value_1, double value_2)
 {
+    if(fabs(value_1) - 1 > 0.0)
+    {
+        return 0;
+    }
     return (acos(value_1) * 180.0) / PI;
 }
 
 double func_Sqrt(double value_1, double value_2)
 {
-    return acos(value_1);
+    return sqrt(value_1);
 }
 
 double func_Exp(double value_1, double value_2)
