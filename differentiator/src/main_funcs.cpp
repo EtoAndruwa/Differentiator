@@ -322,11 +322,6 @@ size_t get_tokens(Tree* tree_ptr)
             tree_ptr->toks[toks_num].value.flt_val = atof(token_val);
             tree_ptr->toks[toks_num].type  = IS_VAL;
         }
-        else if(check_is_float(token_val) == NOT_ALL_DIGITS && check_is_int(token_val) == NOT_ALL_DIGITS && strlen(token_val) > 1)
-        {
-            ERROR_MESSAGE(stderr, ERR_INVALID_TOKEN);
-            return ERR_INVALID_TOKEN;
-        }
         else if(isalpha(token_val[0]) != 0 && strlen(token_val) == 1) // Only vars with 1 letter
         {
             if(strchr(tree_ptr->vars, token_val[0]) != nullptr)
@@ -346,16 +341,20 @@ size_t get_tokens(Tree* tree_ptr)
         }
         else
         {
+            int invalid_tok = INVALID_TOK;
+
             #define DEF_OP(name, code, char_val)                        \  
                 if(token_val[0] == char_val)                            \
                 {                                                       \
+                    invalid_tok = VALID_TOK;                            \
                     tree_ptr->toks[toks_num].value.int_val = code;      \
                     tree_ptr->toks[toks_num].type  = IS_OP;             \
-                }                                                       \
+                }                                                       \                                         
 
             #define DEF_FUNC(name, code, str_val)                       \
                 if(strcmp(token_val, str_val) == 0)                     \
                 {                                                       \
+                    invalid_tok = VALID_TOK;                            \
                     tree_ptr->toks[toks_num].value.int_val = code;      \
                     tree_ptr->toks[toks_num].type  = IS_FUNC;           \
                 }                                                       \
@@ -363,6 +362,12 @@ size_t get_tokens(Tree* tree_ptr)
             #include "def_cmd.h"
             #undef DEF_OP
             #undef DEF_FUNC
+            if(invalid_tok == INVALID_TOK)
+            {
+                printf("\n%s\n", token_val);
+                ERROR_MESSAGE(stderr, ERR_INVALID_TOKEN);
+                return ERR_INVALID_TOKEN;
+            }
         }
 
         token_val = strtok(NULL, "( ) \n\r");

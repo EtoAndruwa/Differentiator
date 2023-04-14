@@ -21,6 +21,8 @@ enum return_codes
     NOT_ALL_DIGITS = 2,
     IS_INT         = 3,
     IS_FLOAT       = 4,
+    VALID_TOK      = 5,
+    INVALID_TOK    = 6,
 };
 
 enum error_codes_diff

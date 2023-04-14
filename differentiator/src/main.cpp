@@ -3,7 +3,7 @@
 int main()
 {
     Tree* tree_ptr_1 = tree_ctor();
-    //get_vars(tree_ptr_1);
+    get_vars(tree_ptr_1);
     get_size(tree_ptr_1);
     get_into_buff(tree_ptr_1);
     get_tokens(tree_ptr_1);
