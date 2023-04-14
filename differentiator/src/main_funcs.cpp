@@ -208,7 +208,7 @@ size_t check_is_float(char* num_text)
     size_t length_text = strlen(num_text);
     if(num_text[0] != '-' && isdigit(num_text[0]) == 0)
     {   
-        printf("\nChecking char: %c\n", num_text[0]);
+        // printf("\nChecking char: %c\n", num_text[0]);
         return NOT_ALL_DIGITS;
     }
     for(size_t i  = 1; i < length_text; i++)
@@ -288,15 +288,15 @@ size_t get_into_buff(Tree* tree_ptr)
     file_inp_ptr = nullptr;
 }
 
-size_t get_tokens(Tree* tree_ptr) 
+size_t get_tokens(Tree* tree_ptr) // ok
 {
     char* token_val = strtok(tree_ptr->tree_buff,"( ) \n\r");
     tree_ptr->toks = (tokens*)calloc(1, sizeof(tokens));
     
     if(tree_ptr->toks == nullptr)
     {
-        tree_ptr->error_code = ERR_CALLOC_TOKS;
-        ERROR_MESSAGE(stderr, ERR_CALLOC_TOKS)
+        tree_ptr->error_code = ERR_TO_CALLOC_TOKS;
+        ERROR_MESSAGE(stderr, ERR_TO_CALLOC_TOKS)
         return tree_ptr->error_code;
     }
 
@@ -323,14 +323,20 @@ size_t get_tokens(Tree* tree_ptr)
             tree_ptr->toks[toks_num].type  = IS_VAL;
         }
         else if(isalpha(token_val[0]) != 0 && strlen(token_val) == 1) // Only vars with 1 letter
-        {
-            if(strchr(tree_ptr->vars, token_val[0]) != nullptr)
+        {   
+            int is_const = IS_CNST_VAR;
+            for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
             {
-                tree_ptr->toks[toks_num].text[0] = token_val[0];
-                tree_ptr->toks[toks_num].text[1] = '\0';
-                tree_ptr->toks[toks_num].type = IS_VARIB;
+                if(tree_ptr->vars[cur_var].var_text[0] == token_val[0])
+                {
+                    tree_ptr->toks[toks_num].text[0] = token_val[0];
+                    tree_ptr->toks[toks_num].text[1] = '\0';
+                    tree_ptr->toks[toks_num].type = IS_VARIB;
+                    is_const = IS_VARIB;
+                    break;   
+                }
             }
-            else
+            if(is_const == IS_CNST_VAR)
             {
                 tree_ptr->toks[toks_num].text[0] = token_val[0];
                 tree_ptr->toks[toks_num].text[1] = '\0';
@@ -375,41 +381,40 @@ size_t get_tokens(Tree* tree_ptr)
     }
 }
 
-size_t realloc_toks(Tree* tree_ptr, size_t i) 
+size_t realloc_toks(Tree* tree_ptr, size_t i) // ok
 {
     if(tree_ptr->num_of_toks == i)
     {
         tree_ptr->num_of_toks++;
         tree_ptr->toks = (tokens*)realloc(tree_ptr->toks, tree_ptr->num_of_toks * sizeof(tokens)); // The pointer to the array of structs
 
-        // if(tree_ptr->toks == nullptr)
-        // {
-        //     tree_ptr->err_code = ERR_TO_REALLOC_TOKS;
-        //     dump_asm(tree_ptr, FUNC_NAME, FUNC_LINE, FUNC_FILE);
-        //     dtor_asm(tree_ptr);
-        //     return tree_ptr->err_code;
-        // }
+        if(tree_ptr->toks == nullptr)
+        {
+            tree_ptr->error_code = ERR_TO_CALLOC_TOKS;
+            ERROR_MESSAGE(stderr,ERR_TO_CALLOC_TOKS)
+            return tree_ptr->error_code;
+        }
     }
 }
 
-// void print_toks(Tree* tree_ptr)
-// {
-//     for(size_t tok_id = 0; tok_id < tree_ptr->num_of_toks; tok_id++)
-//     {
-//         if(tree_ptr->toks[tok_id].type == IS_VAL)
-//         {
-//             printf("index: %ld, type = %ld, val = %d\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
-//         }
-//         else if(tree_ptr->toks[tok_id].type == IS_OP)
-//         {
-//             printf("index: %ld, type = %ld, val = %c\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
-//         }
-//         else
-//         {
-//             printf("index: %ld, type = %ld, val = %s\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].text);
-//         }
-//     }
-// }
+void print_toks(Tree* tree_ptr) // DEBUG
+{
+    for(size_t tok_id = 0; tok_id < tree_ptr->num_of_toks; tok_id++)
+    {
+        if(tree_ptr->toks[tok_id].type == IS_VAL)
+        {
+            printf("index: %ld, type = %ld, val = %d\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
+        }
+        else if(tree_ptr->toks[tok_id].type == IS_OP)
+        {
+            printf("index: %ld, type = %ld, val = %c\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
+        }
+        else
+        {
+            printf("index: %ld, type = %ld, val = %s\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].text);
+        }
+    }
+}
 
 Node* diff_tree(Tree* tree_ptr)
 {
@@ -728,7 +733,7 @@ Node* diff_tree(Tree* tree_ptr)
     }
 }
 
-int get_vars(Tree* tree_ptr)
+int get_vars(Tree* tree_ptr) 
 {
     printf("\nEnter the number of variables:");
     scanf(" %ld", &(tree_ptr->num_of_vars));
@@ -740,28 +745,36 @@ int get_vars(Tree* tree_ptr)
         return ERR_INVALID_VAR_NUM;
     }
 
-    tree_ptr->vars = (char*)calloc(tree_ptr->num_of_vars + 1, sizeof(char));
+    tree_ptr->vars = (Var*)calloc(tree_ptr->num_of_vars, sizeof(Var));
     if(tree_ptr->vars == nullptr)
     {
-        ERROR_MESSAGE(stderr, ERR_CALLOC_VARS)
-        return ERR_CALLOC_VARS;
+        ERROR_MESSAGE(stderr, ERR_TO_CALLOC_VARS)
+        return ERR_TO_CALLOC_VARS;
     }
 
     for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
     {
         printf("\nEnter the %ld varible:", cur_var);
-        scanf(" %c", &tree_ptr->vars[cur_var]);
-        if(isalpha(tree_ptr->vars[cur_var]) == 0)
+        scanf(" %c", &(tree_ptr->vars[cur_var].var_text));
+        tree_ptr->vars[cur_var].var_text[1] = '\0';
+
+        if(isalpha((int)(tree_ptr->vars[cur_var].var_text[0])) == 0)
         {
             ERROR_MESSAGE(stderr, ERR_INVALID_VAR_TEXT)
             return ERR_INVALID_VAR_TEXT;
         }
+
+        printf("\nhere2\n");
+        printf("\nEnter the value of varible '%s':", tree_ptr->vars[cur_var].var_text);
+        scanf(" %lf", &(tree_ptr->vars[cur_var].var_value));
     }
 
-    tree_ptr->vars[tree_ptr->num_of_vars] = '\0';
+    for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
+    {
+        printf("\nVariable '%s' = %lf\n", tree_ptr->vars[cur_var].var_text, tree_ptr->vars[cur_var].var_value);
+    }
     // printf("\nVar string: %s\n", tree_ptr->vars);
 
     return RETURN_OK;
 }
-
 

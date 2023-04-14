@@ -54,7 +54,7 @@ enum node_type
 typedef union Tok_data
 {
     int   int_val;
-    float flt_val;
+    double flt_val;
 }Tok_data;
 
 typedef struct tokens
@@ -76,6 +76,12 @@ typedef struct Node
     Node*     right_child = nullptr;
 }Node;
 
+typedef struct Var
+{
+    char  var_text[2];
+    double var_value = 0;
+};
+
 /**
  * @brief This struct contains error code of the tree and the pointer to the tree's node
  * 
@@ -89,7 +95,7 @@ typedef struct Tree
     char    num_of_toks = 1;
     tokens* toks        = nullptr;
     size_t  cur_tok     = 0;
-    char*   vars        = nullptr;
+    Var*    vars        = nullptr;
     size_t  num_of_vars = 0;
 }Tree;
 

@@ -32,9 +32,9 @@ enum error_codes_diff
     ERR_CANNOT_OPEN_INPUT   = -3,
     ERR_CANNOT_CLOSE_INPUT  = -4,
     ERR_INVALID_VAR_NUM     = -5,
-    ERR_CALLOC_VARS         = -6,
+    ERR_TO_CALLOC_VARS      = -6,
     ERR_INVALID_VAR_TEXT    = -7,
-    ERR_CALLOC_TOKS         = -8,
+    ERR_TO_CALLOC_TOKS      = -8,
     ERR_INVALID_TOKEN       = -9,
 };
 
