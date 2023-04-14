@@ -817,13 +817,15 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                     printf("\nadd1\n");
                     return node_ptr;
                 }
-                else if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) && (node_ptr->right_child->type == IS_OP || node_ptr->right_child->type == IS_FUNC))
+                else if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) && 
+                    (node_ptr->right_child->type != IS_VARIB || node_ptr->right_child->type != IS_CNST_VAR))
                 {
                     printf("\nadd2\n");
                     node_ptr->right_child = shortener(tree_ptr, node_ptr->right_child);
                     return node_ptr;
                 }
-                else if((node_ptr->left_child->type == IS_OP || node_ptr->left_child->type == IS_FUNC) && (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
+                else if((node_ptr->left_child->type != IS_VARIB || node_ptr->left_child->type != IS_CNST_VAR) && 
+                    (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
                 {
                     printf("\nadd3\n");
                     node_ptr->left_child = shortener(tree_ptr, node_ptr->left_child);
@@ -846,13 +848,15 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                     printf("\nsub1\n");
                     return node_ptr;
                 }
-                else if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) && (node_ptr->right_child->type == IS_OP || node_ptr->right_child->type == IS_FUNC))
+                else if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) && 
+                    (node_ptr->right_child->type != IS_VARIB || node_ptr->right_child->type != IS_CNST_VAR))
                 {
                     printf("\nsub2\n");
                     node_ptr->right_child = shortener(tree_ptr, node_ptr->right_child);
                     return node_ptr;
                 }
-                else if((node_ptr->left_child->type == IS_OP || node_ptr->left_child->type == IS_FUNC) && (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
+                else if((node_ptr->left_child->type != IS_VARIB || node_ptr->left_child->type != IS_CNST_VAR) && 
+                    (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
                 {
                     printf("\nsub3\n");
                     node_ptr->left_child = shortener(tree_ptr, node_ptr->left_child);
