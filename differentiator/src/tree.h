@@ -51,11 +51,17 @@ enum node_type
 
 /*---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+typedef union Tok_data
+{
+    int   int_val;
+    float flt_val;
+}Tok_data;
+
 typedef struct tokens
 {
-    int    value = 0;         /// \brief The value reponsible for asm code of the token
-    size_t type  = 0;         /// \brief The value responsible for type of token ('cmd','reg', 'val', 'flg')
-    char   text[8];
+    Tok_data  value;         /// \brief The value reponsible for asm code of the token
+    size_t    type  = 0;         /// \brief The value responsible for type of token ('cmd','reg', 'val', 'flg')
+    char      text[8];
 }tokens;
 
 /**

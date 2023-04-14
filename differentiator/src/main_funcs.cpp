@@ -133,7 +133,7 @@ Node* input_tree(Tree* tree_ptr)
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
         {   
             GET_CUR_TOK()
-            return create_node(tree_ptr, tree_ptr->toks[cur_tok].value);
+            return create_node(tree_ptr, tree_ptr->toks[cur_tok].value.flt_val);
         }
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
         {
@@ -149,11 +149,26 @@ Node* input_tree(Tree* tree_ptr)
 
         Node* left  = nullptr;
         Node* right = nullptr;
-        switch(tree_ptr->toks[tree_ptr->cur_tok].value)
+        switch(tree_ptr->toks[tree_ptr->cur_tok].value.int_val)
         {
 
-        #define DEF_OP(code, int_val, ...) case code: tree_ptr->cur_tok++; left = input_tree(tree_ptr); right = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_OP, "", left, right);
-        #define DEF_FUNC(code, int_val, ...) case code: tree_ptr->cur_tok++; if(code == Pow){left = input_tree(tree_ptr); right = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_FUNC, "", left, right);}left = input_tree(tree_ptr); return create_node(tree_ptr, int_val, IS_FUNC, "", left);
+        #define DEF_OP(code, ...)                                               \
+            case code: tree_ptr->cur_tok++;                                     \
+                left = input_tree(tree_ptr);                                    \
+                right = input_tree(tree_ptr);                                   \
+                return create_node(tree_ptr, code, IS_OP, "", left, right);  \
+
+        #define DEF_FUNC(code, ...)                                                     \
+            case code: tree_ptr->cur_tok++;                                             \
+                if(code == Pow)                                                         \
+                {                                                                       \
+                    left = input_tree(tree_ptr);                                        \
+                    right = input_tree(tree_ptr);                                       \
+                    return create_node(tree_ptr, code, IS_FUNC, "", left, right);       \
+                }                                                                       \
+                left = input_tree(tree_ptr);                                            \
+                return create_node(tree_ptr, code, IS_FUNC, "", left);                  \
+
         #include "def_cmd.h"
         #undef DEF_OP
         #undef DEF_FUNC
@@ -165,20 +180,46 @@ Node* input_tree(Tree* tree_ptr)
     }
 }
 
-size_t check_is_number(char* num_text) 
+size_t check_is_int(char* num_text) 
 {
-    size_t is_digits = ALL_DIGITS; 
+    size_t is_digits = IS_INT; 
 
     size_t length_text = strlen(num_text);
-    for(size_t i  = 0; i < length_text; i++)
+    if(num_text[0] != '-' && isdigit(num_text[0]) == 0)
+    {   
+        printf("\nChecking char: %c\n", num_text[0]);
+        return NOT_ALL_DIGITS;
+    }
+    for(size_t i  = 1; i < length_text; i++)
     {
-        if(isdigit(num_text[i]) == 0 && num_text[0] != '-') // If the character is not a digit
+        if(isdigit(num_text[i]) == 0) // If the character is not a digit
         {
             is_digits = NOT_ALL_DIGITS;
         }
     }
 
     return is_digits; // Returns 1 if all characters are digits (word is an integer)
+}
+
+size_t check_is_float(char* num_text)
+{
+    size_t is_digits = IS_FLOAT; 
+
+    size_t length_text = strlen(num_text);
+    if(num_text[0] != '-' && isdigit(num_text[0]) == 0)
+    {   
+        printf("\nChecking char: %c\n", num_text[0]);
+        return NOT_ALL_DIGITS;
+    }
+    for(size_t i  = 1; i < length_text; i++)
+    {
+        if(isdigit(num_text[i]) == 0 && num_text[i] != '.') // If the character is not a digit
+        {
+            is_digits = NOT_ALL_DIGITS;
+        }
+    }
+
+    return is_digits; // Returns 1 if all characters are digits (word is an integer)  
 }
 
 size_t get_size(Tree* tree_ptr) 
@@ -252,13 +293,12 @@ size_t get_tokens(Tree* tree_ptr)
     char* token_val = strtok(tree_ptr->tree_buff,"( ) \n\r");
     tree_ptr->toks = (tokens*)calloc(1, sizeof(tokens));
     
-    // if(tree_ptr->toks == nullptr)
-    // {
-    //     tree_ptr->err_code = ERR_TO_CALLOC_TOKS;
-    //     dump_asm(tree_ptr, FUNC_NAME, FUNC_LINE, FUNC_FILE);
-    //     dtor_asm(tree_ptr);
-    //     return tree_ptr->err_code;
-    // }
+    if(tree_ptr->toks == nullptr)
+    {
+        tree_ptr->error_code = ERR_CALLOC_TOKS;
+        ERROR_MESSAGE(stderr, ERR_CALLOC_TOKS)
+        return tree_ptr->error_code;
+    }
 
     size_t toks_num = 0;
     while(token_val != NULL)                        
@@ -270,12 +310,24 @@ size_t get_tokens(Tree* tree_ptr)
         //     return tree_ptr->err_code;
         // }
         
-        if(check_is_number(token_val) == ALL_DIGITS)
+        if(check_is_int(token_val) == IS_INT)
         {
-            tree_ptr->toks[toks_num].value = atoi(token_val);
+            // printf("\nINT\n");
+            tree_ptr->toks[toks_num].value.flt_val = (float)atoi(token_val);
             tree_ptr->toks[toks_num].type  = IS_VAL;
         }
-        else if(isalpha(token_val[0]) != 0)
+        else if(check_is_float(token_val) == IS_FLOAT)
+        {   
+            // printf("\nFLOAT\n");
+            tree_ptr->toks[toks_num].value.flt_val = atof(token_val);
+            tree_ptr->toks[toks_num].type  = IS_VAL;
+        }
+        else if(check_is_float(token_val) == NOT_ALL_DIGITS && check_is_int(token_val) == NOT_ALL_DIGITS && strlen(token_val) > 1)
+        {
+            ERROR_MESSAGE(stderr, ERR_INVALID_TOKEN);
+            return ERR_INVALID_TOKEN;
+        }
+        else if(isalpha(token_val[0]) != 0 && strlen(token_val) == 1) // Only vars with 1 letter
         {
             if(strchr(tree_ptr->vars, token_val[0]) != nullptr)
             {
@@ -294,8 +346,20 @@ size_t get_tokens(Tree* tree_ptr)
         }
         else
         {
-            #define DEF_OP(name, int_val, char_val) if(token_val[0] == char_val){tree_ptr->toks[toks_num].value = int_val; tree_ptr->toks[toks_num].type  = IS_OP;}
-            #define DEF_FUNC(name, int_val, str_val) if(strcmp(token_val, str_val) == 0){tree_ptr->toks[toks_num].value = int_val; tree_ptr->toks[toks_num].type  = IS_FUNC;}
+            #define DEF_OP(name, code, char_val)                        \  
+                if(token_val[0] == char_val)                            \
+                {                                                       \
+                    tree_ptr->toks[toks_num].value.int_val = code;      \
+                    tree_ptr->toks[toks_num].type  = IS_OP;             \
+                }                                                       \
+
+            #define DEF_FUNC(name, code, str_val)                       \
+                if(strcmp(token_val, str_val) == 0)                     \
+                {                                                       \
+                    tree_ptr->toks[toks_num].value.int_val = code;      \
+                    tree_ptr->toks[toks_num].type  = IS_FUNC;           \
+                }                                                       \
+
             #include "def_cmd.h"
             #undef DEF_OP
             #undef DEF_FUNC
@@ -323,24 +387,24 @@ size_t realloc_toks(Tree* tree_ptr, size_t i)
     }
 }
 
-void print_toks(Tree* tree_ptr)
-{
-    for(size_t tok_id = 0; tok_id < tree_ptr->num_of_toks; tok_id++)
-    {
-        if(tree_ptr->toks[tok_id].type == IS_VAL)
-        {
-            printf("index: %ld, type = %ld, val = %d\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
-        }
-        else if(tree_ptr->toks[tok_id].type == IS_OP)
-        {
-            printf("index: %ld, type = %ld, val = %c\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
-        }
-        else
-        {
-            printf("index: %ld, type = %ld, val = %s\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].text);
-        }
-    }
-}
+// void print_toks(Tree* tree_ptr)
+// {
+//     for(size_t tok_id = 0; tok_id < tree_ptr->num_of_toks; tok_id++)
+//     {
+//         if(tree_ptr->toks[tok_id].type == IS_VAL)
+//         {
+//             printf("index: %ld, type = %ld, val = %d\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
+//         }
+//         else if(tree_ptr->toks[tok_id].type == IS_OP)
+//         {
+//             printf("index: %ld, type = %ld, val = %c\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
+//         }
+//         else
+//         {
+//             printf("index: %ld, type = %ld, val = %s\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].text);
+//         }
+//     }
+// }
 
 Node* diff_tree(Tree* tree_ptr)
 {
@@ -365,7 +429,7 @@ Node* diff_tree(Tree* tree_ptr)
         Node* left  = nullptr;
         Node* right = nullptr;
 
-        switch(tree_ptr->toks[tree_ptr->cur_tok].value)
+        switch(tree_ptr->toks[tree_ptr->cur_tok].value.int_val)
         {
         case Mul:  // ok 
             {

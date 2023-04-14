@@ -18,9 +18,9 @@ const int MAX_LEN_FSCANF = 11;
 enum return_codes
 {
     NULL_PTR_NODE  = 1,
-    ALL_DIGITS     = 2,
-    NOT_ALL_DIGITS = 3,
-
+    NOT_ALL_DIGITS = 2,
+    IS_INT         = 3,
+    IS_FLOAT       = 4,
 };
 
 enum error_codes_diff
@@ -32,6 +32,8 @@ enum error_codes_diff
     ERR_INVALID_VAR_NUM     = -5,
     ERR_CALLOC_VARS         = -6,
     ERR_INVALID_VAR_TEXT    = -7,
+    ERR_CALLOC_TOKS         = -8,
+    ERR_INVALID_TOKEN       = -9,
 };
 
 size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr);
@@ -58,7 +60,8 @@ double func_Log10(double value_1, double value_2 = 0);
 double func_Pow(double value_1, double value_2);
 
 Node*  input_tree(Tree* tree_ptr);
-size_t check_is_number(char* num_text);
+size_t check_is_int(char* num_text);
+size_t check_is_float(char* num_text);
 size_t get_into_buff(Tree* tree_ptr);
 size_t get_size(Tree* tree_ptr);
 size_t get_tokens(Tree* tree_ptr);
