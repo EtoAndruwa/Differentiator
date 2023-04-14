@@ -71,5 +71,6 @@ size_t realloc_toks(Tree* tree_ptr, size_t i);
 void   print_toks(Tree* tree_ptr);
 Node*  diff_tree(Tree* tree_ptr);
 int    get_vars(Tree* tree_ptr);
+Node* shortener(Tree* tree_ptr, Node* node_ptr);
 
 #endif

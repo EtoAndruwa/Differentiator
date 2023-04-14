@@ -6,7 +6,7 @@
     tree_ptr->cur_tok++;                 \
 
     
-#define NUM_NODE(value) create_node(tree_ptr, value);
+#define NUM_NODE(value)                   create_node(tree_ptr, value);
 #define MUL_NODE(left_child, right_child) create_node(tree_ptr, Mul, IS_OP, nullptr, left_child, right_child);
 #define ADD_NODE(left_child, right_child) create_node(tree_ptr, Add, IS_OP, nullptr, left_child, right_child);
 #define SUB_NODE(left_child, right_child) create_node(tree_ptr, Sub, IS_OP, nullptr, left_child, right_child);

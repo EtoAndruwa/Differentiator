@@ -42,7 +42,7 @@ size_t output_tree(const Node* const root_node_ptr)
     file_ptr = nullptr;
 }
 
-double eval(const Tree* const tree_ptr, const Node* const node_ptr)
+double eval(const Tree* const tree_ptr, const Node* const node_ptr) // OK
 {
     if(node_ptr == nullptr)
     {
@@ -135,7 +135,6 @@ void print_recur_code(const Node* const node_ptr, FILE* file_ptr)
 
 Node* input_tree(Tree* tree_ptr)
 {
-    printf("\nNumber of toks: %ld\n", tree_ptr->num_of_toks);
     if(tree_ptr->cur_tok < tree_ptr->num_of_toks)
     {
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
@@ -188,7 +187,7 @@ Node* input_tree(Tree* tree_ptr)
     }
 }
 
-size_t check_is_int(char* num_text) 
+size_t check_is_int(char* num_text) // OK
 {
     size_t is_digits = IS_INT; 
 
@@ -213,7 +212,7 @@ size_t check_is_int(char* num_text)
     return is_digits; // Returns 1 if all characters are digits (word is an integer)
 }
 
-size_t check_is_float(char* num_text)
+size_t check_is_float(char* num_text) // OK
 {
     size_t is_digits = IS_FLOAT; 
 
@@ -794,3 +793,88 @@ int get_vars(Tree* tree_ptr)
     return RETURN_OK;
 }
 
+Node* shortener(Tree* tree_ptr, Node* node_ptr)
+{
+    if(node_ptr == nullptr)
+    {
+        return nullptr;
+    }
+    if(node_ptr->type == IS_VAL)
+    {
+        return node_ptr;
+    }
+    if(node_ptr->type == IS_OP)
+    {
+        double result = 0;
+
+        switch(node_ptr->value.op_number)
+        {
+        case Add:
+            { 
+                if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) 
+                    && (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
+                {
+                    printf("\nadd1\n");
+                    return node_ptr;
+                }
+                else if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) && (node_ptr->right_child->type == IS_OP || node_ptr->right_child->type == IS_FUNC))
+                {
+                    printf("\nadd2\n");
+                    node_ptr->right_child = shortener(tree_ptr, node_ptr->right_child);
+                    return node_ptr;
+                }
+                else if((node_ptr->left_child->type == IS_OP || node_ptr->left_child->type == IS_FUNC) && (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
+                {
+                    printf("\nadd3\n");
+                    node_ptr->left_child = shortener(tree_ptr, node_ptr->left_child);
+                    return node_ptr;
+                }
+                else
+                {
+                    printf("\nadd4\n");
+                    result = shortener(tree_ptr, node_ptr->left_child)->value.node_value + shortener(tree_ptr, node_ptr->right_child)->value.node_value;
+                    dtor_childs(node_ptr);
+                    return NUM_NODE(result);
+                }
+            }
+        case Sub:
+            {
+                printf("\nSUB\n");
+                if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) 
+                    && (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
+                {
+                    printf("\nsub1\n");
+                    return node_ptr;
+                }
+                else if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) && (node_ptr->right_child->type == IS_OP || node_ptr->right_child->type == IS_FUNC))
+                {
+                    printf("\nsub2\n");
+                    node_ptr->right_child = shortener(tree_ptr, node_ptr->right_child);
+                    return node_ptr;
+                }
+                else if((node_ptr->left_child->type == IS_OP || node_ptr->left_child->type == IS_FUNC) && (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
+                {
+                    printf("\nsub3\n");
+                    node_ptr->left_child = shortener(tree_ptr, node_ptr->left_child);
+                    return node_ptr;
+                }
+                else
+                {
+                    printf("\nsub4\n");
+                    result = shortener(tree_ptr, node_ptr->left_child)->value.node_value - shortener(tree_ptr, node_ptr->right_child)->value.node_value;
+                    dtor_childs(node_ptr);
+                    return NUM_NODE(result);
+                }
+            }
+        case Mul:
+            {
+                result = shortener(tree_ptr, node_ptr->left_child)->value.node_value - shortener(tree_ptr, node_ptr->right_child)->value.node_value;
+                dtor_childs(node_ptr);
+                return NUM_NODE(result);
+            }
+        default:
+            break;
+        }
+    }
+
+}

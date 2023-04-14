@@ -26,13 +26,11 @@ double func_Div(double value_1, double value_2)
 
 double func_Cos(double value_1, double value_2)
 {
-    printf("\ncos: %lf\n", value_1);
     return cos(value_1 * PI / 180.0);
 }
 
 double func_Sin(double value_1, double value_2)
 {
-    printf("\nsin: %lf\n", value_1);
     return sin(value_1 * PI / 180.0);
 }
 
