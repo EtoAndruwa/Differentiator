@@ -38,7 +38,6 @@ size_t output_tree(const Node* const root_node_ptr)
     {
         return ERR_CANNOT_CLOSE_OUTPUT;
     }
-    free(file_ptr);
     file_ptr = nullptr;
 }
 
@@ -98,7 +97,6 @@ size_t generate_cpu_code(const Node* const root_node_ptr)
     {
         return ERR_CANNOT_CLOSE_OUTPUT;
     }
-    free(file_ptr);
     file_ptr = nullptr;
 }
 
@@ -237,7 +235,7 @@ size_t check_is_float(char* num_text) // OK
     return is_digits; // Returns 1 if all characters are digits (word is an integer)  
 }
 
-size_t get_size(Tree* tree_ptr) 
+int get_size(Tree* tree_ptr) 
 {
     FILE* file_inp_ptr = fopen("input_tree.txt", "rb");
     if(file_inp_ptr == nullptr)
@@ -261,11 +259,11 @@ size_t get_size(Tree* tree_ptr)
     {   
         return ERR_CANNOT_CLOSE_INPUT;
     }
-    free(file_inp_ptr);
-    file_inp_ptr = nullptr;
+    file_inp_ptr = nullptr;\
+    return RETURN_OK;
 }
 
-size_t get_into_buff(Tree* tree_ptr) 
+int get_into_buff(Tree* tree_ptr) 
 {
     FILE* file_inp_ptr = fopen("input_tree.txt", "rb");
     if(file_inp_ptr == nullptr)
@@ -299,11 +297,11 @@ size_t get_into_buff(Tree* tree_ptr)
     {   
         return ERR_CANNOT_CLOSE_INPUT;
     }
-    free(file_inp_ptr);
     file_inp_ptr = nullptr;
+    return RETURN_OK;
 }
 
-size_t get_tokens(Tree* tree_ptr) // ok
+int get_tokens(Tree* tree_ptr) // ok
 {
     char* token_val = strtok(tree_ptr->tree_buff,"( ) \n\r");
     tree_ptr->toks = (tokens*)calloc(1, sizeof(tokens));
@@ -395,9 +393,11 @@ size_t get_tokens(Tree* tree_ptr) // ok
         token_val = strtok(NULL, "( ) \n\r");
         toks_num++;
     }
+
+    return RETURN_OK;
 }
 
-size_t realloc_toks(Tree* tree_ptr, size_t i) // ok
+int realloc_toks(Tree* tree_ptr, size_t i) // ok
 {
     if(tree_ptr->num_of_toks == i)
     {
@@ -411,6 +411,8 @@ size_t realloc_toks(Tree* tree_ptr, size_t i) // ok
             return tree_ptr->error_code;
         }
     }
+
+    return RETURN_OK;
 }
 
 void print_toks(Tree* tree_ptr) // DEBUG

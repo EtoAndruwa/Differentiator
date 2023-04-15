@@ -36,7 +36,10 @@ enum error_codes_diff
     ERR_INVALID_VAR_TEXT    = -7,
     ERR_TO_CALLOC_TOKS      = -8,
     ERR_INVALID_TOKEN       = -9,
+    ERR_OPEN_PARSER_LOG     = -10,
+    ERR_CLOSE_PARSER_LOG    = -11,
 };
+
 
 size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr);
 size_t output_tree(const Node* const root_node_ptr);
@@ -64,13 +67,17 @@ double func_Pow(double value_1, double value_2); // ok
 Node*  input_tree(Tree* tree_ptr);
 size_t check_is_int(char* num_text);
 size_t check_is_float(char* num_text);
-size_t get_into_buff(Tree* tree_ptr);
-size_t get_size(Tree* tree_ptr);
-size_t get_tokens(Tree* tree_ptr);
-size_t realloc_toks(Tree* tree_ptr, size_t i);
+int    get_into_buff(Tree* tree_ptr);
+int    get_size(Tree* tree_ptr);
+int    get_tokens(Tree* tree_ptr);
+int    realloc_toks(Tree* tree_ptr, size_t i);
 void   print_toks(Tree* tree_ptr);
 Node*  diff_tree(Tree* tree_ptr);
 int    get_vars(Tree* tree_ptr);
-Node* shortener(Tree* tree_ptr, Node* node_ptr);
+Node*  shortener(Tree* tree_ptr, Node* node_ptr);
+int    get_eq_string(Tree* const tree_ptr);
+
+Node* rule_N(Tree* const tree_ptr, FILE* log_ptr);
+Node* get_recur_tree(Tree* const tree_ptr);
 
 #endif
