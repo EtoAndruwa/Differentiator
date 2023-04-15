@@ -17,9 +17,9 @@
 #define LN_NODE(left_child)               create_node(tree_ptr, Log, IS_FUNC, nullptr, left_child);
 #define POW_NODE(base, exp)               create_node(tree_ptr, Pow, IS_FUNC, nullptr, base, exp); 
 
-#define PRINT_PARSE_LOG(log_ptr, rule_name, rule_wait)                                                                           \
-    fprintf(log_ptr, "Called rule name: %s(Waiting for: %s). Current position in line: %ld. Current char string[%ld] = '%c'\n",  \
-        rule_name, rule_wait, tree_ptr->cur_pos_str, tree_ptr->cur_pos_str, tree_ptr->tree_buff[tree_ptr->cur_pos_str]);         \   
+#define PRINT_PARSE_LOG(log_ptr, rule_name, rule_wait, error_name)                                                                   \
+    fprintf(log_ptr, "Called rule name: %s(Waiting for: %s). Current position in line: %ld. Current char string[%ld] = '%c'.(%s)\n", \
+        rule_name, rule_wait, tree_ptr->cur_pos_str, tree_ptr->cur_pos_str, tree_ptr->tree_buff[tree_ptr->cur_pos_str], error_name); \   
 
 #define RULE_E "E"
 #define RULE_G "G"
@@ -35,5 +35,11 @@
 #define STRING(pos)  tree_ptr->tree_buff[pos]
 #define POSITION     tree_ptr->cur_pos_str
 #define FUNC_NAME    __func__
+
+#define RULE_OK      "NO ERRORS DETECTED"
+#define RULE_N_ERR   "NOT A NUMBER"
+#define RULE_G_ERR   "NO END OF FILE"
+#define RULE_E_ERR   "NULL PTR CHILD"
+
 
 #endif
