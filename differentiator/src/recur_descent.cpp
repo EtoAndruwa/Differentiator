@@ -73,7 +73,7 @@ Node* rule_T(Tree* const tree_ptr, FILE* log_ptr) //ok
 {
     Node*  right_child = nullptr;
     Node*  comb_node   = nullptr;
-    Node*  left_child  = rule_P(tree_ptr, log_ptr);
+    Node*  left_child  = rule_Pow(tree_ptr, log_ptr);
 
     if(left_child == nullptr)
     {
@@ -94,7 +94,7 @@ Node* rule_T(Tree* const tree_ptr, FILE* log_ptr) //ok
             POSITION++;
             comb_node = DIV_NODE(left_child, nullptr);
         }
-        right_child = rule_P(tree_ptr, log_ptr);
+        right_child = rule_Pow(tree_ptr, log_ptr);
         comb_node->right_child = right_child;
         left_child = comb_node;
         PRINT_PARSE_LOG(log_ptr, RULE_T, RULE_T_WAIT, RULE_OK)
@@ -108,7 +108,7 @@ Node* rule_P(Tree* const tree_ptr, FILE* log_ptr) // ok
     if(STRING(POSITION) == '(')
     {
         POSITION++;
-        inner_node = rule_F(tree_ptr, log_ptr);
+        inner_node = rule_E(tree_ptr, log_ptr);
         if(STRING(POSITION) != ')')
         {
             ERROR_MESSAGE(stderr, ERR_NO_CLOSING_BRACKETS)
@@ -245,6 +245,22 @@ Node* rule_F(Tree* const tree_ptr, FILE* log_ptr)
         inner_func = rule_E(tree_ptr, log_ptr);
         return inner_func;
     }
+}
+
+Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr)
+{
+    Node* pow = rule_P(tree_ptr, log_ptr);
+
+    while(STRING(POSITION) == '^')
+    {
+        printf("Pow on pos: %ld was char '%c'\n", POSITION, STRING(POSITION));
+        POSITION++;
+        printf("Pow before sign on pos: %ld was char '%c'\n", POSITION, STRING(POSITION));
+        Node* exp = rule_P(tree_ptr, log_ptr); 
+        pow = POW_NODE(pow, exp);
+    }
+
+    return pow;
 }
 
 Node* get_recur_tree(Tree* const tree_ptr)

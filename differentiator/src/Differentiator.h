@@ -65,7 +65,7 @@ double func_Sqrt(double value_1, double value_2 = 0); // ok
 double func_Exp(double value_1, double value_2 = 0); // ok
 double func_Log(double value_1, double value_2 = 0); // ok
 double func_Cot(double value_1, double value_2 = 0); // ok
-double func_Log10(double value_1, double value_2 = 0); // ok
+// double func_Log10(double value_1, double value_2 = 0); // ok
 double func_Pow(double value_1, double value_2); // ok
 
 Node*  input_tree(Tree* tree_ptr);
@@ -88,6 +88,7 @@ Node*  rule_T(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_P(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_V(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_F(Tree* const tree_ptr, FILE* log_ptr);
+Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr);
 
 Node*  get_recur_tree(Tree* const tree_ptr);
 size_t length_double(char* str_double);

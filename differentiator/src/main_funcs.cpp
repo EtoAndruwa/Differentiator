@@ -161,23 +161,23 @@ Node* input_tree(Tree* tree_ptr)
             case code: tree_ptr->cur_tok++;                                     \
                 left = input_tree(tree_ptr);                                    \
                 right = input_tree(tree_ptr);                                   \
-                return create_node(tree_ptr, code, IS_OP, "", left, right);  \
-
-        #define DEF_FUNC(code, ...)                                                     \
-            case code: tree_ptr->cur_tok++;                                             \                                                                      
-                left = input_tree(tree_ptr);                                            \
-                return create_node(tree_ptr, code, IS_FUNC, "", left);                  \
+                return create_node(tree_ptr, code, IS_OP, "", left, right);     \
 
         // #define DEF_FUNC(code, ...)                                                     \
-        //     case code: tree_ptr->cur_tok++;                                             \
-        //         if(code == Pow)                                                         \
-        //         {                                                                       \
-        //             left = input_tree(tree_ptr);                                        \
-        //             right = input_tree(tree_ptr);                                       \
-        //             return create_node(tree_ptr, code, IS_FUNC, "", left, right);       \
-        //         }                                                                       \
+        //     case code: tree_ptr->cur_tok++;                                             \                                                                      
         //         left = input_tree(tree_ptr);                                            \
         //         return create_node(tree_ptr, code, IS_FUNC, "", left);                  \
+
+        #define DEF_FUNC(code, ...)                                                     \
+            case code: tree_ptr->cur_tok++;                                             \
+                if(code == Pow)                                                         \
+                {                                                                       \
+                    left  = input_tree(tree_ptr);                                        \
+                    right = input_tree(tree_ptr);                                       \
+                    return create_node(tree_ptr, code, IS_FUNC, "", left, right);       \
+                }                                                                       \
+                left = input_tree(tree_ptr);                                            \
+                return create_node(tree_ptr, code, IS_FUNC, "", left);                  \
 
         #include "def_cmd.h"
         #undef DEF_OP
@@ -621,19 +621,19 @@ Node* diff_tree(Tree* tree_ptr)
                  
                 return DIV_NODE(top, bottom)
             }
-        case Log10: //ok
-            {
-                tree_ptr->cur_tok++;
-                size_t saved_frst_tok_num = tree_ptr->cur_tok; 
-                left = diff_tree(tree_ptr); 
+        // case Log10: //ok
+        //     {
+        //         tree_ptr->cur_tok++;
+        //         size_t saved_frst_tok_num = tree_ptr->cur_tok; 
+        //         left = diff_tree(tree_ptr); 
 
-                tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree (inner of log)
-                Node* left_pre_diff = input_tree(tree_ptr);
-                Node* coef   = NUM_NODE(10)
-                Node* bottom = MUL_NODE(coef, left_pre_diff)
+        //         tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree (inner of log)
+        //         Node* left_pre_diff = input_tree(tree_ptr);
+        //         Node* coef   = NUM_NODE(10)
+        //         Node* bottom = MUL_NODE(coef, left_pre_diff)
 
-                return DIV_NODE(left, bottom)
-            }
+        //         return DIV_NODE(left, bottom)
+        //     }
         case Asin:
             {
                 tree_ptr->cur_tok++; 
@@ -673,82 +673,82 @@ Node* diff_tree(Tree* tree_ptr)
 
                 return DIV_NODE(top, srt)
             }
-        // case Pow:
-        //     {
-        //         size_t saved_frst_tok_num = tree_ptr->cur_tok;
+        case Pow:
+            {
+                size_t saved_frst_tok_num = tree_ptr->cur_tok;
 
-        //         tree_ptr->cur_tok++;
-        //         Node* base = input_tree(tree_ptr);
+                tree_ptr->cur_tok++;
+                Node* base = input_tree(tree_ptr);
 
-        //         size_t saved_exp_id = tree_ptr->cur_tok;
-        //         Node*  exp          = input_tree(tree_ptr);
-        //         size_t last_id      = tree_ptr->cur_tok;
+                size_t saved_exp_id = tree_ptr->cur_tok;
+                Node*  exp          = input_tree(tree_ptr);
+                size_t last_id      = tree_ptr->cur_tok;
 
-        //         if(base->type == IS_VAL && exp->type == IS_VAL)
-        //         {
-        //             return NUM_NODE(0);
-        //             free(base);
-        //             free(exp);
-        //         }
-        //         else if(base->type == IS_VAL)
-        //         {
-        //             free(exp);
-        //             tree_ptr->cur_tok = saved_frst_tok_num;
-        //             Node* pre_dif_pow = input_tree(tree_ptr);
-        //             Node* ln          = LN_NODE(base)
+                if(base->type == IS_VAL && exp->type == IS_VAL)
+                {
+                    return NUM_NODE(0);
+                    free(base);
+                    free(exp);
+                }
+                else if(base->type == IS_VAL)
+                {
+                    free(exp);
+                    tree_ptr->cur_tok = saved_frst_tok_num;
+                    Node* pre_dif_pow = input_tree(tree_ptr);
+                    Node* ln          = LN_NODE(base)
 
-        //             tree_ptr->cur_tok = saved_exp_id;
-        //             left = diff_tree(tree_ptr);
+                    tree_ptr->cur_tok = saved_exp_id;
+                    left = diff_tree(tree_ptr);
 
-        //             Node* mul_1 = MUL_NODE(pre_dif_pow, ln);
-        //             return MUL_NODE(mul_1, left);
-        //         }
-        //         else if((base->type == IS_FUNC || base->type == IS_VARIB) && exp->type == IS_VAL)
-        //         {
-        //             tree_ptr->cur_tok = saved_frst_tok_num;
-        //             Node* pre_dif_pow = input_tree(tree_ptr);
+                    Node* mul_1 = MUL_NODE(pre_dif_pow, ln);
+                    return MUL_NODE(mul_1, left);
+                }
+                else if((base->type == IS_FUNC || base->type == IS_VARIB) && exp->type == IS_VAL)
+                {
+                    tree_ptr->cur_tok = saved_frst_tok_num;
+                    Node* pre_dif_pow = input_tree(tree_ptr);
 
-        //             double new_exp_val = exp->value.node_value - 1.0; // decreasing exp val
-        //             printf("\n\n%lf\n\n", new_exp_val);
-        //             Node* coef = NUM_NODE(exp->value.node_value);
-        //             exp->value.node_value = new_exp_val; // changing old exp val
+                    double new_exp_val = exp->value.node_value - 1.0; // decreasing exp val
+                    printf("\n\n%lf\n\n", new_exp_val);
+                    Node* coef = NUM_NODE(exp->value.node_value);
+                    exp->value.node_value = new_exp_val; // changing old exp val
 
-        //             Node* new_pow = create_node(tree_ptr, Pow, IS_FUNC, nullptr, base, exp);
-        //             Node* mul     = MUL_NODE(coef, new_pow);
+                    Node* new_pow = create_node(tree_ptr, Pow, IS_FUNC, nullptr, base, exp);
+                    Node* mul     = MUL_NODE(coef, new_pow);
 
-        //             tree_ptr->cur_tok = saved_frst_tok_num + 1;
-        //             left              = diff_tree(tree_ptr);
-        //             tree_ptr->cur_tok = last_id;
+                    tree_ptr->cur_tok = saved_frst_tok_num + 1;
+                    left              = diff_tree(tree_ptr);
+                    tree_ptr->cur_tok = last_id;
 
-        //             return MUL_NODE(mul, left);
-        //         }
+                    return MUL_NODE(mul, left);
+                }
 
-        //         Node* one          = NUM_NODE(1); // 1
-        //         Node* new_exp_base = SUB_NODE(exp, one); // v - 1
-        //         Node* new_pow      = POW_NODE(base, new_exp_base); // u^(v-1)
+                Node* one          = NUM_NODE(1); // 1
+                Node* new_exp_base = SUB_NODE(exp, one); // v - 1
+                Node* new_pow      = POW_NODE(base, new_exp_base); // u^(v-1)
 
-        //         tree_ptr->cur_tok = saved_exp_id;
-        //         Node* old_exp     = input_tree(tree_ptr); // v
-        //         tree_ptr->cur_tok = saved_frst_tok_num + 1; 
-        //         Node* diff_base   = diff_tree(tree_ptr); // du/dx
+                tree_ptr->cur_tok = saved_exp_id;
+                Node* old_exp     = input_tree(tree_ptr); // v
+                tree_ptr->cur_tok = saved_frst_tok_num + 1; 
+                Node* diff_base   = diff_tree(tree_ptr); // du/dx
 
-        //         Node* mul_1 = MUL_NODE(old_exp, new_pow); // v * u^(v-1) 
-        //         Node* mul_2 = MUL_NODE(mul_1, diff_base);  // v * u^(v-1) * (du/dx)
+                Node* mul_1 = MUL_NODE(old_exp, new_pow); // v * u^(v-1) 
+                Node* mul_2 = MUL_NODE(mul_1, diff_base);  // v * u^(v-1) * (du/dx)
 
-        //         tree_ptr->cur_tok = saved_frst_tok_num;
-        //         Node* old_pow     = input_tree(tree_ptr); // u^v
-        //         tree_ptr->cur_tok = saved_frst_tok_num + 1;
-        //         Node* old_base    = input_tree(tree_ptr); // u
-        //         Node* ln_base     = LN_NODE(old_base); // ln(u)
+                tree_ptr->cur_tok = saved_frst_tok_num;
+                Node* old_pow     = input_tree(tree_ptr); // u^v
+                tree_ptr->cur_tok = saved_frst_tok_num + 1;
+                Node* old_base    = input_tree(tree_ptr); // u
+                Node* ln_base     = LN_NODE(old_base); // ln(u)
 
-        //         Node* mul_3 = MUL_NODE(old_pow, ln_base); // u^v * ln(u)
+                Node* mul_3 = MUL_NODE(old_pow, ln_base); // u^v * ln(u)
 
-        //         tree_ptr->cur_tok = saved_exp_id;
-        //         Node* diff_exp    = diff_tree(tree_ptr); // (dv/dx)
-        //         Node* mul_4       = MUL_NODE(mul_3, diff_exp); // u^v * ln(u) * (dv/dx)
+                tree_ptr->cur_tok = saved_exp_id;
+                Node* diff_exp    = diff_tree(tree_ptr); // (dv/dx)
+                Node* mul_4       = MUL_NODE(mul_3, diff_exp); // u^v * ln(u) * (dv/dx)
 
-        //         return ADD_NODE(mul_2, mul_4);
-        //     }
+                return ADD_NODE(mul_2, mul_4);
+            }
         default:
             printf("\n\nUNKNOWN COMMAND\n\n");
             break;
