@@ -23,6 +23,8 @@ enum return_codes
     IS_FLOAT       = 4,
     VALID_TOK      = 5,
     INVALID_TOK    = 6,
+    EXISTING_FUNC  = 7,
+    NON_EXIST_FUNC = 8,
 };
 
 enum error_codes_diff
@@ -85,6 +87,7 @@ Node*  rule_E(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_T(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_P(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_V(Tree* const tree_ptr, FILE* log_ptr);
+Node*  rule_F(Tree* const tree_ptr, FILE* log_ptr);
 
 Node*  get_recur_tree(Tree* const tree_ptr);
 size_t length_double(char* str_double);

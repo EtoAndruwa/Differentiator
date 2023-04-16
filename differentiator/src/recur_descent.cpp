@@ -21,7 +21,7 @@ int get_eq_string(Tree* const tree_ptr)
 
 Node* rule_G(Tree* const tree_ptr, FILE* log_ptr) //ok
 {
-    Node* root_node = rule_E(tree_ptr, log_ptr);
+    Node* root_node = rule_F(tree_ptr, log_ptr);
 
     if(STRING(POSITION) != '\0')
     {
@@ -150,7 +150,7 @@ Node* rule_N(Tree* const tree_ptr, FILE* log_ptr) // ok
     }
 }
 
-Node* rule_V(Tree* const tree_ptr, FILE* log_ptr)
+Node* rule_V(Tree* const tree_ptr, FILE* log_ptr) // ok
 {
     char var_name[20];
     size_t var_name_pos = 0;
@@ -165,7 +165,71 @@ Node* rule_V(Tree* const tree_ptr, FILE* log_ptr)
     var_name[var_name_pos] = '\0';
     // printf("The last non alphabetic char is: %d, index %ld\n", STRING(POSITION), POSITION);
 
+    PRINT_PARSE_LOG(log_ptr, RULE_V, RULE_V_WAIT, RULE_OK)
     return create_node(tree_ptr, 0, IS_VARIB, var_name);
+}
+
+Node* rule_F(Tree* const tree_ptr, FILE* log_ptr)
+{
+    char var_name[7];
+    size_t var_name_pos = 0;
+    size_t svd_pos = POSITION;
+    Node* inner_func = nullptr;
+    Node* func_node = nullptr;
+
+    while(isalpha(STRING(svd_pos)) != 0)
+    {
+        var_name[var_name_pos] = STRING(svd_pos);
+        // printf("var_name[%ld] = '%c'\n", var_name_pos, var_name[var_name_pos]);
+        var_name_pos++;
+        svd_pos++;
+    }
+    var_name[var_name_pos] = '\0';
+    if(STRING(svd_pos) == '(' && svd_pos != POSITION)
+    {
+        PRINT_PARSE_LOG(log_ptr, RULE_F, RULE_F_WAIT, RULE_OK)
+        int ex_func = NON_EXIST_FUNC;
+        
+        POSITION = svd_pos + 1;
+        inner_func = rule_F(tree_ptr, log_ptr);
+        func_node  = nullptr;
+
+        #define DEF_FUNC(name, code, str_val)                                       \
+        if(strcmp(var_name, str_val) == 0)                                          \
+        {                                                                           \
+            func_node = create_node(tree_ptr, name, IS_FUNC, "", inner_func);       \
+            ex_func = EXISTING_FUNC;                                                \
+        }                                                                           \
+
+        #define DEF_OP(name, code, str_val)
+
+        #include "def_cmd.h"
+        #undef DEF_FUNC
+        #undef DEF_OP
+
+        if(ex_func == NON_EXIST_FUNC)
+        {
+            PRINT_PARSE_LOG(log_ptr, RULE_F, RULE_F_WAIT, RULE_F_ERR)
+            ERROR_MESSAGE(stderr, NON_EXIST_FUNC);
+            return nullptr;
+        }
+
+        if(STRING(POSITION) != ')')
+        {
+            PRINT_PARSE_LOG(log_ptr, RULE_F, RULE_F_WAIT, RULE_F_ERR)
+            printf("Rule F was waiting for closing brack on pos: %ld, but char was %ld\n", POSITION, STRING(POSITION));
+            ERROR_MESSAGE(stderr, ERR_NO_CLOSING_BRACKETS)
+            return nullptr;
+        } 
+
+        POSITION++;
+        return func_node;
+    }
+    else
+    {
+        inner_func = rule_E(tree_ptr, log_ptr);
+        return inner_func;
+    }
 }
 
 Node* get_recur_tree(Tree* const tree_ptr)
