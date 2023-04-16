@@ -21,7 +21,7 @@ int get_eq_string(Tree* const tree_ptr)
 
 Node* rule_G(Tree* const tree_ptr, FILE* log_ptr) //ok
 {
-    Node* root_node = rule_F(tree_ptr, log_ptr);
+    Node* root_node = rule_E(tree_ptr, log_ptr);
 
     if(STRING(POSITION) != '\0')
     {
@@ -38,9 +38,9 @@ Node* rule_G(Tree* const tree_ptr, FILE* log_ptr) //ok
 
 Node* rule_E(Tree* const tree_ptr, FILE* log_ptr) //ok
 {
-    Node*  right_child = nullptr;
-    Node*  comb_node   = nullptr;
-    Node*  left_child  = rule_T(tree_ptr, log_ptr);
+    Node* right_child = nullptr;
+    Node* comb_node   = nullptr;
+    Node* left_child  = rule_T(tree_ptr, log_ptr);
 
     if(left_child == nullptr)
     {
@@ -108,7 +108,7 @@ Node* rule_P(Tree* const tree_ptr, FILE* log_ptr) // ok
     if(STRING(POSITION) == '(')
     {
         POSITION++;
-        inner_node = rule_E(tree_ptr, log_ptr);
+        inner_node = rule_F(tree_ptr, log_ptr);
         if(STRING(POSITION) != ')')
         {
             ERROR_MESSAGE(stderr, ERR_NO_CLOSING_BRACKETS)
@@ -154,19 +154,30 @@ Node* rule_V(Tree* const tree_ptr, FILE* log_ptr) // ok
 {
     char var_name[20];
     size_t var_name_pos = 0;
+    size_t old_pos = POSITION;
 
-    while(isalpha(STRING(POSITION)) != 0)
+    while(isalpha(STRING(old_pos)) != 0)
     {
-        var_name[var_name_pos] = STRING(POSITION);
+        var_name[var_name_pos] = STRING(old_pos);
         // printf("var_name[%ld] = '%c'\n", var_name_pos, var_name[var_name_pos]);
         var_name_pos++;
-        POSITION++;
+        old_pos++;
     }
+    printf("\nPosition %ld, char on pos: %c\n", old_pos, STRING(old_pos));
     var_name[var_name_pos] = '\0';
-    // printf("The last non alphabetic char is: %d, index %ld\n", STRING(POSITION), POSITION);
+    printf("var_name: %s\n", var_name);
+    if(STRING(old_pos) != '(')
+    {
+        POSITION = old_pos;
+        PRINT_PARSE_LOG(log_ptr, RULE_V, RULE_V_WAIT, RULE_OK)
 
-    PRINT_PARSE_LOG(log_ptr, RULE_V, RULE_V_WAIT, RULE_OK)
-    return create_node(tree_ptr, 0, IS_VARIB, var_name);
+        return create_node(tree_ptr, 0, IS_VARIB, var_name);
+    }
+    else
+    {
+        PRINT_PARSE_LOG(log_ptr, RULE_V, RULE_V_WAIT, RULE_OK)
+        return rule_F(tree_ptr, log_ptr);
+    }
 }
 
 Node* rule_F(Tree* const tree_ptr, FILE* log_ptr)
@@ -186,7 +197,11 @@ Node* rule_F(Tree* const tree_ptr, FILE* log_ptr)
     }
     var_name[var_name_pos] = '\0';
     if(STRING(svd_pos) == '(' && svd_pos != POSITION)
-    {
+    {    // else if(is)
+    // {
+    //     inner_node = rule_N(tree_ptr, log_ptr);
+    //     PRINT_PARSE_LOG(log_ptr, RULE_P, RULE_P_WAIT, RULE_OK)
+    // }
         PRINT_PARSE_LOG(log_ptr, RULE_F, RULE_F_WAIT, RULE_OK)
         int ex_func = NON_EXIST_FUNC;
         
@@ -217,7 +232,7 @@ Node* rule_F(Tree* const tree_ptr, FILE* log_ptr)
         if(STRING(POSITION) != ')')
         {
             PRINT_PARSE_LOG(log_ptr, RULE_F, RULE_F_WAIT, RULE_F_ERR)
-            printf("Rule F was waiting for closing brack on pos: %ld, but char was %ld\n", POSITION, STRING(POSITION));
+            printf("Rule F was waiting for closing brack on pos: %ld, but char was '%c'\n", POSITION, STRING(POSITION));
             ERROR_MESSAGE(stderr, ERR_NO_CLOSING_BRACKETS)
             return nullptr;
         } 

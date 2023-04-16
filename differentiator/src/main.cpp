@@ -3,7 +3,7 @@
 int main()
 {
     Tree* tree_ptr_1 = tree_ctor();
-    get_vars(tree_ptr_1);
+    // get_vars(tree_ptr_1);
     get_eq_string(tree_ptr_1);
     tree_ptr_1->root = get_recur_tree(tree_ptr_1);
     // tree_ptr_1->root = shortener(tree_ptr_1, tree_ptr_1->root);
@@ -11,8 +11,8 @@ int main()
     // get_tokens(tree_ptr_1);
     // tree_ptr_1->root = input_tree(tree_ptr_1);
     create_graph_jpg(tree_ptr_1, "tree_ptr_1");
-    double result = eval(tree_ptr_1, tree_ptr_1->root);
-    printf("\nresult of eval = %lf\n", result);
+    // double result = eval(tree_ptr_1, tree_ptr_1->root);
+    // printf("\nresult of eval = %lf\n", result);
     // tree_ptr_1->root = shortener(tree_ptr_1, tree_ptr_1->root);
     // create_graph_jpg(tree_ptr_1, "tree_ptr_1");
     // printf("\n\nResult: %lf\n\n", eval(tree_ptr_1->root));
