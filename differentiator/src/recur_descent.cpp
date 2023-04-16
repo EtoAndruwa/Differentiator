@@ -25,6 +25,7 @@ Node* rule_G(Tree* const tree_ptr, FILE* log_ptr)
 
     if(STRING(POSITION) != '\0')
     {
+        printf("\nWas waiting for end of file in pos: %ld, but here is char: %c\n", POSITION, STRING(POSITION));
         ERROR_MESSAGE(stderr, ERR_NO_END_OF_LINE)
         PRINT_PARSE_LOG(log_ptr, FUNC_NAME, RULE_G_WAIT, RULE_OK)
         return nullptr;
@@ -50,6 +51,7 @@ Node* rule_E(Tree* const tree_ptr, FILE* log_ptr)
 
     while(STRING(POSITION) == '-' || STRING(POSITION) == '+')
     {
+        // printf("while: %c\n", STRING(POSITION));
         if(STRING(POSITION) == '-')
         {
             POSITION++;
@@ -112,17 +114,16 @@ Node* rule_N(Tree* const tree_ptr, FILE* log_ptr)
     if((('0' <= (STRING(POSITION))) &&  ((STRING(POSITION)) <= '9')) || ((STRING(POSITION)) == '.') || ((STRING(POSITION)) == '-'))
     {   
         double value = atof(&(STRING(POSITION)));
+        // printf("value: %lf\n", value);
 
         char arr_of_val[25];
         sprintf(arr_of_val, "%f", value);
-        length_double(arr_of_val);
         PRINT_PARSE_LOG(log_ptr, RULE_N, RULE_N_WAIT, RULE_OK)
 
-        printf("pos bef: %ld\n", POSITION);
-        POSITION += strlen(arr_of_val);
-        printf("pos aft: %ld\n", POSITION);
-
-        printf("\n1\n");
+        // printf("pos bef: %ld\n", POSITION);
+        POSITION += length_double(arr_of_val);;
+        // printf("pos aft: %ld\n", POSITION);
+        // printf("char on this pos: %ld char: %c\n", POSITION, STRING(POSITION));
 
         return NUM_NODE(value);
     }
@@ -164,13 +165,27 @@ size_t length_double(char* str_double)
 {
     size_t old_length = strlen(str_double) - 1;
     size_t num_of_zeros = 0;
-    for(size_t right_end_id = old_length; right_end_id >= 0; right_end_id--)
+    size_t right_end_id = old_length;
+    for(;  right_end_id >= 0; right_end_id--)
     {
         if(str_double[right_end_id] != '0')
         {
+            // printf("Not a zero char: '%c' on pos %ld of string %s\n", str_double[right_end_id], right_end_id, str_double);
             break;
         }
         num_of_zeros++;
     }
+    // printf("right_end_id %ld\n",right_end_id);
+    if(str_double[right_end_id] == '.' && str_double[right_end_id + 1] == '0')  //shorts the atof value to normal 1.00 -> 1'\0'
+    {
+        // printf("\nCase 1: %c%c\n", str_double[right_end_id - 1], str_double[right_end_id]);
+        str_double[strchr(str_double, '.') - str_double] = '\0'; //shorts the atof value to normal 1.00 -> 1'\0'
+        // printf("Case 1 strlen: %ld of string %s\n", strlen(str_double), str_double);
+        return strlen(str_double);
+    }
+
+    // printf("\nCase 2: %c%c\n", str_double[right_end_id - 1], str_double[right_end_id]);
     str_double[old_length + 1 - num_of_zeros] = '\0'; //shorts the atof value to normal 1.230000 -> 1.23'\0'
+    // printf("Case 2 strlen: %ld of string %s\n", strlen(str_double), str_double);
+    return strlen(str_double);
 }
