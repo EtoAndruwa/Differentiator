@@ -84,6 +84,8 @@ Node*  rule_G(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_E(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_T(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_P(Tree* const tree_ptr, FILE* log_ptr);
+Node*  rule_V(Tree* const tree_ptr, FILE* log_ptr);
+
 Node*  get_recur_tree(Tree* const tree_ptr);
 size_t length_double(char* str_double);
 

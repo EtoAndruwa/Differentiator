@@ -146,10 +146,26 @@ Node* rule_N(Tree* const tree_ptr, FILE* log_ptr) // ok
     }
     else 
     {
-        PRINT_PARSE_LOG(log_ptr, FUNC_NAME, RULE_N_WAIT, RULE_N_ERR)
-        ERROR_MESSAGE(stderr, INVALID_TOK)
-        return nullptr;
+        return rule_V(tree_ptr, log_ptr);
     }
+}
+
+Node* rule_V(Tree* const tree_ptr, FILE* log_ptr)
+{
+    char var_name[20];
+    size_t var_name_pos = 0;
+
+    while(isalpha(STRING(POSITION)) != 0)
+    {
+        var_name[var_name_pos] = STRING(POSITION);
+        // printf("var_name[%ld] = '%c'\n", var_name_pos, var_name[var_name_pos]);
+        var_name_pos++;
+        POSITION++;
+    }
+    var_name[var_name_pos] = '\0';
+    // printf("The last non alphabetic char is: %d, index %ld\n", STRING(POSITION), POSITION);
+
+    return create_node(tree_ptr, 0, IS_VARIB, var_name);
 }
 
 Node* get_recur_tree(Tree* const tree_ptr)
