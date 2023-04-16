@@ -11,12 +11,21 @@ size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr)
 
     if(node_ptr->type == IS_VAL)
     {
-        fprintf(file_ptr, "%.3f", node_ptr->value.node_value);
+        fprintf(file_ptr, "%lf", node_ptr->value.node_value);
     }
-    else
+    else if(node_ptr->type == IS_OP)
     {
         fprintf(file_ptr, "%c", node_ptr->value.op_number);
     }
+    else if(node_ptr->type == IS_FUNC)
+    {
+        fprintf(file_ptr, "%s", get_string_func(node_ptr->value.op_number));
+    }
+    else
+    {
+        fprintf(file_ptr, "%s", node_ptr->value.text);
+    }
+
 
     print_recur_tree(node_ptr->left_child, file_ptr);
     print_recur_tree(node_ptr->right_child, file_ptr);
@@ -377,7 +386,7 @@ int get_tokens(Tree* tree_ptr) // ok
                 }                                                       \                                         
 
             #define DEF_FUNC(name, code, str_val)                       \
-                if(strcmp(token_val, str_val) == 0)                     \
+                if(strcasecmp(token_val, str_val) == 0)                 \
                 {                                                       \
                     invalid_tok = VALID_TOK;                            \
                     tree_ptr->toks[toks_num].value.int_val = code;      \
@@ -399,6 +408,8 @@ int get_tokens(Tree* tree_ptr) // ok
         toks_num++;
     }
 
+    free(tree_ptr->tree_buff);
+    tree_ptr->tree_buff = nullptr;
     return RETURN_OK;
 }
 
@@ -1012,3 +1023,26 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
     }
 
 }
+
+char* get_string_func(size_t func_code)
+{
+
+    switch(func_code)
+    {
+
+    #define DEF_FUNC(name, code, string)        \
+        case name:                              \
+            return string;                      \
+
+    #define DEF_OP(name, code, string)
+
+    #include "def_cmd.h"
+
+    #undef DEF_FUNC
+    #undef DEF_OP
+
+    default:
+        return "new_func";
+    }
+}
+

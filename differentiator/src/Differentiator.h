@@ -88,10 +88,11 @@ Node*  rule_T(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_P(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_V(Tree* const tree_ptr, FILE* log_ptr);
 Node*  rule_F(Tree* const tree_ptr, FILE* log_ptr);
-Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr);
+Node*  rule_Pow(Tree* const tree_ptr, FILE* log_ptr);
 
 Node*  get_recur_tree(Tree* const tree_ptr);
 size_t length_double(char* str_double);
+char* get_string_func(size_t func_code);
 
 
 

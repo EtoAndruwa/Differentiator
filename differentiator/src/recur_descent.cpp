@@ -210,7 +210,7 @@ Node* rule_F(Tree* const tree_ptr, FILE* log_ptr)
         func_node  = nullptr;
 
         #define DEF_FUNC(name, code, str_val)                                       \
-        if(strcmp(var_name, str_val) == 0)                                          \
+        if(strcasecmp(var_name, str_val) == 0)                                      \
         {                                                                           \
             func_node = create_node(tree_ptr, name, IS_FUNC, "", inner_func);       \
             ex_func = EXISTING_FUNC;                                                \
