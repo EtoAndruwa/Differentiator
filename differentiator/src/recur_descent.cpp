@@ -40,7 +40,7 @@ Node* rule_E(Tree* const tree_ptr, FILE* log_ptr)
 {
     Node*  right_child = nullptr;
     Node*  comb_node   = nullptr;
-    Node*  left_child  = rule_N(tree_ptr, log_ptr);
+    Node*  left_child  = rule_T(tree_ptr, log_ptr);
 
     if(left_child == nullptr)
     {
@@ -62,7 +62,7 @@ Node* rule_E(Tree* const tree_ptr, FILE* log_ptr)
             POSITION++;
             comb_node = ADD_NODE(left_child, nullptr);
         }
-        right_child = rule_N(tree_ptr, log_ptr);
+        right_child = rule_T(tree_ptr, log_ptr);
         comb_node->right_child = right_child;
         left_child = comb_node;
         PRINT_PARSE_LOG(log_ptr, RULE_E, RULE_E_WAIT, RULE_OK)
@@ -72,35 +72,36 @@ Node* rule_E(Tree* const tree_ptr, FILE* log_ptr)
 
 Node* rule_T(Tree* const tree_ptr, FILE* log_ptr)
 {
-    // Node*  right_child = nullptr;
-    // Node*  comb_node   = nullptr;
-    // Node*  left_child  = rule_N(tree_ptr, log_ptr);
+    Node*  right_child = nullptr;
+    Node*  comb_node   = nullptr;
+    Node*  left_child  = rule_N(tree_ptr, log_ptr);
 
-    // if(left_child == nullptr)
-    // {
-    //     ERROR_MESSAGE(stderr, INVALID_TOK)
-    //     PRINT_PARSE_LOG(log_ptr, RULE_E, RULE_E_WAIT, RULE_E_ERR)
-    //     return nullptr;
-    // }
+    if(left_child == nullptr)
+    {
+        ERROR_MESSAGE(stderr, INVALID_TOK)
+        PRINT_PARSE_LOG(log_ptr, RULE_E, RULE_E_WAIT, RULE_E_ERR)
+        return nullptr;
+    }
 
-    // while(STRING(POSITION) == '-' || STRING(POSITION) == '+')
-    // {
-    //     if(STRING(POSITION) == '-')
-    //     {
-    //         POSITION++;
-    //         comb_node = SUB_NODE(left_child, nullptr);
-    //     }
-    //     else
-    //     {
-    //         POSITION++;
-    //         comb_node = ADD_NODE(left_child, nullptr);
-    //     }
-    //     right_child = rule_N(tree_ptr, log_ptr);
-    //     comb_node->right_child = right_child;
-    //     left_child = comb_node;
-    //     PRINT_PARSE_LOG(log_ptr, RULE_E, RULE_E_WAIT, RULE_OK)
-    // }
-    // return comb_node; 
+    while(STRING(POSITION) == '*' || STRING(POSITION) == '/')
+    {
+        // printf("while: %c\n", STRING(POSITION));
+        if(STRING(POSITION) == '*')
+        {
+            POSITION++;
+            comb_node = MUL_NODE(left_child, nullptr);
+        }
+        else
+        {
+            POSITION++;
+            comb_node = DIV_NODE(left_child, nullptr);
+        }
+        right_child = rule_N(tree_ptr, log_ptr);
+        comb_node->right_child = right_child;
+        left_child = comb_node;
+        PRINT_PARSE_LOG(log_ptr, RULE_E, RULE_E_WAIT, RULE_OK)
+    }
+    return left_child; 
 }
 
 Node* rule_P(Tree* const tree_ptr, FILE* log_ptr)
@@ -134,12 +135,6 @@ Node* rule_N(Tree* const tree_ptr, FILE* log_ptr)
         return nullptr;
     }
 }
-
-// int rule_FL(Tree* const tree_ptr, FILE* log_ptr)
-// {
-
-
-// }
 
 Node* get_recur_tree(Tree* const tree_ptr)
 {
@@ -176,6 +171,7 @@ size_t length_double(char* str_double)
         num_of_zeros++;
     }
     // printf("right_end_id %ld\n",right_end_id);
+
     if(str_double[right_end_id] == '.' && str_double[right_end_id + 1] == '0')  //shorts the atof value to normal 1.00 -> 1'\0'
     {
         // printf("\nCase 1: %c%c\n", str_double[right_end_id - 1], str_double[right_end_id]);
