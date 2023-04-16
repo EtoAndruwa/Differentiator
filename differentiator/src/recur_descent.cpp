@@ -19,7 +19,7 @@ int get_eq_string(Tree* const tree_ptr)
     return RETURN_OK;
 }
 
-Node* rule_G(Tree* const tree_ptr, FILE* log_ptr)
+Node* rule_G(Tree* const tree_ptr, FILE* log_ptr) //ok
 {
     Node* root_node = rule_E(tree_ptr, log_ptr);
 
@@ -27,7 +27,7 @@ Node* rule_G(Tree* const tree_ptr, FILE* log_ptr)
     {
         printf("\nWas waiting for end of file in pos: %ld, but here is char: %c\n", POSITION, STRING(POSITION));
         ERROR_MESSAGE(stderr, ERR_NO_END_OF_LINE)
-        PRINT_PARSE_LOG(log_ptr, FUNC_NAME, RULE_G_WAIT, RULE_OK)
+        PRINT_PARSE_LOG(log_ptr, RULE_G, RULE_G_WAIT, RULE_G_ERR)
         return nullptr;
     }
 
@@ -36,7 +36,7 @@ Node* rule_G(Tree* const tree_ptr, FILE* log_ptr)
     return root_node;
 }
 
-Node* rule_E(Tree* const tree_ptr, FILE* log_ptr)
+Node* rule_E(Tree* const tree_ptr, FILE* log_ptr) //ok
 {
     Node*  right_child = nullptr;
     Node*  comb_node   = nullptr;
@@ -51,7 +51,6 @@ Node* rule_E(Tree* const tree_ptr, FILE* log_ptr)
 
     while(STRING(POSITION) == '-' || STRING(POSITION) == '+')
     {
-        // printf("while: %c\n", STRING(POSITION));
         if(STRING(POSITION) == '-')
         {
             POSITION++;
@@ -70,22 +69,21 @@ Node* rule_E(Tree* const tree_ptr, FILE* log_ptr)
     return left_child; 
 }
 
-Node* rule_T(Tree* const tree_ptr, FILE* log_ptr)
+Node* rule_T(Tree* const tree_ptr, FILE* log_ptr) //ok
 {
     Node*  right_child = nullptr;
     Node*  comb_node   = nullptr;
-    Node*  left_child  = rule_N(tree_ptr, log_ptr);
+    Node*  left_child  = rule_P(tree_ptr, log_ptr);
 
     if(left_child == nullptr)
     {
         ERROR_MESSAGE(stderr, INVALID_TOK)
-        PRINT_PARSE_LOG(log_ptr, RULE_E, RULE_E_WAIT, RULE_E_ERR)
+        PRINT_PARSE_LOG(log_ptr, RULE_T, RULE_T_WAIT, RULE_T_ERR)
         return nullptr;
     }
 
     while(STRING(POSITION) == '*' || STRING(POSITION) == '/')
     {
-        // printf("while: %c\n", STRING(POSITION));
         if(STRING(POSITION) == '*')
         {
             POSITION++;
@@ -96,21 +94,39 @@ Node* rule_T(Tree* const tree_ptr, FILE* log_ptr)
             POSITION++;
             comb_node = DIV_NODE(left_child, nullptr);
         }
-        right_child = rule_N(tree_ptr, log_ptr);
+        right_child = rule_P(tree_ptr, log_ptr);
         comb_node->right_child = right_child;
         left_child = comb_node;
-        PRINT_PARSE_LOG(log_ptr, RULE_E, RULE_E_WAIT, RULE_OK)
+        PRINT_PARSE_LOG(log_ptr, RULE_T, RULE_T_WAIT, RULE_OK)
     }
     return left_child; 
 }
 
-Node* rule_P(Tree* const tree_ptr, FILE* log_ptr)
+Node* rule_P(Tree* const tree_ptr, FILE* log_ptr) // ok
 {
-
-
+    Node* inner_node = nullptr;
+    if(STRING(POSITION) == '(')
+    {
+        POSITION++;
+        inner_node = rule_E(tree_ptr, log_ptr);
+        if(STRING(POSITION) != ')')
+        {
+            ERROR_MESSAGE(stderr, ERR_NO_CLOSING_BRACKETS)
+            PRINT_PARSE_LOG(log_ptr, RULE_P, RULE_P_WAIT, RULE_P_ERR)
+            return nullptr;
+        }
+        POSITION++;
+        PRINT_PARSE_LOG(log_ptr, RULE_P, RULE_P_WAIT, RULE_OK)
+    }
+    else
+    {
+        inner_node = rule_N(tree_ptr, log_ptr);
+        PRINT_PARSE_LOG(log_ptr, RULE_P, RULE_P_WAIT, RULE_OK)
+    }
+    return inner_node;
 }
 
-Node* rule_N(Tree* const tree_ptr, FILE* log_ptr)
+Node* rule_N(Tree* const tree_ptr, FILE* log_ptr) // ok
 {
     if((('0' <= (STRING(POSITION))) &&  ((STRING(POSITION)) <= '9')) || ((STRING(POSITION)) == '.') || ((STRING(POSITION)) == '-'))
     {   

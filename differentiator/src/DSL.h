@@ -40,6 +40,8 @@
 #define RULE_N_ERR   "NOT A NUMBER"
 #define RULE_G_ERR   "NO END OF FILE"
 #define RULE_E_ERR   "NULL PTR CHILD"
+#define RULE_T_ERR   "NULL PTR CHILD"
+#define RULE_P_ERR   "NO CLOSING BRACKETS"
 
 
 #endif

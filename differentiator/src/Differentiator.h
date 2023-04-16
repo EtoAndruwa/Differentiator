@@ -39,6 +39,7 @@ enum error_codes_diff
     ERR_OPEN_PARSER_LOG     = -10,
     ERR_CLOSE_PARSER_LOG    = -11,
     ERR_NO_END_OF_LINE      = -12,
+    ERR_NO_CLOSING_BRACKETS = -12,
 };
 
 
@@ -78,11 +79,12 @@ int    get_vars(Tree* tree_ptr);
 Node*  shortener(Tree* tree_ptr, Node* node_ptr);
 int    get_eq_string(Tree* const tree_ptr);
 
-Node* rule_N(Tree* const tree_ptr, FILE* log_ptr);
-Node* rule_G(Tree* const tree_ptr, FILE* log_ptr);
-Node* rule_E(Tree* const tree_ptr, FILE* log_ptr);
-Node* rule_T(Tree* const tree_ptr, FILE* log_ptr);
-Node* get_recur_tree(Tree* const tree_ptr);
+Node*  rule_N(Tree* const tree_ptr, FILE* log_ptr);
+Node*  rule_G(Tree* const tree_ptr, FILE* log_ptr);
+Node*  rule_E(Tree* const tree_ptr, FILE* log_ptr);
+Node*  rule_T(Tree* const tree_ptr, FILE* log_ptr);
+Node*  rule_P(Tree* const tree_ptr, FILE* log_ptr);
+Node*  get_recur_tree(Tree* const tree_ptr);
 size_t length_double(char* str_double);
 
 
