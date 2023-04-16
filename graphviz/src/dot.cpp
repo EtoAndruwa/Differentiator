@@ -16,18 +16,18 @@ int print_tree_data(Tree* tree_struct, Node* node_ptr, const char* file_name) //
     {  
         if(node_ptr->type == IS_VAL)
         {
-            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\" { <f0> left_child = %p } | {{<here> type = VALUE} | { value = %lf \\n }} | { <f1> right_child = %p } \"];\n", 
-                node_ptr, RED_BG_COLOR_DOT, node_ptr->left_child, node_ptr->value.node_value, node_ptr->right_child);
+            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"  {{<here> type = VALUE} | { <f0> value = %lf \\n }}\"];\n", 
+                node_ptr, RED_BG_COLOR_DOT,node_ptr->value.node_value);
         }
         else if(node_ptr->type == IS_OP)
         {
-            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\" { <f0> left_child = %p } | {{<here> type = OPERATOR} | {value = %c \\n}} | { <f1> right_child = %p } \"];\n", 
-                node_ptr, BLUE_BG_COLOR_DOT, node_ptr->left_child, node_ptr->value.op_number, node_ptr->right_child);
+            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = OPERATOR} | { <f0> value = %c \\n}}\"];\n", 
+                node_ptr, BLUE_BG_COLOR_DOT,node_ptr->value.op_number);
         }
         else if(node_ptr->type == IS_CNST_VAR)
         {
-            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\" { <f0> left_child = %p } | {{<here> type = CONST VARIABLE} | {value = %s \\n}} | { <f1> right_child = %p } \"];\n", 
-                node_ptr, L_BLUE_BG_COLOR_DOT, node_ptr->left_child, node_ptr->value.text, node_ptr->right_child);
+            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = CONST VARIABLE} | { <f0> value = %s \\n}}\"];\n", 
+                node_ptr, L_BLUE_BG_COLOR_DOT,node_ptr->value.text);
         }
         else if(node_ptr->type == IS_FUNC)
         {
@@ -35,8 +35,7 @@ int print_tree_data(Tree* tree_struct, Node* node_ptr, const char* file_name) //
 
             #define DEF_FUNC(name, ...)                                                                                                                 \
                 if(node_ptr->value.op_number == name){fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\",                 \
-                    label =\" { <f0> left_child = %p } | {{<here> type = FUNCTION} | {value = %s \\n}} | { <f1> right_child = %p } \"];\n", node_ptr,   \
-                        PURP_BG_COLOR_DOT, node_ptr->left_child, #name, node_ptr->right_child);}                                                        \
+                    label =\"{{<here> type = FUNCTION} | { <f0> value = %s \\n}}\"];\n", node_ptr, PURP_BG_COLOR_DOT, #name);}                          \
 
             #define DEF_OP(...)
             #include "../../differentiator/src/def_cmd.h"
@@ -46,8 +45,8 @@ int print_tree_data(Tree* tree_struct, Node* node_ptr, const char* file_name) //
         }
         else
         {
-            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\" { <f0> left_child = %p } | {{<here> type = VARIABLE} | {value = %s \\n}} | { <f1> right_child = %p } \"];\n", 
-                node_ptr, ORAN_BG_COLOR_DOT, node_ptr->left_child, node_ptr->value.text, node_ptr->right_child);
+            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = VARIABLE} | { <f0> value = %s \\n}}\"];\n", 
+                node_ptr, ORAN_BG_COLOR_DOT, node_ptr->value.text);
         }
         
         
@@ -100,7 +99,7 @@ int print_tree_links(Tree* tree_struct, Node* node_ptr, const char* file_name) /
     }
     if(node_ptr->right_child != nullptr)
     {
-        fprintf(graph_txt, "\tnode_%p:f1 -> node_%p:here[color=\"red\", label = \"right_child\"];\n", node_ptr, node_ptr->right_child);
+        fprintf(graph_txt, "\tnode_%p:f0 -> node_%p:here[color=\"red\", label = \"right_child\"];\n", node_ptr, node_ptr->right_child);
         if(print_tree_links(tree_struct, node_ptr->right_child, file_name) != RETURN_OK)
         {
             ERROR_MESSAGE(stderr, tree_struct->error_code);
