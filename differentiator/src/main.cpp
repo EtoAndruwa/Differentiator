@@ -6,7 +6,7 @@ int main()
     // get_vars(tree_ptr_1);
     get_eq_string(tree_ptr_1);
     tree_ptr_1->root = get_recur_tree(tree_ptr_1);
-    tree_ptr_1->root = shortener(tree_ptr_1, tree_ptr_1->root);
+    // tree_ptr_1->root = shortener(tree_ptr_1, tree_ptr_1->root);
 
     // get_tokens(tree_ptr_1);
     // tree_ptr_1->root = input_tree(tree_ptr_1);
