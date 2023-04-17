@@ -318,7 +318,7 @@ int get_into_buff(Tree* tree_ptr)
 int get_tokens(Tree* tree_ptr) // ok
 {
     char* token_val = strtok(tree_ptr->tree_buff,"( ) \n\r");
-    tree_ptr->toks = (tokens*)calloc(1, sizeof(tokens));
+    tree_ptr->toks = (Tokens*)calloc(1, sizeof(Tokens));
     
     if(tree_ptr->toks == nullptr)
     {
@@ -418,7 +418,7 @@ int realloc_toks(Tree* tree_ptr, size_t i) // ok
     if(tree_ptr->num_of_toks == i)
     {
         tree_ptr->num_of_toks++;
-        tree_ptr->toks = (tokens*)realloc(tree_ptr->toks, tree_ptr->num_of_toks * sizeof(tokens)); // The pointer to the array of structs
+        tree_ptr->toks = (Tokens*)realloc(tree_ptr->toks, tree_ptr->num_of_toks * sizeof(Tokens)); // The pointer to the array of structs
 
         if(tree_ptr->toks == nullptr)
         {

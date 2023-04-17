@@ -26,6 +26,7 @@ enum error_codes
     ERR_TO_CALLOC_ROOT     = 1,
     ERR_TO_CALLOC_NODE     = 2,
     ERR_TO_CALLOC_TREE     = 3,
+    ERR_VAL_VAR_HAS_CHILD  = 4,
 };
 
 
@@ -67,12 +68,12 @@ typedef union Tok_data
 /**
  * @brief 
  */
-typedef struct tokens
+typedef struct Tokens
 {
-    Tok_data  value;    /// \brief The value reponsible for asm code of the token
-    size_t    type = 0; /// \brief The value responsible for type of token ('cmd','reg', 'val', 'flg')
-    char      text[8];  /// \brief
-}tokens;
+    Tok_data value;    /// \brief The value reponsible for asm code of the token
+    size_t   type = 0; /// \brief The value responsible for type of token ('cmd','reg', 'val', 'flg')
+    char     text[8];  /// \brief
+}Tokens;
 
 /**
  * @brief The struct of the node 
@@ -90,9 +91,11 @@ typedef struct Node
  */
 typedef struct Var
 {
-    char   var_text[10];     /// \brief
-    double var_value = 0;   /// \brief
+    char   var_text[10];   /// \brief
+    double var_value = 0;  /// \brief
 };
+
+/*####################################################################################################################################################################*/
 
 /**
  * @brief This struct contains all information of the tree
@@ -102,11 +105,11 @@ typedef struct Tree
     Node*   root        = nullptr;  /// \brief The pointer to the root node of the tree 
     char*   tree_buff   = nullptr;  /// \brief The pointer to the buffer with the tree equation
     FILE*   file_ptr    = nullptr;  /// \brief The pointer to the file with the tree equation
-    tokens* toks        = nullptr;  /// \brief The pointer to the array of token structs
+    Tokens* toks        = nullptr;  /// \brief The pointer to the array of token structs
     Var*    vars        = nullptr;  /// \brief The pointer to the array of var structs
 
-    char    size        = 0;        /// \brief The total size of the buffer with the tree equation
-    char    num_of_toks = 1;        /// \brief The total number of tokens
+    size_t  size        = 0;        /// \brief The total size of the buffer with the tree equation
+    size_t  num_of_toks = 1;        /// \brief The total number of tokens
     size_t  cur_tok     = 0;        /// \brief The current number of tok in the array of tokens
     size_t  num_of_vars = 0;        /// \brief The total number of variables in the tree
     size_t  cur_pos_str = 0;        /// \brief The current position in the buffer with the tree equation

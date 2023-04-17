@@ -7,18 +7,39 @@ Tree* tree_ctor()
     if(tree_ptr == nullptr)
     {
         tree_ptr->error_code = ERR_TO_CALLOC_TREE;
+        ERROR_MESSAGE(stderr, ERR_TO_CALLOC_TREE);
+        return nullptr;
     }
     tree_ptr->error_code = TREE_OK;
 
     return tree_ptr;
 }
 
-void  tree_dtor(Tree* tree_ptr)
+void tree_dtor(Tree* tree_ptr)
 {
     dtor_childs(tree_ptr->root);
-
     tree_ptr->root = nullptr;
+
+    free(tree_ptr->tree_buff);
+    tree_ptr->tree_buff   = nullptr;
+    tree_ptr->cur_pos_str = POISON;
+
+    tree_ptr->file_ptr = nullptr;
+    tree_ptr->size     = POISON;
+
+    free(tree_ptr->toks);
+    tree_ptr->toks        = nullptr;
+    tree_ptr->num_of_toks = POISON;
+    tree_ptr->cur_tok     = POISON;
+
+    free(tree_ptr->vars);
+    tree_ptr->vars        = nullptr;
+    tree_ptr->num_of_vars = POISON;
+
     tree_ptr->error_code = TREE_OK;
+
+    free(tree_ptr);
+    tree_ptr = nullptr;
 }
 
 void  dtor_childs(Node* node_ptr)
@@ -45,7 +66,7 @@ Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, 
 {
     if((node_type == IS_VAL || node_type == IS_VARIB || node_type == IS_CNST_VAR) && (left_child != nullptr || right_child != nullptr))
     {
-        printf("ERROR: value/variable cannot have child nodes\n\n");
+        ERROR_MESSAGE(stderr, ERR_VAL_VAR_HAS_CHILD)
         return nullptr;
     }
 
@@ -54,6 +75,8 @@ Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, 
     if(new_node_ptr == nullptr)
     {   
         tree_ptr->error_code = ERR_TO_CALLOC_NODE;
+        ERROR_MESSAGE(stderr, ERR_TO_CALLOC_NODE)
+        return nullptr;
     }
     if(node_type == IS_VAL)
     {
@@ -69,7 +92,7 @@ Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, 
     }
     
     new_node_ptr->type = node_type;
-    new_node_ptr->left_child = left_child;
+    new_node_ptr->left_child  = left_child;
     new_node_ptr->right_child = right_child;
 
     return new_node_ptr;
@@ -155,5 +178,3 @@ void print_postorder(Node* node_ptr)
     }
     printf(")");
 }
-
-

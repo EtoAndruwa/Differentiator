@@ -1,20 +1,30 @@
 #ifndef DIFFERENTIATOR_H
 #define DIFFERENTIATOR_H
 
+/*####################################################################################################################################################################*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include <ctype.h>
-#include "tree.h"
-#include "DSL.h"
-#include "../../graphviz/src/graphviz.h"
 
-#define EPS 1e-7
-#define PI  3.14159265
+/*####################################################################################################################################################################*/
 
-const int MAX_LEN_FSCANF = 11;
+#include "tree.h"                         // The tree header with struct
+#include "DSL.h"                          // The DSL header with macros
+#include "../../graphviz/src/graphviz.h"  // The graphviz lib's header with funcs
 
+/*####################################################################################################################################################################*/
+
+#define EPS 1e-7        // Used in comparisson of doubles
+#define PI  3.14159265  // Used in calculations
+
+/*####################################################################################################################################################################*/
+
+/**
+ * @brief This enum contains the codes of returns of the functions
+ */
 enum return_codes
 {
     NULL_PTR_NODE  = 1,
@@ -27,6 +37,9 @@ enum return_codes
     NON_EXIST_FUNC = 8,
 };
 
+/**
+ * @brief This enum contains all error codes of the differetiator's part of project
+ */
 enum error_codes_diff
 {
     ERR_CANNOT_OPEN_OUTPUT  = -1,
@@ -44,6 +57,7 @@ enum error_codes_diff
     ERR_NO_CLOSING_BRACKETS = -12,
 };
 
+/*####################################################################################################################################################################*/
 
 size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr);
 size_t output_tree(const Node* const root_node_ptr);
@@ -68,32 +82,32 @@ double func_Cot(double value_1, double value_2 = 0); // ok
 // double func_Log10(double value_1, double value_2 = 0); // ok
 double func_Pow(double value_1, double value_2); // ok
 
-Node*  input_tree(Tree* tree_ptr);
+Node* input_tree(Tree* tree_ptr);
 size_t check_is_int(char* num_text);
 size_t check_is_float(char* num_text);
-int    get_into_buff(Tree* tree_ptr);
-int    get_size(Tree* tree_ptr);
-int    get_tokens(Tree* tree_ptr);
-int    realloc_toks(Tree* tree_ptr, size_t i);
-void   print_toks(Tree* tree_ptr);
-Node*  diff_tree(Tree* tree_ptr);
-int    get_vars(Tree* tree_ptr);
-Node*  shortener(Tree* tree_ptr, Node* node_ptr);
-int    get_eq_string(Tree* const tree_ptr);
+int get_into_buff(Tree* tree_ptr);
+int get_size(Tree* tree_ptr);
+int get_tokens(Tree* tree_ptr);
+int realloc_toks(Tree* tree_ptr, size_t i);
+void print_toks(Tree* tree_ptr);
+Node* diff_tree(Tree* tree_ptr);
+int get_vars(Tree* tree_ptr);
+Node* shortener(Tree* tree_ptr, Node* node_ptr);
+int get_eq_string(Tree* const tree_ptr);
 
-Node*  rule_N(Tree* const tree_ptr, FILE* log_ptr);
-Node*  rule_G(Tree* const tree_ptr, FILE* log_ptr);
-Node*  rule_E(Tree* const tree_ptr, FILE* log_ptr);
-Node*  rule_T(Tree* const tree_ptr, FILE* log_ptr);
-Node*  rule_P(Tree* const tree_ptr, FILE* log_ptr);
-Node*  rule_V(Tree* const tree_ptr, FILE* log_ptr);
-Node*  rule_F(Tree* const tree_ptr, FILE* log_ptr);
-Node*  rule_Pow(Tree* const tree_ptr, FILE* log_ptr);
+Node* rule_N(Tree* const tree_ptr, FILE* log_ptr);
+Node* rule_G(Tree* const tree_ptr, FILE* log_ptr);
+Node* rule_E(Tree* const tree_ptr, FILE* log_ptr);
+Node* rule_T(Tree* const tree_ptr, FILE* log_ptr);
+Node* rule_P(Tree* const tree_ptr, FILE* log_ptr);
+Node* rule_V(Tree* const tree_ptr, FILE* log_ptr);
+Node* rule_F(Tree* const tree_ptr, FILE* log_ptr);
+Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr);
 
-Node*  get_recur_tree(Tree* const tree_ptr);
+Node* get_recur_tree(Tree* const tree_ptr);
 size_t length_double(char* str_double);
 char* get_string_func(size_t func_code);
 
-
+/*####################################################################################################################################################################*/
 
 #endif

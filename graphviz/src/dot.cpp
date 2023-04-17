@@ -33,15 +33,15 @@ int print_tree_data(Tree* tree_struct, Node* node_ptr, const char* file_name) //
         {
             char* str_value = nullptr;
 
-            #define DEF_FUNC(name, ...)                                                                                                                 \
-                if(node_ptr->value.op_number == name){fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\",                 \
-                    label =\"{{<here> type = FUNCTION} | { <f0> value = %s \\n}}\"];\n", node_ptr, PURP_BG_COLOR_DOT, #name);}                          \
+            #define DEF_FUNC(name, ...)                                                                                                                                     \
+                if(node_ptr->value.op_number == name)                                                                                                                       \
+                    {fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = FUNCTION} | { <f0> value = %s \\n}}\"];\n", \
+                    node_ptr, PURP_BG_COLOR_DOT, #name);}                                                                                                                   \   
 
             #define DEF_OP(...)
             #include "../../differentiator/src/def_cmd.h"
             #undef DEF_OP
             #undef DEF_FUNC
-
         }
         else
         {
