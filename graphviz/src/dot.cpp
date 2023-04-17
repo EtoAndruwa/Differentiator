@@ -271,7 +271,7 @@ int html_end(char* file_name) // OK
     return RETURN_OK;
 }
 
-int hmtl_start(char* file_name) // OK
+int html_start(char* file_name) // OK
 {
     FILE* graph_txt = fopen(file_name, "a+");
     if(graph_txt == nullptr)
@@ -322,7 +322,7 @@ int create_html(char* file_name) // OK
         return ERR_CALLOC_DIR_FIL_NAM;
     }
 
-    int error_code = hmtl_start(dir_file_name);
+    int error_code = html_start(dir_file_name);
     
     if(error_code != 0)
     {
