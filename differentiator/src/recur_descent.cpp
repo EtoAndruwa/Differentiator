@@ -20,7 +20,7 @@ int get_eq_string(Tree* const tree_ptr)
 }
 
 Node* rule_G(Tree* const tree_ptr, FILE* log_ptr) //ok
-{
+{   
     Node* root_node = rule_E(tree_ptr, log_ptr);
 
     if(STRING(POSITION) != '\0')
@@ -31,6 +31,7 @@ Node* rule_G(Tree* const tree_ptr, FILE* log_ptr) //ok
         return nullptr;
     }
 
+    printf("RULE_G end of file in pos: %ld, char: %c\n\n", POSITION, STRING(POSITION));
     PRINT_PARSE_LOG(log_ptr, FUNC_NAME, RULE_G_WAIT, RULE_OK)
 
     return root_node;
@@ -40,6 +41,7 @@ Node* rule_E(Tree* const tree_ptr, FILE* log_ptr) //ok
 {
     Node* right_child = nullptr;
     Node* comb_node   = nullptr;
+    printf("RULE_E was called\n");
     Node* left_child  = rule_T(tree_ptr, log_ptr);
 
     if(left_child == nullptr)
@@ -71,6 +73,7 @@ Node* rule_E(Tree* const tree_ptr, FILE* log_ptr) //ok
 
 Node* rule_T(Tree* const tree_ptr, FILE* log_ptr) //ok
 {
+    printf("RULE_T was called\n");
     Node*  right_child = nullptr;
     Node*  comb_node   = nullptr;
     Node*  left_child  = rule_Pow(tree_ptr, log_ptr);
@@ -104,6 +107,7 @@ Node* rule_T(Tree* const tree_ptr, FILE* log_ptr) //ok
 
 Node* rule_P(Tree* const tree_ptr, FILE* log_ptr) // ok
 {
+    printf("RULE_P was called\n");
     Node* inner_node = nullptr;
     if(STRING(POSITION) == '(')
     {
@@ -128,6 +132,7 @@ Node* rule_P(Tree* const tree_ptr, FILE* log_ptr) // ok
 
 Node* rule_N(Tree* const tree_ptr, FILE* log_ptr) // ok
 {
+    printf("RULE_N was called\n");
     if((('0' <= (STRING(POSITION))) &&  ((STRING(POSITION)) <= '9')) || ((STRING(POSITION)) == '.') || ((STRING(POSITION)) == '-'))
     {   
         double value = atof(&(STRING(POSITION)));
@@ -152,6 +157,7 @@ Node* rule_N(Tree* const tree_ptr, FILE* log_ptr) // ok
 
 Node* rule_V(Tree* const tree_ptr, FILE* log_ptr) // ok
 {
+    printf("RULE_V was called\n");
     char var_name[20];
     size_t var_name_pos = 0;
     size_t old_pos = POSITION;
@@ -163,12 +169,13 @@ Node* rule_V(Tree* const tree_ptr, FILE* log_ptr) // ok
         var_name_pos++;
         old_pos++;
     }
-    printf("\nPosition %ld, char on pos: %c\n", old_pos, STRING(old_pos));
+    // printf("\nPosition %ld, char on pos: %c\n", old_pos, STRING(old_pos));
     var_name[var_name_pos] = '\0';
-    printf("var_name: %s\n", var_name);
-    if(STRING(old_pos) != '(')
+    // printf("var_name: %s\n", var_name);
+    if(STRING(old_pos) != '(' && old_pos != POSITION) // closing bracket is on pos old_pos if func
     {
         POSITION = old_pos;
+        printf("RULE_V: Variable name is '%s'. Current pos %ld and char on pos: '%c'\n", var_name, old_pos, STRING(old_pos));
         PRINT_PARSE_LOG(log_ptr, RULE_V, RULE_V_WAIT, RULE_OK)
 
         return create_node(tree_ptr, 0, IS_VARIB, var_name);
@@ -182,6 +189,7 @@ Node* rule_V(Tree* const tree_ptr, FILE* log_ptr) // ok
 
 Node* rule_F(Tree* const tree_ptr, FILE* log_ptr)
 {
+    printf("RULE_F was called\n");
     char var_name[7];
     size_t var_name_pos = 0;
     size_t svd_pos = POSITION;
@@ -196,25 +204,25 @@ Node* rule_F(Tree* const tree_ptr, FILE* log_ptr)
         svd_pos++;
     }
     var_name[var_name_pos] = '\0';
+    printf("RULE_F: Func name: '%s'. Current pos: %ld and char on pos: '%c'\n", var_name, svd_pos, STRING(svd_pos));
+
     if(STRING(svd_pos) == '(' && svd_pos != POSITION)
-    {    // else if(is)
-    // {
-    //     inner_node = rule_N(tree_ptr, log_ptr);
-    //     PRINT_PARSE_LOG(log_ptr, RULE_P, RULE_P_WAIT, RULE_OK)
-    // }
+    {    
         PRINT_PARSE_LOG(log_ptr, RULE_F, RULE_F_WAIT, RULE_OK)
         int ex_func = NON_EXIST_FUNC;
         
-        POSITION = svd_pos + 1;
-        inner_func = rule_F(tree_ptr, log_ptr);
+        POSITION   = svd_pos + 1;
+        printf("RULE_F INNER: pos is: %ld, char on pos of inner func: '%c'\n", POSITION, STRING(POSITION));
+
+        inner_func = rule_E(tree_ptr, log_ptr);
         func_node  = nullptr;
 
-        #define DEF_FUNC(name, code, str_val)                                       \
-        if(strcasecmp(var_name, str_val) == 0)                                      \
-        {                                                                           \
-            func_node = create_node(tree_ptr, name, IS_FUNC, "", inner_func);       \
-            ex_func = EXISTING_FUNC;                                                \
-        }                                                                           \
+        #define DEF_FUNC(name, code, str_val)                                           \
+            if(strcasecmp(var_name, str_val) == 0)                                      \
+            {                                                                           \
+                func_node = create_node(tree_ptr, name, IS_FUNC, "", inner_func);       \
+                ex_func = EXISTING_FUNC;                                                \
+            }                                                                           \
 
         #define DEF_OP(name, code, str_val)
 
@@ -231,12 +239,12 @@ Node* rule_F(Tree* const tree_ptr, FILE* log_ptr)
 
         if(STRING(POSITION) != ')')
         {
+            printf("STRING(%ld): '%c' and before was STRING(%ld): '%c'\n", POSITION, STRING(POSITION), POSITION-1, STRING(POSITION-1));
             PRINT_PARSE_LOG(log_ptr, RULE_F, RULE_F_WAIT, RULE_F_ERR)
             printf("Rule F was waiting for closing brack on pos: %ld, but char was '%c'\n", POSITION, STRING(POSITION));
             ERROR_MESSAGE(stderr, ERR_NO_CLOSING_BRACKETS)
             return nullptr;
         } 
-
         POSITION++;
         return func_node;
     }
@@ -247,15 +255,16 @@ Node* rule_F(Tree* const tree_ptr, FILE* log_ptr)
     }
 }
 
-Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr)
+Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr) // OK
 {
+    printf("RULE_Pow was called\n");
     Node* pow = rule_P(tree_ptr, log_ptr);
 
     while(STRING(POSITION) == '^')
     {
-        printf("Pow on pos: %ld was char '%c'\n", POSITION, STRING(POSITION));
+        // printf("Pow on pos: %ld was char '%c'\n", POSITION, STRING(POSITION));
         POSITION++;
-        printf("Pow before sign on pos: %ld was char '%c'\n", POSITION, STRING(POSITION));
+        // printf("Pow before sign on pos: %ld was char '%c'\n", POSITION, STRING(POSITION));
         Node* exp = rule_P(tree_ptr, log_ptr); 
         pow = POW_NODE(pow, exp);
     }
