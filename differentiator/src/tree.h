@@ -12,13 +12,24 @@ const int POISON = 0xDEAD; /// \brief The Poison value which is used in order to
  */
 typedef union Node_data
 {
-    int     op_number;      // The number of operator
-    double  node_value;     // The value of the constant
-    char    text[4] = {};   // ???????
+    int     op_number;           /// \brief The number of operator
+    double  node_value;          /// \brief The value of the constant
+    char    text[MAX_LEN_VARIB]; /// \brief The text of the node (for variables)
 }Node_data;
 
 /**
- * @brief 
+ * @brief This unioin is used in order to store the value of nodes for differentiation using strtok
+ */
+typedef union Tok_data
+{
+    int    int_val; /// \brief This type of data is used to store the value of operator/function in the node
+    double flt_val; /// \brief This type of data is used to store the value of constant node
+}Tok_data;
+
+/*####################################################################################################################################################################*/
+
+/**
+ * @brief This enum contains the erro codes of the tree functions
  */
 enum error_codes
 {
@@ -29,9 +40,8 @@ enum error_codes
     ERR_VAL_VAR_HAS_CHILD  = 4,
 };
 
-
 /**
- * @brief This enum contains the names and numbers of funcs and operators
+ * @brief This enum contains the names and numbers of functions and operators
  */
 enum op_func_numbers 
 {
@@ -57,26 +67,17 @@ enum node_type
 /*####################################################################################################################################################################*/
 
 /**
- * @brief 
- */
-typedef union Tok_data
-{
-    int    int_val;
-    double flt_val;
-}Tok_data;
-
-/**
- * @brief 
+ * @brief This struct contains the information about the single token
  */
 typedef struct Tokens
 {
-    Tok_data value;    /// \brief The value reponsible for asm code of the token
-    size_t   type = 0; /// \brief The value responsible for type of token ('cmd','reg', 'val', 'flg')
-    char     text[8];  /// \brief
+    Tok_data value;                /// \brief This value is reponsible for asm code of the token
+    size_t   type = IS_VAL;        /// \brief This value is responsible for type of token ('cmd','reg', 'val', 'flg')
+    char     text[MAX_LEN_VARIB];  /// \brief This value is responsible for storing the string value of the node (for variables)
 }Tokens;
 
 /**
- * @brief The struct of the node 
+ * @brief This struct contains the information about the single node
  */
 typedef struct Node
 {
@@ -87,18 +88,18 @@ typedef struct Node
 }Node;
 
 /**
- * @brief 
+ * @brief This struct describes the single variable
  */
 typedef struct Var
 {
-    char   var_text[10];   /// \brief
-    double var_value = 0;  /// \brief
+    char   var_text[MAX_LEN_VARIB];   /// \brief The text of the variable
+    double var_value = 0;             /// \brief The value which will replace the exact variable 
 };
 
 /*####################################################################################################################################################################*/
 
 /**
- * @brief This struct contains all information of the tree
+ * @brief This struct contains all information about the tree
  */
 typedef struct Tree
 {
@@ -127,7 +128,7 @@ Tree* tree_ctor();
 /*####################################################################################################################################################################*/
 
 /**
- * @brief 
+ * @brief Deletes the tree struct and free's all its nodes
  * @param tree_ptr The pointer to the Tree struct
  */
 void tree_dtor(Tree* tree_ptr);

@@ -11,14 +11,15 @@
 
 /*####################################################################################################################################################################*/
 
-#include "tree.h"                         // The tree header with struct
-#include "DSL.h"                          // The DSL header with macros
-#include "../../graphviz/src/graphviz.h"  // The graphviz lib's header with funcs
+#define EPS 1e-7        // Used in comparisson of doubles
+#define PI  3.14159265  // Used in calculations
+const static size_t MAX_LEN_VARIB = 21; // The maximum length of the variable text = 20 + 1 terminating symbol
 
 /*####################################################################################################################################################################*/
 
-#define EPS 1e-7        // Used in comparisson of doubles
-#define PI  3.14159265  // Used in calculations
+#include "tree.h"                         // The tree header with struct
+#include "DSL.h"                          // The DSL header with macros
+#include "../../graphviz/src/graphviz.h"  // The graphviz lib's header with funcs
 
 /*####################################################################################################################################################################*/
 
