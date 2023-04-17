@@ -2,31 +2,23 @@
 
 static size_t number_of_images = 0; // global variable in order to count the number of jpg files
 
-int print_tree_data(Tree* tree_struct, Node* node_ptr, const char* file_name) // OK
+int print_tree_data(Tree* tree_struct, Node* node_ptr, FILE* graph_txt_ptr) // OK
 {
-    FILE* graph_txt = fopen(file_name, "a+");
-    if(graph_txt == nullptr)
-    {
-        tree_struct->error_code = ERR_TO_OPEN_GRAPH_TXT;
-        ERROR_MESSAGE(stderr, ERR_TO_OPEN_GRAPH_TXT)
-        return ERR_TO_OPEN_GRAPH_TXT;
-    }
-
     if(node_ptr != nullptr)
     {  
         if(node_ptr->type == IS_VAL)
         {
-            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"  {{<here> type = VALUE} | { <f0> value = %lf \\n }}\"];\n", 
+            fprintf(graph_txt_ptr, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"  {{<here> type = VALUE} | { <f0> value = %lf \\n }}\"];\n", 
                 node_ptr, RED_BG_COLOR_DOT,node_ptr->value.node_value);
         }
         else if(node_ptr->type == IS_OP)
         {
-            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = OPERATOR} | { <f0> value = %c \\n}}\"];\n", 
+            fprintf(graph_txt_ptr, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = OPERATOR} | { <f0> value = %c \\n}}\"];\n", 
                 node_ptr, BLUE_BG_COLOR_DOT,node_ptr->value.op_number);
         }
         else if(node_ptr->type == IS_CNST_VAR)
         {
-            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = CONST VARIABLE} | { <f0> value = %s \\n}}\"];\n", 
+            fprintf(graph_txt_ptr, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = CONST VARIABLE} | { <f0> value = %s \\n}}\"];\n", 
                 node_ptr, L_BLUE_BG_COLOR_DOT,node_ptr->value.text);
         }
         else if(node_ptr->type == IS_FUNC)
@@ -35,7 +27,7 @@ int print_tree_data(Tree* tree_struct, Node* node_ptr, const char* file_name) //
 
             #define DEF_FUNC(name, ...)                                                                                                                                     \
                 if(node_ptr->value.op_number == name)                                                                                                                       \
-                    {fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = FUNCTION} | { <f0> value = %s \\n}}\"];\n", \
+                    {fprintf(graph_txt_ptr, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = FUNCTION} | { <f0> value = %s \\n}}\"];\n", \
                     node_ptr, PURP_BG_COLOR_DOT, #name);}                                                                                                                   \   
 
             #define DEF_OP(...)
@@ -45,14 +37,14 @@ int print_tree_data(Tree* tree_struct, Node* node_ptr, const char* file_name) //
         }
         else
         {
-            fprintf(graph_txt, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = VARIABLE} | { <f0> value = %s \\n}}\"];\n", 
+            fprintf(graph_txt_ptr, "\tnode_%p[shape = Mrecord, style=\"filled\" fillcolor=\"%s\", label =\"{{<here> type = VARIABLE} | { <f0> value = %s \\n}}\"];\n", 
                 node_ptr, ORAN_BG_COLOR_DOT, node_ptr->value.text);
         }
         
         
         if(node_ptr->left_child != nullptr)
         {
-            if(print_tree_data(tree_struct, node_ptr->left_child, file_name) != RETURN_OK)
+            if(print_tree_data(tree_struct, node_ptr->left_child, graph_txt_ptr) != RETURN_OK)
             {
                 ERROR_MESSAGE(stderr, tree_struct->error_code);
                 return tree_struct->error_code;
@@ -60,38 +52,22 @@ int print_tree_data(Tree* tree_struct, Node* node_ptr, const char* file_name) //
         }
         if(node_ptr->right_child != nullptr)
         {
-            if(print_tree_data(tree_struct, node_ptr->right_child, file_name) != RETURN_OK)
+            if(print_tree_data(tree_struct, node_ptr->right_child, graph_txt_ptr) != RETURN_OK)
             {
                 ERROR_MESSAGE(stderr, tree_struct->error_code);
                 return tree_struct->error_code;
             }
         }
     }
-
-    if(fclose(graph_txt) == EOF)
-    {
-        tree_struct->error_code = ERR_TO_CLOSE_GRAPH_TXT;
-        ERROR_MESSAGE(stderr, ERR_TO_CLOSE_GRAPH_TXT)
-        return ERR_TO_CLOSE_GRAPH_TXT;
-    }
-
     return RETURN_OK;
 }
 
-int print_tree_links(Tree* tree_struct, Node* node_ptr, const char* file_name) // OK
+int print_tree_links(Tree* tree_struct, Node* node_ptr, FILE* graph_txt_ptr) // OK
 {
-    FILE* graph_txt = fopen(file_name, "a+");
-    if(graph_txt == nullptr)
-    {
-        tree_struct->error_code = ERR_TO_OPEN_GRAPH_TXT;
-        ERROR_MESSAGE(stderr, ERR_TO_OPEN_GRAPH_TXT);
-        return ERR_TO_OPEN_GRAPH_TXT;
-    }
-
     if(node_ptr->left_child != nullptr)
     {
-        fprintf(graph_txt, "\tnode_%p:f0 -> node_%p:here[color=\"blue\", label = \"left_child\"];\n", node_ptr, node_ptr->left_child);
-        if(print_tree_links(tree_struct, node_ptr->left_child, file_name) != RETURN_OK)
+        fprintf(graph_txt_ptr, "\tnode_%p:f0 -> node_%p:here[color=\"blue\", label = \"left_child\"];\n", node_ptr, node_ptr->left_child);
+        if(print_tree_links(tree_struct, node_ptr->left_child, graph_txt_ptr) != RETURN_OK)
         {
             ERROR_MESSAGE(stderr, tree_struct->error_code);
             return tree_struct->error_code;
@@ -99,21 +75,13 @@ int print_tree_links(Tree* tree_struct, Node* node_ptr, const char* file_name) /
     }
     if(node_ptr->right_child != nullptr)
     {
-        fprintf(graph_txt, "\tnode_%p:f0 -> node_%p:here[color=\"red\", label = \"right_child\"];\n", node_ptr, node_ptr->right_child);
-        if(print_tree_links(tree_struct, node_ptr->right_child, file_name) != RETURN_OK)
+        fprintf(graph_txt_ptr, "\tnode_%p:f0 -> node_%p:here[color=\"red\", label = \"right_child\"];\n", node_ptr, node_ptr->right_child);
+        if(print_tree_links(tree_struct, node_ptr->right_child, graph_txt_ptr) != RETURN_OK)
         {
             ERROR_MESSAGE(stderr, tree_struct->error_code);
             return tree_struct->error_code;
         }
     }
-
-    if(fclose(graph_txt) == EOF)
-    {
-        tree_struct->error_code = ERR_TO_CLOSE_GRAPH_TXT;
-        ERROR_MESSAGE(stderr, ERR_TO_CLOSE_GRAPH_TXT);
-        return ERR_TO_CLOSE_GRAPH_TXT;
-    }
-
     return RETURN_OK;
 }
 
@@ -143,39 +111,52 @@ int create_graph_jpg(Tree* tree_struct, char* legend) // OK
         return ERR_MAKE_DIR_NEW_FILE; 
     }
 
-    error_code = graph_start(dir_file_name);
+    FILE* graph_txt_ptr = fopen(dir_file_name, "a+");
+    if(graph_txt_ptr == nullptr)
+    {
+        ERROR_MESSAGE(stderr, ERR_TO_OPEN_GRAPH_TXT)
+        return ERR_TO_OPEN_GRAPH_TXT;
+    }
+
+    error_code = graph_start(graph_txt_ptr);
     if(error_code != RETURN_OK)
     {
         ERROR_MESSAGE(stderr, error_code);
         return error_code; 
     }
     
-    error_code = print_legend(legend, dir_file_name);
+    error_code = print_legend(legend, graph_txt_ptr);
     if(error_code != RETURN_OK)
     {
         ERROR_MESSAGE(stderr, error_code);
         return error_code; 
     }
 
-    error_code = print_tree_data(tree_struct, tree_struct->root, dir_file_name);
+    error_code = print_tree_data(tree_struct, tree_struct->root, graph_txt_ptr);
     if(error_code != RETURN_OK)
     {
         ERROR_MESSAGE(stderr, error_code);
         return error_code; 
     }
 
-    error_code = print_tree_links(tree_struct, tree_struct->root, dir_file_name);
+    error_code = print_tree_links(tree_struct, tree_struct->root, graph_txt_ptr);
     if(error_code != RETURN_OK)
     {
         ERROR_MESSAGE(stderr, error_code);
         return error_code; 
     }
 
-    error_code = graph_end(dir_file_name);
+    error_code = graph_end(graph_txt_ptr);
     if(error_code != RETURN_OK)
     {
         ERROR_MESSAGE(stderr, error_code);
         return error_code; 
+    }
+
+    if(fclose(graph_txt_ptr) == EOF)
+    {
+        ERROR_MESSAGE(stderr, ERR_TO_OPEN_GRAPH_TXT)
+        return ERR_TO_CLOSE_GRAPH_TXT;
     }
 
     error_code = system_dot(file_name);
@@ -197,15 +178,8 @@ int create_graph_jpg(Tree* tree_struct, char* legend) // OK
     return RETURN_OK;
 }
  
-int graph_start(char* file_name) // OK
+int graph_start(FILE* graph_txt) // OK
 {
-    FILE* graph_txt = fopen(file_name, "a+");
-    if(graph_txt == nullptr)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_OPEN_GRAPH_TXT)
-        return ERR_TO_OPEN_GRAPH_TXT;
-    }
-
     /*
         The text below is the syntax of the DOT language 
         which is used in order to create the graph using
@@ -217,76 +191,31 @@ int graph_start(char* file_name) // OK
     fprintf(graph_txt, "\trankdir=%s;\n", RANKDIR_DOT);
     fprintf(graph_txt, "\tsplines=%s;\n", SPLINES_DOT);
 
-    if(fclose(graph_txt) == EOF)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_OPEN_GRAPH_TXT)
-        return ERR_TO_CLOSE_GRAPH_TXT;
-    }
-
     return RETURN_OK;
 }
 
-int graph_end(char* file_name) // OK
+int graph_end(FILE* graph_txt_ptr) // OK
 {
-    FILE* graph_txt = fopen(file_name, "a+");
-    if(graph_txt == nullptr)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_OPEN_GRAPH_TXT)
-        return ERR_TO_OPEN_GRAPH_TXT;
-    }
-
     /*
         The text below is the syntax of the DOT language 
         which is used in order to create the graph using
                         the graphviz lib
     */
-    fprintf(graph_txt, "}\n"); // The end of the digraph
-
-    if(fclose(graph_txt) == EOF)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_CLOSE_GRAPH_TXT)
-        return ERR_TO_CLOSE_GRAPH_TXT;
-    }
+    fprintf(graph_txt_ptr, "}\n"); // The end of the digraph
 
     return RETURN_OK;
 }
 
-int html_end(char* file_name) // OK
+int html_end(FILE* html_file_ptr) // OK
 {
-    FILE* graph_txt = fopen(file_name, "a+");
-    if(graph_txt == nullptr)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_OPEN_HTML)
-        return ERR_TO_OPEN_HTML;
-    }
-
-    fprintf(graph_txt, "</pre>\n");
-
-    if(fclose(graph_txt) == EOF)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_CLOSE_HTML)
-        return ERR_TO_CLOSE_HTML;
-    }
+    fprintf(html_file_ptr, "</pre>\n");
 
     return RETURN_OK;
 }
 
-int html_start(char* file_name) // OK
+int html_start(FILE* html_file_ptr) // OK
 {
-    FILE* graph_txt = fopen(file_name, "a+");
-    if(graph_txt == nullptr)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_OPEN_HTML)
-        return ERR_TO_OPEN_HTML;
-    }
-
-    fprintf(graph_txt, "<pre>\n");
-
-    if(fclose(graph_txt) == EOF)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_CLOSE_HTML)
-        return ERR_TO_CLOSE_HTML;
-    }
+    fprintf(html_file_ptr, "<pre>\n");
 
     return RETURN_OK;
 }
@@ -322,7 +251,14 @@ int create_html(char* file_name) // OK
         return ERR_CALLOC_DIR_FIL_NAM;
     }
 
-    int error_code = html_start(dir_file_name);
+    FILE* html_file_ptr = fopen(dir_file_name, "a+");
+    if(html_file_ptr == nullptr)
+    {
+        ERROR_MESSAGE(stderr, ERR_TO_OPEN_HTML)
+        return ERR_TO_OPEN_HTML;
+    }
+
+    int error_code = html_start(html_file_ptr);
     
     if(error_code != 0)
     {
@@ -330,18 +266,24 @@ int create_html(char* file_name) // OK
         return error_code;
     }
 
-    error_code = add_image_to_html(dir_file_name);
+    error_code = add_image_to_html(html_file_ptr);
     if(error_code != 0)
     {
         ERROR_MESSAGE(stderr, error_code)
         return error_code;
     }
 
-    error_code = html_end(dir_file_name);
+    error_code = html_end(html_file_ptr);
     if(error_code != 0)
     {
         ERROR_MESSAGE(stderr, error_code)
         return error_code;
+    }
+
+    if(fclose(html_file_ptr) == EOF)
+    {
+        ERROR_MESSAGE(stderr, ERR_TO_CLOSE_HTML)
+        return ERR_TO_CLOSE_HTML;
     }
 
     free(dir_file_name);
@@ -384,14 +326,13 @@ int system_dot(char* file_name) // OK
         ERROR_MESSAGE(stderr, ERR_TO_SYSTEM_CMD)
         return ERR_TO_SYSTEM_CMD;
     }
-
     strcpy(system_cmd, dot);
 
     strcat(system_cmd, txt_file);
     strcat(system_cmd, OUTPUT_FORMAT_FLAG);
     strcat(system_cmd, flag);
     strcat(system_cmd, jpg_file);
-
+    
     system(system_cmd);
 
     free(txt_file);
@@ -462,15 +403,8 @@ int add_to_image_list(char* file_name) // OK
     return RETURN_OK;
 }
 
-int add_image_to_html(char* dir_file_name) // OK
+int add_image_to_html(FILE* html_file_ptr) // OK
 {
-    FILE* html_file = fopen(dir_file_name, "a+");
-    if(html_file == nullptr)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_OPEN_HTML);
-        return ERR_TO_OPEN_HTML;
-    }
-
     char* buffer = get_tokens_into_buf();
     if(buffer == nullptr)
     {
@@ -478,17 +412,11 @@ int add_image_to_html(char* dir_file_name) // OK
         return ERR_EMPTY_BUFFER;
     }
 
-    int error_code = get_tokens(buffer, html_file);
+    int error_code = get_tokens(buffer, html_file_ptr);
     if(error_code != RETURN_OK)
     {
         ERROR_MESSAGE(stderr, error_code)
         return error_code;
-    }
-
-    if(fclose(html_file) == EOF)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_CLOSE_HTML);
-        return ERR_TO_CLOSE_HTML;
     }
 
     return RETURN_OK;
@@ -614,15 +542,8 @@ int get_tokens(char* buffer, FILE* file_tpr) // OK
     return RETURN_OK;
 }
 
-int print_legend(char* legend_text, char* dir_file_name) // OK
+int print_legend(char* legend_text, FILE* graph_txt) // OK
 {
-    FILE* graph_txt = fopen(dir_file_name, "a+");
-    if(graph_txt == nullptr)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_OPEN_GRAPH_TXT)
-        return ERR_TO_OPEN_GRAPH_TXT;
-    }
-
     if(strcmp(legend_text, DEFAULT_LEGEND_TEXT) == 0)
     {
         fprintf(graph_txt, "\tnode_legend[shape = record, label = \"%s\"];\n", DEFAULT_LEGEND_TEXT);
@@ -630,13 +551,6 @@ int print_legend(char* legend_text, char* dir_file_name) // OK
     else
     {
         fprintf(graph_txt, "\tnode_legend[shape=record , label = \"%s\"];\n", legend_text);
-    }
-
-
-    if(fclose(graph_txt) == EOF)
-    {
-        ERROR_MESSAGE(stderr, ERR_TO_CLOSE_GRAPH_TXT)
-        return ERR_TO_CLOSE_GRAPH_TXT;
     }
 
     return RETURN_OK;
@@ -679,4 +593,3 @@ char* create_legend(const char* func_name, int first_node_id, int first_node_val
 
     return legend;
 }
-

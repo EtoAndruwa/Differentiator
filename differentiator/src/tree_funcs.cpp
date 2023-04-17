@@ -42,7 +42,7 @@ void tree_dtor(Tree* tree_ptr)
     tree_ptr = nullptr;
 }
 
-void  dtor_childs(Node* node_ptr)
+void dtor_childs(Node* node_ptr)
 {
     if(node_ptr->left_child != nullptr)
     {
