@@ -1,6 +1,6 @@
 #include "Differentiator.h"
 
-int get_eq_string(Tree* const tree_ptr, char* file_name)
+int get_eq_string(Tree* const tree_ptr, char* file_name) // ok
 {
     int error_code = get_size(tree_ptr, file_name);
     if(error_code != RETURN_OK)
@@ -243,7 +243,7 @@ Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr) // OK
     return pow;
 }
 
-Node* get_recur_tree(Tree* const tree_ptr)
+Node* get_recur_tree(Tree* const tree_ptr) // ok
 {
     FILE* log_ptr = fopen("parser_log.txt","w");
     if(log_ptr == nullptr)
@@ -263,7 +263,7 @@ Node* get_recur_tree(Tree* const tree_ptr)
     return root_node;
 }
 
-size_t length_double(char* str_double)
+size_t length_double(char* str_double) // ok
 {
     size_t old_length = strlen(str_double) - 1;
     size_t num_of_zeros = 0;

@@ -1,12 +1,11 @@
 #include "Differentiator.h"
 
-size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr)
+size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr) // ok
 {
     if(node_ptr == nullptr)
     {
-        return NULL_PTR_NODE;
+        return 0;
     }
-
     fprintf(file_ptr, "(");
 
     if(node_ptr->type == IS_VAL)
@@ -26,18 +25,18 @@ size_t print_recur_tree(const Node* const node_ptr, FILE* file_ptr)
         fprintf(file_ptr, "%s", node_ptr->value.text);
     }
 
-
     print_recur_tree(node_ptr->left_child, file_ptr);
     print_recur_tree(node_ptr->right_child, file_ptr);
 
     fprintf(file_ptr, ")");
 }
 
-size_t output_tree(const Node* const root_node_ptr, char* file_name)
+size_t output_tree(const Node* const root_node_ptr, char* file_name) // ok
 {
     FILE* file_ptr = fopen(file_name, "w");
     if(file_ptr == nullptr)
     {
+        ERROR_MESSAGE(stderr, ERR_CANNOT_OPEN_OUTPUT)
         return ERR_CANNOT_OPEN_OUTPUT;
     }
 
@@ -45,16 +44,19 @@ size_t output_tree(const Node* const root_node_ptr, char* file_name)
 
     if(fclose(file_ptr) == EOF)
     {
+        ERROR_MESSAGE(stderr, ERR_CANNOT_CLOSE_OUTPUT)
         return ERR_CANNOT_CLOSE_OUTPUT;
     }
+
     file_ptr = nullptr;
 }
 
-double eval(const Tree* const tree_ptr, const Node* const node_ptr) // OK
+double eval(const Tree* const tree_ptr, const Node* const node_ptr) // ok
 {
     if(node_ptr == nullptr)
     {
-        return 0;
+        ERROR_MESSAGE(stderr, ERR_NULL_PTR_NODE)
+        return NAN;
     }
     if(node_ptr->type == IS_VAL)
     {
@@ -66,7 +68,6 @@ double eval(const Tree* const tree_ptr, const Node* const node_ptr) // OK
         {
             if(node_ptr->value.text[0] == tree_ptr->vars[cur_var].var_text[0])
             {
-                printf("returned: %lf \n", tree_ptr->vars[cur_var].var_value);
                 return tree_ptr->vars[cur_var].var_value;
             }
         }
@@ -84,63 +85,12 @@ double eval(const Tree* const tree_ptr, const Node* const node_ptr) // OK
     #undef DEF_FUNC
 
     default:
-        printf("cmd: %s\n", node_ptr->value.text);
-        printf("\n\nUNKNOWN cmd\n\n");
-        break;
+        ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC);
+        return NAN;
     }
 }
 
-size_t generate_cpu_code(const Node* const root_node_ptr)
-{
-    FILE* file_ptr = fopen("../CPU/ASM/asm_code.txt", "w");
-    if(file_ptr == nullptr)
-    {
-        return ERR_CANNOT_OPEN_OUTPUT;
-    }
-
-    print_recur_code(root_node_ptr, file_ptr);
-    fprintf(file_ptr, "OUT\n");
-    fprintf(file_ptr, "HLT\n");
-
-    if(fclose(file_ptr) == EOF)
-    {
-        return ERR_CANNOT_CLOSE_OUTPUT;
-    }
-    file_ptr = nullptr;
-}
-
-void print_recur_code(const Node* const node_ptr, FILE* file_ptr)
-{
-    if(node_ptr == nullptr)
-    {
-        return;
-    }
-
-    print_recur_code(node_ptr->left_child, file_ptr);
-    print_recur_code(node_ptr->right_child, file_ptr);
-
-    int op_number = node_ptr->value.op_number;
-
-    if(node_ptr->type == IS_VAL)
-    {
-        fprintf(file_ptr, "PUSH %d\n", (int)node_ptr->value.node_value);
-        return;
-    }
-
-    // switch(op_number)
-    // {
-
-    // // #define DEF_CMD(code, ...) case code: fprintf(file_ptr, "%s\n", #code); break;
-    // // #include "def_cmd.h"
-    // // #undef DEF_CMD
-
-    // default:
-    //     printf("\n\nNEW CMD\n\n");
-    //     break;
-    // }
-}
-
-Node* input_tree(Tree* tree_ptr)
+Node* input_tree(Tree* tree_ptr) // ok
 {
     if(tree_ptr->cur_tok < tree_ptr->num_of_toks)
     {
@@ -167,15 +117,20 @@ Node* input_tree(Tree* tree_ptr)
 
         #define DEF_OP(code, ...)                                               \
             case code: tree_ptr->cur_tok++;                                     \
-                left = input_tree(tree_ptr);                                    \
+                left  = input_tree(tree_ptr);                                   \
                 right = input_tree(tree_ptr);                                   \
                 return create_node(tree_ptr, code, IS_OP, "", left, right);     \
 
+        /*
+            For POW func we need to read two arguments
+            base and exp therefore is statement included 
+            into the macro
+        */
         #define DEF_FUNC(code, ...)                                                     \
             case code: tree_ptr->cur_tok++;                                             \
                 if(code == Pow)                                                         \
                 {                                                                       \
-                    left  = input_tree(tree_ptr);                                        \
+                    left  = input_tree(tree_ptr);                                       \
                     right = input_tree(tree_ptr);                                       \
                     return create_node(tree_ptr, code, IS_FUNC, "", left, right);       \
                 }                                                                       \
@@ -187,49 +142,24 @@ Node* input_tree(Tree* tree_ptr)
         #undef DEF_FUNC
 
         default:
-            printf("\n\nUNKNOWN token\n\n");
-            break;
+            ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
+            tree_ptr->error_code = ERR_UNKNOWN_FUNC;
+            return nullptr;
         }
     }
 }
 
-size_t check_is_int(char* num_text) // OK
-{
-    size_t is_digits = IS_INT; 
-
-    size_t length_text = strlen(num_text);
-    if(num_text[0] == '-' && length_text == 1)
-    {
-        return NOT_ALL_DIGITS;
-    }
-    if(num_text[0] != '-' && isdigit(num_text[0]) == 0)
-    {   
-        // printf("\nChecking char: %c\n", num_text[0]);
-        return NOT_ALL_DIGITS;
-    }
-    for(size_t i  = 1; i < length_text; i++)
-    {
-        if(isdigit(num_text[i]) == 0) // If the character is not a digit
-        {
-            is_digits = NOT_ALL_DIGITS;
-        }
-    }
-
-    return is_digits; // Returns 1 if all characters are digits (word is an integer)
-}
-
-size_t check_is_float(char* num_text) // OK
+size_t check_is_float(char* num_text) // ok
 {
     size_t is_digits = IS_FLOAT; 
-
     size_t length_text = strlen(num_text);
-    if(num_text[0] == '-' && length_text == 1)
+
+    if(num_text[0] == '-' && length_text == 1) // case for '-' minus sign only
     {
         return NOT_ALL_DIGITS;
     }
-    if(num_text[0] != '-' && isdigit(num_text[0]) == 0)
-    {   
-        // printf("\nChecking char: %c\n", num_text[0]);
+    if(num_text[0] != '-' && isdigit(num_text[0]) == 0) // case for negative float
+    {    
         return NOT_ALL_DIGITS;
     }
     for(size_t i  = 1; i < length_text; i++)
@@ -240,14 +170,15 @@ size_t check_is_float(char* num_text) // OK
         }
     }
 
-    return is_digits; // Returns 1 if all characters are digits (word is an integer)  
+    return is_digits; // Returns IS_FLOAT if the word if float
 }
 
-int get_size(Tree* tree_ptr, char* file_name) 
+int get_size(Tree* tree_ptr, char* file_name) // ok
 {
     FILE* file_inp_ptr = fopen(file_name, "rb");
     if(file_inp_ptr == nullptr)
     {
+        ERROR_MESSAGE(stderr, ERR_CANNOT_OPEN_INPUT)
         return ERR_CANNOT_OPEN_INPUT;
     }
 
@@ -256,18 +187,17 @@ int get_size(Tree* tree_ptr, char* file_name)
 
     if(tree_ptr->size == 0) 
     {
-        // tree_ptr->err_code = ERR_EMPTY_ASM_FILE; 
-        // dump_asm(tree_ptr, FUNC_NAME, FUNC_LINE, FUNC_FILE);
-        // dtor_asm(tree_ptr);  
-        // return tree_ptr->err_code;
+        tree_ptr->error_code = ERR_EMPTY_INP_FILE; 
+        ERROR_MESSAGE(stderr, ERR_EMPTY_INP_FILE)
+        return tree_ptr->error_code;
     } 
 
-    // printf("size: %ld\n\n", tree_ptr->size);
     if(fclose(file_inp_ptr) == EOF)
     {   
+        ERROR_MESSAGE(stderr, ERR_CANNOT_CLOSE_INPUT)
         return ERR_CANNOT_CLOSE_INPUT;
     }
-    file_inp_ptr = nullptr;\
+    file_inp_ptr = nullptr;
     return RETURN_OK;
 }
 
@@ -309,7 +239,7 @@ int get_into_buff(Tree* tree_ptr, char* file_name)
     return RETURN_OK;
 }
 
-int get_tokens(Tree* tree_ptr) // ok
+int get_tokens(Tree* tree_ptr) //
 {
     char* token_val = strtok(tree_ptr->tree_buff,"( ) \n\r");
     tree_ptr->toks = (Tokens*)calloc(1, sizeof(Tokens));
@@ -398,8 +328,8 @@ int realloc_toks(Tree* tree_ptr, size_t i) // ok
 
         if(tree_ptr->toks == nullptr)
         {
-            tree_ptr->error_code = ERR_TO_CALLOC_TOKS;
-            ERROR_MESSAGE(stderr,ERR_TO_CALLOC_TOKS)
+            tree_ptr->error_code = ERR_TO_REALLOC_TOKS;
+            ERROR_MESSAGE(stderr,ERR_TO_REALLOC_TOKS)
             return tree_ptr->error_code;
         }
     }
@@ -407,28 +337,8 @@ int realloc_toks(Tree* tree_ptr, size_t i) // ok
     return RETURN_OK;
 }
 
-void print_toks(Tree* tree_ptr) // DEBUG
-{
-    for(size_t tok_id = 0; tok_id < tree_ptr->num_of_toks; tok_id++)
-    {
-        if(tree_ptr->toks[tok_id].type == IS_VAL)
-        {
-            printf("index: %ld, type = %ld, val = %d\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
-        }
-        else if(tree_ptr->toks[tok_id].type == IS_OP)
-        {
-            printf("index: %ld, type = %ld, val = %c\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].value);
-        }
-        else
-        {
-            printf("index: %ld, type = %ld, val = %s\n", tok_id, tree_ptr->toks[tok_id].type, tree_ptr->toks[tok_id].text);
-        }
-    }
-}
-
 Node* diff_tree(Tree* tree_ptr, char* varib_text)
 {
-
     if(tree_ptr->cur_tok < tree_ptr->num_of_toks)
     {
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
@@ -438,13 +348,13 @@ Node* diff_tree(Tree* tree_ptr, char* varib_text)
         }
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB && strcmp(varib_text, tree_ptr->toks[tree_ptr->cur_tok].text) == 0)
         {
-            printf("Variable (%s) is variable\n", tree_ptr->toks[tree_ptr->cur_tok].text);
+            printf("\nVariable (%s) is variable\n", tree_ptr->toks[tree_ptr->cur_tok].text);
             GET_CUR_TOK()
             return NUM_NODE(1)
         }
         if((tree_ptr->toks[tree_ptr->cur_tok].type == IS_CNST_VAR) || (tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB && strcmp(varib_text, tree_ptr->toks[tree_ptr->cur_tok].text) != 0))
         {
-            printf("Variable (%s) is constant\n", tree_ptr->toks[tree_ptr->cur_tok].text);
+            printf("\nVariable (%s) is constant\n", tree_ptr->toks[tree_ptr->cur_tok].text);
             GET_CUR_TOK()
             return NUM_NODE(0)
         }
@@ -746,7 +656,7 @@ Node* diff_tree(Tree* tree_ptr, char* varib_text)
     }
 }
 
-int get_vars(Tree* tree_ptr) 
+int get_vars(Tree* tree_ptr) // ok
 {
     printf("\nEnter the number of variables:");
     scanf(" %ld", &(tree_ptr->num_of_vars));
@@ -767,7 +677,7 @@ int get_vars(Tree* tree_ptr)
 
     for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
     {
-        printf("\nEnter the %ld variable:", cur_var);
+        printf("\n\nEnter the %ld variable:", cur_var);
         scanf(" %s", &(tree_ptr->vars[cur_var].var_text));
         tree_ptr->vars[cur_var].var_text[20] = '\0';
 
@@ -780,12 +690,6 @@ int get_vars(Tree* tree_ptr)
         printf("\nEnter the value of variable '%s':", tree_ptr->vars[cur_var].var_text);
         scanf(" %lf", &(tree_ptr->vars[cur_var].var_value));
     }
-
-    // for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
-    // {
-    //     printf("\nVariable '%s' = %lf\n", tree_ptr->vars[cur_var].var_text, tree_ptr->vars[cur_var].var_value);
-    // }
-    // printf("\nVar string: %s\n", tree_ptr->vars);
 
     return RETURN_OK;
 }
@@ -1003,7 +907,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
 
 }
 
-char* get_string_func(size_t func_code)
+char* get_string_func(size_t func_code) // ok
 {
     switch(func_code)
     {
@@ -1013,19 +917,20 @@ char* get_string_func(size_t func_code)
             return string;                      \
 
     #define DEF_OP(name, code, string)
-
     #include "def_cmd.h"
 
     #undef DEF_FUNC
     #undef DEF_OP
 
     default:
-        return "new_func";
+        ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
+        return "ERR_UNKNOWN_FUNC";
     }
 }
 
-Node* full_diff(Tree* tree_ptr)
+Node* full_diff(Tree* tree_ptr) // ok
 {
+    tree_ptr->cur_tok = 0;
     if(tree_ptr->num_of_vars == 0)
     {
         return diff_tree(tree_ptr, tree_ptr->vars[0].var_text);
@@ -1033,12 +938,12 @@ Node* full_diff(Tree* tree_ptr)
     else
     {
         Node* first_diff = diff_tree(tree_ptr, tree_ptr->vars[0].var_text);
-        tree_ptr->cur_tok = 0;
+        tree_ptr->cur_tok = 0; // Needs to be set to zero because diff tree increases the cor_tok value every time it diff the tree
 
         for(size_t cur_diff = 1; cur_diff < tree_ptr->num_of_vars; cur_diff++)
         {
             first_diff = ADD_NODE(first_diff, diff_tree(tree_ptr, tree_ptr->vars[cur_diff].var_text));
-            tree_ptr->cur_tok = 0;
+            tree_ptr->cur_tok = 0; // Needs to be set to zero because diff tree increases the cor_tok value every time it diff the tree
         }
 
         return first_diff;

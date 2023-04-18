@@ -36,6 +36,9 @@ enum return_codes
     INVALID_TOK    = 6,
     EXISTING_FUNC  = 7,
     NON_EXIST_FUNC = 8,
+    IS_POSITIVE    = 9,
+    IS_NEGATIVE    = 10,
+    IS_ZERO        = 11,
 };
 
 /**
@@ -56,6 +59,11 @@ enum error_codes_diff
     ERR_CLOSE_PARSER_LOG    = -11,
     ERR_NO_END_OF_LINE      = -12,
     ERR_NO_CLOSING_BRACKETS = -12,
+    ERR_UNKNOWN_FUNC        = -13,
+    ERR_NULL_PTR_NODE       = -14,
+    ERR_EMPTY_INP_FILE      = -15,
+    ERR_TO_REALLOC_TOKS     = -16,
+    ERR_INVALID_ARGUMENT    = -17,
 };
 
 /*####################################################################################################################################################################*/
@@ -109,6 +117,7 @@ Node* get_recur_tree(Tree* const tree_ptr);
 size_t length_double(char* str_double);
 char* get_string_func(size_t func_code);
 Node* full_diff(Tree* tree_ptr);
+int is_poisitive(double value);
 
 /*####################################################################################################################################################################*/
 
