@@ -13,7 +13,11 @@ int main()
     get_vars(tree_ptr_2);
     get_tokens(tree_ptr_2);
     tree_ptr_2->root = input_tree(tree_ptr_2);
-    
+    create_graph_jpg(tree_ptr_2, "tree_ptr_2");
+
+    tree_ptr_2->cur_tok = 0; // THE PROBRLEM WITH CUR TOK FOR DIFF
+    printf("tree_ptr_2->vars[0].var_text = %s\n", tree_ptr_2->vars[0].var_text);
+    tree_ptr_2->root = full_diff(tree_ptr_2);
     create_graph_jpg(tree_ptr_2, "tree_ptr_2");
 
     create_html(OUTPUT_NAME);

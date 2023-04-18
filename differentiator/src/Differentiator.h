@@ -91,7 +91,7 @@ int get_size(Tree* tree_ptr, char* file_name);
 int get_tokens(Tree* tree_ptr);
 int realloc_toks(Tree* tree_ptr, size_t i);
 void print_toks(Tree* tree_ptr);
-Node* diff_tree(Tree* tree_ptr);
+Node* diff_tree(Tree* tree_ptr, char* varib_text);
 int get_vars(Tree* tree_ptr);
 Node* shortener(Tree* tree_ptr, Node* node_ptr);
 int get_eq_string(Tree* const tree_ptr, char* file_name);
@@ -108,6 +108,7 @@ Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr);
 Node* get_recur_tree(Tree* const tree_ptr);
 size_t length_double(char* str_double);
 char* get_string_func(size_t func_code);
+Node* full_diff(Tree* tree_ptr);
 
 /*####################################################################################################################################################################*/
 

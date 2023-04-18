@@ -426,8 +426,9 @@ void print_toks(Tree* tree_ptr) // DEBUG
     }
 }
 
-Node* diff_tree(Tree* tree_ptr)
+Node* diff_tree(Tree* tree_ptr, char* varib_text)
 {
+
     if(tree_ptr->cur_tok < tree_ptr->num_of_toks)
     {
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
@@ -435,15 +436,17 @@ Node* diff_tree(Tree* tree_ptr)
             GET_CUR_TOK()
             return NUM_NODE(0)
         }
-        if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
+        if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB && strcmp(varib_text, tree_ptr->toks[tree_ptr->cur_tok].text) == 0)
         {
+            printf("Variable (%s) is variable\n", tree_ptr->toks[tree_ptr->cur_tok].text);
             GET_CUR_TOK()
             return NUM_NODE(1)
         }
-        if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_CNST_VAR)
+        if((tree_ptr->toks[tree_ptr->cur_tok].type == IS_CNST_VAR) || (tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB && strcmp(varib_text, tree_ptr->toks[tree_ptr->cur_tok].text) != 0))
         {
+            printf("Variable (%s) is constant\n", tree_ptr->toks[tree_ptr->cur_tok].text);
             GET_CUR_TOK()
-            return NUM_NODE(1)
+            return NUM_NODE(0)
         }
 
         Node* left  = nullptr;
@@ -456,8 +459,8 @@ Node* diff_tree(Tree* tree_ptr)
                 tree_ptr->cur_tok++;
                 size_t saved_frst_tok_num = tree_ptr->cur_tok; // stores hte cur tok for creation of sub trees
 
-                left  = diff_tree(tree_ptr);
-                right = diff_tree(tree_ptr);
+                left  = diff_tree(tree_ptr, varib_text);
+                right = diff_tree(tree_ptr, varib_text);
 
                 tree_ptr->cur_tok    = saved_frst_tok_num;   // to get first pre dif sub_tree
                 Node* left_pre_diff  = input_tree(tree_ptr); // from the array of tokens
@@ -470,15 +473,15 @@ Node* diff_tree(Tree* tree_ptr)
         case Sub:  // ok
             {
                 tree_ptr->cur_tok++;                 
-                left  = diff_tree(tree_ptr); // from the array of tokens                  
-                right = diff_tree(tree_ptr); // from the array of tokens                                             
+                left  = diff_tree(tree_ptr, varib_text); // from the array of tokens                  
+                right = diff_tree(tree_ptr, varib_text); // from the array of tokens                                             
                 return SUB_NODE(left, right)
             }
         case Add: // ok
             {
                 tree_ptr->cur_tok++;                 
-                left  = diff_tree(tree_ptr);                         
-                right = diff_tree(tree_ptr);                                                                   
+                left  = diff_tree(tree_ptr, varib_text);                         
+                right = diff_tree(tree_ptr, varib_text);                                                                   
                 return ADD_NODE(left, right)
             }
         case Div: // ok
@@ -486,8 +489,8 @@ Node* diff_tree(Tree* tree_ptr)
                 tree_ptr->cur_tok++;                 
                 size_t saved_frst_tok_num = tree_ptr->cur_tok; // stores hte cur tok for creation of sub trees
 
-                left  = diff_tree(tree_ptr);
-                right = diff_tree(tree_ptr);
+                left  = diff_tree(tree_ptr, varib_text);
+                right = diff_tree(tree_ptr, varib_text);
 
                 tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
                 Node* left_pre_diff = input_tree(tree_ptr);
@@ -513,7 +516,7 @@ Node* diff_tree(Tree* tree_ptr)
             {
                 size_t saved_frst_tok_num = tree_ptr->cur_tok;
                 tree_ptr->cur_tok++;
-                left = diff_tree(tree_ptr);
+                left = diff_tree(tree_ptr, varib_text);
 
                 tree_ptr->cur_tok = saved_frst_tok_num + 1; // to get first pre dif sub_tree (inner of cos)
                 Node* left_pre_diff_inner = input_tree(tree_ptr); 
@@ -527,7 +530,7 @@ Node* diff_tree(Tree* tree_ptr)
             {
                 size_t saved_frst_tok_num = tree_ptr->cur_tok;
                 tree_ptr->cur_tok++;
-                left = diff_tree(tree_ptr);
+                left = diff_tree(tree_ptr, varib_text);
 
                 tree_ptr->cur_tok = saved_frst_tok_num + 1; // to get first pre dif sub_tree(inner of sin)
                 Node* left_pre_diff_inner = input_tree(tree_ptr); 
@@ -539,7 +542,7 @@ Node* diff_tree(Tree* tree_ptr)
             {
                 tree_ptr->cur_tok++;
                 size_t saved_frst_tok_num = tree_ptr->cur_tok; 
-                left = diff_tree(tree_ptr); 
+                left = diff_tree(tree_ptr, varib_text); 
 
                 tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
                 Node* left_pre_diff = input_tree(tree_ptr);
@@ -550,7 +553,7 @@ Node* diff_tree(Tree* tree_ptr)
             {
                 size_t saved_frst_tok_num = tree_ptr->cur_tok;
                 tree_ptr->cur_tok++;
-                left = diff_tree(tree_ptr);
+                left = diff_tree(tree_ptr, varib_text);
 
                 tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
                 Node* left_pre_diff = input_tree(tree_ptr); 
@@ -561,7 +564,7 @@ Node* diff_tree(Tree* tree_ptr)
             {
                 size_t saved_frst_tok_num = tree_ptr->cur_tok;
                 tree_ptr->cur_tok++;
-                left = diff_tree(tree_ptr);
+                left = diff_tree(tree_ptr, varib_text);
 
                 tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
                 Node* left_pre_diff = input_tree(tree_ptr);
@@ -574,7 +577,7 @@ Node* diff_tree(Tree* tree_ptr)
             {
                 tree_ptr->cur_tok++;
                 size_t saved_frst_tok_num = tree_ptr->cur_tok;
-                left = diff_tree(tree_ptr);
+                left = diff_tree(tree_ptr, varib_text);
 
                 tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree (inner of tan)
                 Node* left_pre_diff_1 = input_tree(tree_ptr);
@@ -592,7 +595,7 @@ Node* diff_tree(Tree* tree_ptr)
             {
                 tree_ptr->cur_tok++;
                 size_t saved_frst_tok_num = tree_ptr->cur_tok;
-                left = diff_tree(tree_ptr);
+                left = diff_tree(tree_ptr, varib_text);
 
                 tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree (inner of cot)
                 Node* left_pre_diff_1 = input_tree(tree_ptr);
@@ -625,7 +628,7 @@ Node* diff_tree(Tree* tree_ptr)
             {
                 tree_ptr->cur_tok++; 
                 size_t saved_frst_tok_num = tree_ptr->cur_tok; 
-                left = diff_tree(tree_ptr);
+                left = diff_tree(tree_ptr, varib_text);
 
                 tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree (inner of asin)
                 Node* left_pre_diff_1 = input_tree(tree_ptr);
@@ -643,7 +646,7 @@ Node* diff_tree(Tree* tree_ptr)
             {
                 tree_ptr->cur_tok++; 
                 size_t saved_frst_tok_num = tree_ptr->cur_tok; 
-                left = diff_tree(tree_ptr);
+                left = diff_tree(tree_ptr, varib_text);
 
                 tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
                 Node* left_pre_diff_1 = input_tree(tree_ptr);
@@ -685,7 +688,7 @@ Node* diff_tree(Tree* tree_ptr)
                     Node* ln          = LN_NODE(base)
 
                     tree_ptr->cur_tok = saved_exp_id;
-                    left = diff_tree(tree_ptr);
+                    left = diff_tree(tree_ptr, varib_text);
 
                     Node* mul_1 = MUL_NODE(pre_dif_pow, ln);
                     return MUL_NODE(mul_1, left);
@@ -704,7 +707,7 @@ Node* diff_tree(Tree* tree_ptr)
                     Node* mul     = MUL_NODE(coef, new_pow);
 
                     tree_ptr->cur_tok = saved_frst_tok_num + 1;
-                    left              = diff_tree(tree_ptr);
+                    left              = diff_tree(tree_ptr, varib_text);
                     tree_ptr->cur_tok = last_id;
 
                     return MUL_NODE(mul, left);
@@ -717,7 +720,7 @@ Node* diff_tree(Tree* tree_ptr)
                 tree_ptr->cur_tok = saved_exp_id;
                 Node* old_exp     = input_tree(tree_ptr); // v
                 tree_ptr->cur_tok = saved_frst_tok_num + 1; 
-                Node* diff_base   = diff_tree(tree_ptr); // du/dx
+                Node* diff_base   = diff_tree(tree_ptr, varib_text); // du/dx
 
                 Node* mul_1 = MUL_NODE(old_exp, new_pow); // v * u^(v-1) 
                 Node* mul_2 = MUL_NODE(mul_1, diff_base);  // v * u^(v-1) * (du/dx)
@@ -731,7 +734,7 @@ Node* diff_tree(Tree* tree_ptr)
                 Node* mul_3 = MUL_NODE(old_pow, ln_base); // u^v * ln(u)
 
                 tree_ptr->cur_tok = saved_exp_id;
-                Node* diff_exp    = diff_tree(tree_ptr); // (dv/dx)
+                Node* diff_exp    = diff_tree(tree_ptr, varib_text); // (dv/dx)
                 Node* mul_4       = MUL_NODE(mul_3, diff_exp); // u^v * ln(u) * (dv/dx)
 
                 return ADD_NODE(mul_2, mul_4);
@@ -748,7 +751,7 @@ int get_vars(Tree* tree_ptr)
     printf("\nEnter the number of variables:");
     scanf(" %ld", &(tree_ptr->num_of_vars));
 
-    if(tree_ptr->num_of_vars <= 0)
+    if(tree_ptr->num_of_vars < 0)
     {
         printf("Invalid number of variables\n");
         ERROR_MESSAGE(stderr, ERR_INVALID_VAR_NUM)
@@ -1018,6 +1021,27 @@ char* get_string_func(size_t func_code)
 
     default:
         return "new_func";
+    }
+}
+
+Node* full_diff(Tree* tree_ptr)
+{
+    if(tree_ptr->num_of_vars == 0)
+    {
+        return diff_tree(tree_ptr, tree_ptr->vars[0].var_text);
+    }
+    else
+    {
+        Node* first_diff = diff_tree(tree_ptr, tree_ptr->vars[0].var_text);
+        tree_ptr->cur_tok = 0;
+
+        for(size_t cur_diff = 1; cur_diff < tree_ptr->num_of_vars; cur_diff++)
+        {
+            first_diff = ADD_NODE(first_diff, diff_tree(tree_ptr, tree_ptr->vars[cur_diff].var_text));
+            tree_ptr->cur_tok = 0;
+        }
+
+        return first_diff;
     }
 }
 
