@@ -1,15 +1,15 @@
 #include "Differentiator.h"
 
-int get_eq_string(Tree* const tree_ptr)
+int get_eq_string(Tree* const tree_ptr, char* file_name)
 {
-    int error_code = get_size(tree_ptr);
+    int error_code = get_size(tree_ptr, file_name);
     if(error_code != RETURN_OK)
     {
         ERROR_MESSAGE(stderr, error_code)
         return error_code;
     }
 
-    error_code = get_into_buff(tree_ptr);
+    error_code = get_into_buff(tree_ptr, file_name);
     if(error_code != RETURN_OK)
     {
         ERROR_MESSAGE(stderr, error_code)

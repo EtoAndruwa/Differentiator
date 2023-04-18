@@ -77,10 +77,10 @@ double func_Log(double value_1, double value_2)
     return log(value_1);
 }
 
-double func_Log10(double value_1, double value_2)
-{
-    return log10(value_1);
-}
+// double func_Log10(double value_1, double value_2)
+// {
+//     return log10(value_1);
+// }
 
 double func_Pow(double value_1, double value_2)
 {
