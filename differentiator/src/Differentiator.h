@@ -64,6 +64,7 @@ enum error_codes_diff
     ERR_EMPTY_INP_FILE      = -15,
     ERR_TO_REALLOC_TOKS     = -16,
     ERR_INVALID_ARGUMENT    = -17,
+    ERR_NOT_A_SPACE         = -18,
 };
 
 /*####################################################################################################################################################################*/
@@ -118,6 +119,7 @@ size_t length_double(char* str_double);
 char* get_string_func(size_t func_code);
 Node* full_diff(Tree* tree_ptr);
 int is_poisitive(double value);
+size_t skip_spaces(Tree* tree_ptr);
 
 /*####################################################################################################################################################################*/
 
