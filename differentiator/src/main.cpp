@@ -16,10 +16,11 @@ int main()
     tree_ptr_2->root = input_tree(tree_ptr_2);
     create_graph_jpg(tree_ptr_2, "tree_ptr_2");
 
-    // tree_ptr_2->root = shortener(tree_ptr_2, tree_ptr_2->root);
-    // create_graph_jpg(tree_ptr_2, "tree_ptr_2");
-    tree_ptr_2->root = copy_subtree(tree_ptr_2, tree_ptr_2->root);
-    create_graph_jpg(tree_ptr_2, "tree_ptr_3");
+    tree_ptr_2->root = shortener(tree_ptr_2, tree_ptr_2->root);
+    create_graph_jpg(tree_ptr_2, "tree_ptr_2");
+
+    // tree_ptr_2->root = copy_subtree(tree_ptr_2, tree_ptr_2->root);
+    // create_graph_jpg(tree_ptr_2, "tree_ptr_3");
 
     // printf("\nResult: %lf\n", eval(tree_ptr_2, tree_ptr_2->root));
 

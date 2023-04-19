@@ -727,81 +727,163 @@ int get_vars(Tree* tree_ptr) // ok
     return RETURN_OK;
 }
 
-// Node* shortener(Tree* tree_ptr, Node* node_ptr)
-// {
-//     if(node_ptr == nullptr)
-//     {
-//         return nullptr;
-//     }
-//     if(node_ptr->type == IS_VAL)
-//     {
-//         return node_ptr;
-//     }
-//     if(node_ptr->type == IS_OP)
-//     {
-//         double result = 0;
+Node* shortener(Tree* tree_ptr, Node* node_ptr)
+{
+    if(node_ptr == nullptr)
+    {
+        return nullptr;
+    }
+    if(node_ptr->type == IS_VAL)
+    {
+        return node_ptr;
+    }
+    if(node_ptr->type == IS_VARIB)
+    {
+        return node_ptr;
+    }
+    if(node_ptr->type == IS_OP)
+    {
+        double result = 0;
+        Node* short_left  = nullptr;
+        Node* short_right = nullptr;
 
-//         switch(node_ptr->value.op_number)
-//         {
-//         case Add:
-//             { 
-//                 if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO && 
-//                     NODE_RIGHT_CHILD->type == IS_VARIB)
-//                 {
-//                     return VARIB_NODE(NODE_RIGHT_CHILD->value.text)
-//                 }
-//                 else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO && 
-//                     NODE_LEFT_CHILD->type == IS_VARIB)
-//                 {
-//                     return VARIB_NODE(NODE_LEFT_CHILD->value.text)
-//                 }
-//                 else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL)
-//                 {
-//                     return NUM_NODE(NODE_RIGHT_CHILD->value.node_value + NODE_LEFT_CHILD->value.node_value)
-//                 }
-//                 else if(NODE_RIGHT_CHILD->type == IS_VARIB && NODE_LEFT_CHILD->type == IS_VARIB)
-//                 {
-//                     return SUB_NODE()
-//                 }
-//             }
-//         // case Sub:
-//         //     {
+        switch(node_ptr->value.op_number)
+        {
+        case Add:
+            { 
+                if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // zero
+                    NODE_RIGHT_CHILD->type == IS_VARIB)
+                {
+                    return VARIB_NODE(NODE_RIGHT_CHILD->value.text)
+                }
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO &&  // zero
+                    NODE_LEFT_CHILD->type == IS_VARIB)
+                {
+                    return VARIB_NODE(NODE_LEFT_CHILD->value.text)
+                }
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL) // val val
+                {
+                    return NUM_NODE(NODE_RIGHT_CHILD->value.node_value + NODE_LEFT_CHILD->value.node_value)
+                }
+                else if(NODE_RIGHT_CHILD->type == IS_VARIB && NODE_LEFT_CHILD->type == IS_VARIB) // varib varib
+                {
+                    return copy_subtree(tree_ptr, node_ptr);
+                }
+                else
+                {
+                    short_left  = SHORT_CHILD(NODE_LEFT_CHILD);
+                    short_right = SHORT_CHILD(NODE_RIGHT_CHILD);
+                    
+                    if(short_left->type == IS_VAL && is_poisitive(short_left->value.node_value) == IS_ZERO && 
+                        short_right->type == IS_VARIB)
+                    {
+                        return VARIB_NODE(short_right->value.text)
+                    }
+                    else if(short_right->type == IS_VAL && is_poisitive(short_right->value.node_value) == IS_ZERO && 
+                        short_left->type == IS_VARIB)
+                    {
+                        return VARIB_NODE(short_left->value.text)
+                    }
+                    else if(short_right->type == IS_VAL && short_left->type == IS_VAL)
+                    {
+                        return NUM_NODE(short_right->value.node_value + short_left->value.node_value)
+                    }
+                    else if(short_right->type == IS_VAL && short_left->type == IS_VARIB || short_right->type == IS_VARIB && short_left->type == IS_VAL)
+                    {
+                        return ADD_NODE(short_right, short_left)
+                    }
+                    else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Add 
+                        && short_left->right_child->type == IS_VAL)
+                    {
+                        Node* left_short_l = copy_subtree(tree_ptr, short_left->left_child);
+                        Node* sort_sum = NUM_NODE(short_right->value.node_value + short_left->right_child->value.node_value)
+                        return ADD_NODE(left_short_l, sort_sum)
+                    }
+                    else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Add 
+                        && short_left->left_child->type == IS_VAL)
+                    {
+                        Node* left_short_r = copy_subtree(tree_ptr, short_left->right_child);
+                        Node* sort_sum = NUM_NODE(short_right->value.node_value + short_left->left_child->value.node_value)
+                        return ADD_NODE(left_short_r, sort_sum)
+                    }
+                    return ADD_NODE(short_left, short_right)
+                }
+            }
+        case Sub:
+            {
                 
-//         //     }
-//         // case Mul:
-//         //     {
-                
-//         //     }
-//         // case Div:
-//         //     {
-                
-//         //     }
-//         default:
-//             ERROR_MESSAGE(stderr, ERR_UNKNOWN_OPERATOR)
-//             return nullptr;
-//         }
-//     }
+            }
+        case Mul:
+            {
+                if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO && 
+                    NODE_RIGHT_CHILD->type != IS_VAL)
+                {
+                    return NUM_NODE(0)
+                }
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO && 
+                    NODE_LEFT_CHILD->type != IS_VAL)
+                {
+                    return NUM_NODE(0)
+                }
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL)
+                {
+                    return NUM_NODE(NODE_RIGHT_CHILD->value.node_value * NODE_LEFT_CHILD->value.node_value)
+                }
+            }
+        case Div:
+            {
+                if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO && 
+                    NODE_RIGHT_CHILD->type != IS_VAL)
+                {
+                    return NUM_NODE(0)
+                }
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO)
+                {
+                    ERROR_MESSAGE(stderr, ERR_DIV_TO_ZERO)
+                    return nullptr;
+                }
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO 
+                        && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO)
+                {
+                    ERROR_MESSAGE(stderr, ERR_UNCERTAINTY)
+                    return nullptr;
+                }
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL)
+                {
+                    return NUM_NODE(NODE_RIGHT_CHILD->value.node_value * NODE_LEFT_CHILD->value.node_value)
+                }
+                else
+                {
 
-//     switch(node_ptr->value.op_number)
-//     {        
-//     case Sin:
-//         {
-//             Node* short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
-//             if(short_arg->type == IS_VAL)
-//             {
-//                 dtor_childs(node_ptr);
-//                 return NUM_NODE(func_Sin(short_arg->value.node_value))
-//             }
-//             else
-//             {
-//                 return SIN_NODE(short_arg)
-//             }
-//         }
-//     default:
-//         break;
-//     }
 
-// }
+                }
+            }
+        default:
+            ERROR_MESSAGE(stderr, ERR_UNKNOWN_OPERATOR)
+            return nullptr;
+        }
+    }
+
+    switch(node_ptr->value.op_number)
+    {        
+    case Sin:
+        {
+            Node* short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+            if(short_arg->type == IS_VAL)
+            {
+                dtor_childs(node_ptr);
+                return NUM_NODE(func_Sin(short_arg->value.node_value))
+            }
+            else
+            {
+                return SIN_NODE(short_arg)
+            }
+        }
+    default:
+        break;
+    }
+
+}
 
 char* get_string_func(size_t func_code) // ok
 {
@@ -849,7 +931,7 @@ Node* full_diff(Tree* tree_ptr) // ok
     }
 }
 
-Node* copy_subtree(Tree* tree_ptr, Node* node_ptr)
+Node* copy_subtree(Tree* tree_ptr, Node* node_ptr) // ok
 {
     if(node_ptr == nullptr)
     {
