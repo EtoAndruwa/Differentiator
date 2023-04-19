@@ -3,9 +3,12 @@
 
 /*####################################################################################################################################################################*/
 
-#define STRING(pos)  tree_ptr->tree_buff[pos]
-#define POSITION     tree_ptr->cur_pos_str
-#define FUNC_NAME    __func__
+#define STRING(pos)                       tree_ptr->tree_buff[pos]
+#define POSITION                          tree_ptr->cur_pos_str
+#define FUNC_NAME                         __func__
+#define NODE_LEFT_CHILD                   node_ptr->left_child
+#define NODE_RIGHT_CHILD                  node_ptr->right_child
+#define SHORT_CHILD(child_node)           shortener(tree_ptr, child_node)
 
 /*####################################################################################################################################################################*/
 
@@ -28,7 +31,9 @@
 #define COS_NODE(left_child)              create_node(tree_ptr, Cos, IS_FUNC, nullptr, left_child);
 #define SQRT_NODE(left_child)             create_node(tree_ptr, Sqrt, IS_FUNC, nullptr, left_child);
 #define LN_NODE(left_child)               create_node(tree_ptr, Log, IS_FUNC, nullptr, left_child);
-#define POW_NODE(base, exp)               create_node(tree_ptr, Pow, IS_FUNC, nullptr, base, exp); 
+#define POW_NODE(base, exp)               create_node(tree_ptr, Pow, IS_FUNC, nullptr, base, exp);
+#define VARIB_NODE(text)                  create_node(tree_ptr, 0, IS_VARIB,  text);
+#define CNST_VARIB_NODE(text)             create_node(tree_ptr, 0, IS_CNST_VAR, text);
 
 /*####################################################################################################################################################################*/
 

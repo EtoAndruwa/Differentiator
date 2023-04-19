@@ -65,7 +65,8 @@ enum error_codes_diff
     ERR_TO_REALLOC_TOKS     = -16,
     ERR_INVALID_ARGUMENT    = -17,
     ERR_NOT_A_SPACE         = -18,
-    ERR_FOUND_MORE_VARS     = -19,
+    ERR_FOUND_DIFF_NUM_VARS = -19,
+    ERR_UNKNOWN_OPERATOR    = -20,
 };
 
 /*####################################################################################################################################################################*/
@@ -121,6 +122,7 @@ char* get_string_func(size_t func_code);
 Node* full_diff(Tree* tree_ptr);
 int is_poisitive(double value);
 size_t skip_spaces(Tree* tree_ptr);
+Node* copy_subtree(Tree* tree_ptr, Node* node_ptr);
 
 /*####################################################################################################################################################################*/
 

@@ -55,7 +55,7 @@ double eval(const Tree* const tree_ptr, const Node* const node_ptr) // ok
 {
     if(tree_ptr->num_found_vars != tree_ptr->num_of_vars)
     {   
-        ERROR_MESSAGE(stderr, ERR_FOUND_MORE_VARS)
+        ERROR_MESSAGE(stderr, ERR_FOUND_DIFF_NUM_VARS)
         return 0;
     }
 
@@ -126,19 +126,19 @@ Node* input_tree(Tree* tree_ptr) // ok
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
         {   
             GET_CUR_TOK()
-            return create_node(tree_ptr, tree_ptr->toks[cur_tok].value.flt_val);
+            return NUM_NODE(tree_ptr->toks[cur_tok].value.flt_val)
         }
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
         {
             GET_CUR_TOK()
             tree_ptr->num_found_vars++;
-            return create_node(tree_ptr, 0, IS_VARIB, tree_ptr->toks[cur_tok].text);
+            return VARIB_NODE(tree_ptr->toks[cur_tok].text)
         }
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_CNST_VAR)
         {
             GET_CUR_TOK()
             tree_ptr->num_found_vars++;
-            return create_node(tree_ptr, 0, IS_CNST_VAR, tree_ptr->toks[cur_tok].text);
+            return CNST_VARIB_NODE(tree_ptr->toks[cur_tok].text)
         }
 
         Node* left  = nullptr;
@@ -727,218 +727,81 @@ int get_vars(Tree* tree_ptr) // ok
     return RETURN_OK;
 }
 
-Node* shortener(Tree* tree_ptr, Node* node_ptr)
-{
-    if(node_ptr == nullptr)
-    {
-        return nullptr;
-    }
-    if(node_ptr->type == IS_VAL)
-    {
-        return node_ptr;
-    }
-    if(node_ptr->type == IS_OP)
-    {
-        double result = 0;
+// Node* shortener(Tree* tree_ptr, Node* node_ptr)
+// {
+//     if(node_ptr == nullptr)
+//     {
+//         return nullptr;
+//     }
+//     if(node_ptr->type == IS_VAL)
+//     {
+//         return node_ptr;
+//     }
+//     if(node_ptr->type == IS_OP)
+//     {
+//         double result = 0;
 
-        switch(node_ptr->value.op_number)
-        {
-        case Add:
-            { 
-                if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) 
-                    && (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
-                {
-                    printf("\nadd1\n");
-                    return node_ptr;
-                }
-                else if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) && 
-                    (node_ptr->right_child->type == IS_OP || node_ptr->right_child->type == IS_VAL || node_ptr->right_child->type == IS_FUNC))
-                {
-                    printf("\nadd2\n");
-                    node_ptr->right_child = shortener(tree_ptr, node_ptr->right_child);
-                    return node_ptr;
-                }
-                else if((node_ptr->left_child->type == IS_OP || node_ptr->left_child->type == IS_FUNC) && 
-                    (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
-                {
-                    printf("\nadd3\n");
-                    node_ptr->left_child = shortener(tree_ptr, node_ptr->left_child);
-                    return node_ptr;
-                }
-                else if(node_ptr->left_child->type == IS_VAL && (node_ptr->right_child->type == IS_OP || node_ptr->right_child->type == IS_VAL || 
-                    node_ptr->right_child->type == IS_FUNC))
-                {
-                    printf("\nadd4\n");
-                    Node* new_right_node = shortener(tree_ptr, node_ptr->right_child);
-                    if(new_right_node->type == IS_VAL)
-                    {
-                        result = new_right_node->value.node_value + node_ptr->left_child->value.node_value;
-                        dtor_childs(node_ptr);
-                        return NUM_NODE(result);
-                    }
-                    else
-                    {
-                        node_ptr->right_child = new_right_node;
-                        return node_ptr;
-                    }
-                }
-                else if(node_ptr->right_child->type == IS_VAL && (node_ptr->left_child->type == IS_OP || node_ptr->left_child->type == IS_VAL || 
-                    node_ptr->left_child->type == IS_FUNC))
-                {
-                    printf("\nadd5\n");
-                    Node* new_left_node = shortener(tree_ptr, node_ptr->left_child);
-                    if(new_left_node->type == IS_VAL)
-                    {
-                        result = new_left_node->value.node_value + node_ptr->right_child->value.node_value;
-                        dtor_childs(node_ptr);
-                        return NUM_NODE(result);
-                    }
-                    else
-                    {
-                        node_ptr->left_child = new_left_node;
-                        return node_ptr;
-                    }
-                }
-                else
-                {
-                    printf("\nadd6\n");
-                    result = shortener(tree_ptr, node_ptr->left_child)->value.node_value + shortener(tree_ptr, node_ptr->right_child)->value.node_value;
-                    dtor_childs(node_ptr);
-                    return NUM_NODE(result);
-                }
-                return node_ptr;
-            }
-        case Sub:
-            {
-                if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) 
-                    && (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
-                {
-                    printf("\nsub1\n");
-                    return node_ptr;
-                }
-                else if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) && 
-                    (node_ptr->right_child->type == IS_OP || node_ptr->right_child->type == IS_FUNC))
-                {
-                    printf("\nsub2\n");
-                    node_ptr->right_child = shortener(tree_ptr, node_ptr->right_child);
-                    return node_ptr;
-                }
-                else if((node_ptr->left_child->type == IS_OP || node_ptr->left_child->type == IS_FUNC) && 
-                    (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
-                {
-                    printf("\nsub3\n");
-                    node_ptr->left_child = shortener(tree_ptr, node_ptr->left_child);
-                    return node_ptr;
-                }
-                else if(node_ptr->left_child->type == IS_VAL && (node_ptr->right_child->type == IS_OP || node_ptr->right_child->type == IS_VAL || 
-                    node_ptr->right_child->type == IS_FUNC))
-                {
-                    printf("\nsub4\n");
-                    Node* new_right_node = shortener(tree_ptr, node_ptr->right_child);
-                    if(new_right_node->type == IS_VAL)
-                    {
-                        result = node_ptr->left_child->value.node_value - new_right_node->value.node_value;
-                        dtor_childs(node_ptr);
-                        return NUM_NODE(result);
-                    }
-                    else
-                    {
-                        node_ptr->right_child = new_right_node;
-                        return node_ptr;
-                    }
-                }
-                else if(node_ptr->right_child->type == IS_VAL && (node_ptr->left_child->type == IS_OP || node_ptr->left_child->type == IS_VAL || 
-                    node_ptr->left_child->type == IS_FUNC))
-                {
-                    printf("\nsub5\n");
-                    Node* new_left_node = shortener(tree_ptr, node_ptr->left_child);
-                    if(new_left_node->type == IS_VAL)
-                    {
-                        result = new_left_node->value.node_value - node_ptr->right_child->value.node_value;
-                        dtor_childs(node_ptr);
-                        return NUM_NODE(result);
-                    }
-                    else
-                    {
-                        node_ptr->left_child = new_left_node;
-                        return node_ptr;
-                    }
-                }
-                else
-                {
-                    printf("\nsub6\n");
-                    result = shortener(tree_ptr, node_ptr->left_child)->value.node_value - shortener(tree_ptr, node_ptr->right_child)->value.node_value;
-                    dtor_childs(node_ptr);
-                    return NUM_NODE(result);
-                }
-                return node_ptr;
-            }
-        case Mul:
-            {
-                if((node_ptr->left_child->type == IS_VAL && fabs(node_ptr->left_child->value.node_value) <= EPS) || 
-                    (node_ptr->right_child->type == IS_VAL && fabs(node_ptr->right_child->value.node_value) <= EPS))
-                {
-                    printf("\nmul0\n");
-                    dtor_childs(node_ptr);
-                    return NUM_NODE(0);
-                }
-                else if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) 
-                    && (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
-                {
-                    printf("\nmul1\n");
-                    return node_ptr;
-                }
-                else if((node_ptr->left_child->type == IS_VARIB || node_ptr->left_child->type == IS_CNST_VAR) && 
-                    (node_ptr->right_child->type == IS_OP || node_ptr->right_child->type == IS_FUNC || node_ptr->right_child->type == IS_VAL))
-                {
-                    printf("\nmul2\n");
-                    Node* new_right_node = shortener(tree_ptr, node_ptr->right_child);
-                    if(new_right_node->type == IS_VAL && fabs(new_right_node->value.node_value) <= EPS)
-                    {
-                        dtor_childs(node_ptr);
-                        return NUM_NODE(0);
-                    }
-                    node_ptr->right_child = new_right_node;
-                    return node_ptr;
-                }
-                else if((node_ptr->left_child->type == IS_OP || node_ptr->left_child->type == IS_VAL || node_ptr->left_child->type == IS_FUNC) && 
-                    (node_ptr->right_child->type == IS_VARIB || node_ptr->right_child->type == IS_CNST_VAR))
-                {
-                    printf("\nmul3\n");
-                    Node* new_left_node = shortener(tree_ptr, node_ptr->left_child);
-                    if(new_left_node->type == IS_VAL && fabs(new_left_node->value.node_value) <= EPS)
-                    {
-                        dtor_childs(node_ptr);
-                        return NUM_NODE(0);
-                    }
-                    node_ptr->left_child = new_left_node;
-                    return node_ptr;
-                }
-                else
-                {
-                    printf("\nmul6\n");
-                    result = shortener(tree_ptr, node_ptr->left_child)->value.node_value * shortener(tree_ptr, node_ptr->right_child)->value.node_value;
-                    dtor_childs(node_ptr);
-                    return NUM_NODE(result);
-                }
-                return node_ptr;
-            }
-        default:
-            break;
-        }
-    }
+//         switch(node_ptr->value.op_number)
+//         {
+//         case Add:
+//             { 
+//                 if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO && 
+//                     NODE_RIGHT_CHILD->type == IS_VARIB)
+//                 {
+//                     return VARIB_NODE(NODE_RIGHT_CHILD->value.text)
+//                 }
+//                 else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO && 
+//                     NODE_LEFT_CHILD->type == IS_VARIB)
+//                 {
+//                     return VARIB_NODE(NODE_LEFT_CHILD->value.text)
+//                 }
+//                 else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL)
+//                 {
+//                     return NUM_NODE(NODE_RIGHT_CHILD->value.node_value + NODE_LEFT_CHILD->value.node_value)
+//                 }
+//                 else if(NODE_RIGHT_CHILD->type == IS_VARIB && NODE_LEFT_CHILD->type == IS_VARIB)
+//                 {
+//                     return SUB_NODE()
+//                 }
+//             }
+//         // case Sub:
+//         //     {
+                
+//         //     }
+//         // case Mul:
+//         //     {
+                
+//         //     }
+//         // case Div:
+//         //     {
+                
+//         //     }
+//         default:
+//             ERROR_MESSAGE(stderr, ERR_UNKNOWN_OPERATOR)
+//             return nullptr;
+//         }
+//     }
 
-    switch(node_ptr->value.op_number)
-    {
-    case Sin:
+//     switch(node_ptr->value.op_number)
+//     {        
+//     case Sin:
+//         {
+//             Node* short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+//             if(short_arg->type == IS_VAL)
+//             {
+//                 dtor_childs(node_ptr);
+//                 return NUM_NODE(func_Sin(short_arg->value.node_value))
+//             }
+//             else
+//             {
+//                 return SIN_NODE(short_arg)
+//             }
+//         }
+//     default:
+//         break;
+//     }
 
-        break;
-    
-    default:
-        break;
-    }
-
-}
+// }
 
 char* get_string_func(size_t func_code) // ok
 {
@@ -986,3 +849,22 @@ Node* full_diff(Tree* tree_ptr) // ok
     }
 }
 
+Node* copy_subtree(Tree* tree_ptr, Node* node_ptr)
+{
+    if(node_ptr == nullptr)
+    {
+        return nullptr;
+    }
+    if(node_ptr->type == IS_VAL)
+    {
+        return NUM_NODE(node_ptr->value.node_value)
+    }
+    if(node_ptr->type == IS_VARIB)
+    {
+        return VARIB_NODE(node_ptr->value.text)
+    }
+    else
+    {
+        return create_node(tree_ptr, node_ptr->value.op_number, node_ptr->type, nullptr, copy_subtree(tree_ptr, node_ptr->left_child), copy_subtree(tree_ptr, node_ptr->right_child));
+    }
+}
