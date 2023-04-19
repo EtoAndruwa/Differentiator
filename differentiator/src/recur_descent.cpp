@@ -19,7 +19,7 @@ int get_eq_string(Tree* const tree_ptr, char* file_name) // ok
     return RETURN_OK;
 }
 
-Node* rule_G(Tree* const tree_ptr, FILE* log_ptr) // Full ok
+Node* rule_G(Tree* const tree_ptr, FILE* log_ptr) // ok
 {   
     skip_spaces(tree_ptr);
     Node* root_node = rule_E(tree_ptr, log_ptr);
@@ -259,7 +259,7 @@ Node* rule_F(Tree* const tree_ptr, FILE* log_ptr) // ok
     }
 }
 
-Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr) // Full ok
+Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr) // ok
 {
     skip_spaces(tree_ptr);
     Node* pow = rule_P(tree_ptr, log_ptr);
@@ -322,7 +322,7 @@ size_t length_double(char* str_double) // ok
     return strlen(str_double);
 }
 
-size_t skip_spaces(Tree* tree_ptr)
+size_t skip_spaces(Tree* tree_ptr) // ok
 {
     while(isspace(STRING(POSITION)) != 0)
     {

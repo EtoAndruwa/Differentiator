@@ -201,7 +201,7 @@ int get_size(Tree* tree_ptr, char* file_name) // ok
     return RETURN_OK;
 }
 
-int get_into_buff(Tree* tree_ptr, char* file_name) 
+int get_into_buff(Tree* tree_ptr, char* file_name) // ok
 {
     FILE* file_inp_ptr = fopen(file_name, "rb");
     if(file_inp_ptr == nullptr)
@@ -230,7 +230,6 @@ int get_into_buff(Tree* tree_ptr, char* file_name)
     }
     tree_ptr->tree_buff[tree_ptr->size] = '\0'; // Makes form the file null-terminated string
 
-    // printf("buff: %s\n", tree_ptr->tree_buff);
     if(fclose(file_inp_ptr) == EOF)
     {   
         return ERR_CANNOT_CLOSE_INPUT;
@@ -239,10 +238,10 @@ int get_into_buff(Tree* tree_ptr, char* file_name)
     return RETURN_OK;
 }
 
-int get_tokens(Tree* tree_ptr) //
+int get_tokens(Tree* tree_ptr) // ok
 {
     char* token_val = strtok(tree_ptr->tree_buff,"( ) \n\r");
-    tree_ptr->toks = (Tokens*)calloc(1, sizeof(Tokens));
+    tree_ptr->toks  = (Tokens*)calloc(1, sizeof(Tokens));
     
     if(tree_ptr->toks == nullptr)
     {
@@ -251,15 +250,18 @@ int get_tokens(Tree* tree_ptr) //
         return tree_ptr->error_code;
     }
 
-    size_t toks_num = 0;
+    size_t toks_num = 0; // current totatl number of tokens
     while(token_val != NULL)                        
     {   
         realloc_toks(tree_ptr, toks_num); // Reallocs the struct with tokens
 
-        // if(tree_ptr->err_code != STRUCT_OK)
-        // {
-        //     return tree_ptr->err_code;
-        // }
+        if(tree_ptr->error_code != TREE_OK)
+        {
+            ERROR_MESSAGE(stderr, tree_ptr->error_code)
+            return tree_ptr->error_code;
+        }
+
+
         if(check_is_float(token_val) == IS_FLOAT)
         {   
             tree_ptr->toks[toks_num].value.flt_val = atof(token_val);
@@ -337,7 +339,7 @@ int realloc_toks(Tree* tree_ptr, size_t i) // ok
     return RETURN_OK;
 }
 
-Node* diff_tree(Tree* tree_ptr, char* varib_text)
+Node* diff_tree(Tree* tree_ptr, char* varib_text) // ok
 {
     if(tree_ptr->cur_tok < tree_ptr->num_of_toks)
     {
@@ -348,13 +350,12 @@ Node* diff_tree(Tree* tree_ptr, char* varib_text)
         }
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB && strcmp(varib_text, tree_ptr->toks[tree_ptr->cur_tok].text) == 0)
         {
-            printf("\nVariable (%s) is variable\n", tree_ptr->toks[tree_ptr->cur_tok].text);
             GET_CUR_TOK()
             return NUM_NODE(1)
         }
-        if((tree_ptr->toks[tree_ptr->cur_tok].type == IS_CNST_VAR) || (tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB && strcmp(varib_text, tree_ptr->toks[tree_ptr->cur_tok].text) != 0))
+        if((tree_ptr->toks[tree_ptr->cur_tok].type == IS_CNST_VAR) || (tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB 
+                && strcmp(varib_text, tree_ptr->toks[tree_ptr->cur_tok].text) != 0))
         {
-            printf("\nVariable (%s) is constant\n", tree_ptr->toks[tree_ptr->cur_tok].text);
             GET_CUR_TOK()
             return NUM_NODE(0)
         }
@@ -609,7 +610,6 @@ Node* diff_tree(Tree* tree_ptr, char* varib_text)
                     Node* pre_dif_pow = input_tree(tree_ptr);
 
                     double new_exp_val = exp->value.node_value - 1.0; // decreasing exp val
-                    printf("\n\n%lf\n\n", new_exp_val);
                     Node* coef = NUM_NODE(exp->value.node_value);
                     exp->value.node_value = new_exp_val; // changing old exp val
 
@@ -650,8 +650,8 @@ Node* diff_tree(Tree* tree_ptr, char* varib_text)
                 return ADD_NODE(mul_2, mul_4);
             }
         default:
-            printf("\n\nUNKNOWN COMMAND\n\n");
-            break;
+            ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
+            return nullptr;
         }
     }
 }
@@ -933,6 +933,7 @@ Node* full_diff(Tree* tree_ptr) // ok
     tree_ptr->cur_tok = 0;
     if(tree_ptr->num_of_vars == 0)
     {
+        dtor_childs(tree_ptr->root);
         return diff_tree(tree_ptr, tree_ptr->vars[0].var_text);
     }
     else
@@ -946,6 +947,8 @@ Node* full_diff(Tree* tree_ptr) // ok
             tree_ptr->cur_tok = 0; // Needs to be set to zero because diff tree increases the cor_tok value every time it diff the tree
         }
 
+
+        dtor_childs(tree_ptr->root);
         return first_diff;
     }
 }
