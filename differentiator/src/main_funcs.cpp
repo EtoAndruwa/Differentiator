@@ -53,10 +53,15 @@ size_t output_tree(const Node* const root_node_ptr, char* file_name) // ok
 
 double eval(const Tree* const tree_ptr, const Node* const node_ptr) // ok
 {
+    if(tree_ptr->num_found_vars != tree_ptr->num_of_vars)
+    {   
+        ERROR_MESSAGE(stderr, ERR_FOUND_MORE_VARS)
+        return 0;
+    }
+
     if(node_ptr == nullptr)
     {
-        ERROR_MESSAGE(stderr, ERR_NULL_PTR_NODE)
-        return NAN;
+        return 0;
     }
     if(node_ptr->type == IS_VAL)
     {
@@ -73,11 +78,35 @@ double eval(const Tree* const tree_ptr, const Node* const node_ptr) // ok
         }
     }
 
+    double val1 = 0;
+    double val2 = 0;
+
     switch(node_ptr->value.op_number)
     {
 
-    #define DEF_OP(code, ...) case code: return func_ ## code(eval(tree_ptr, node_ptr->left_child), eval(tree_ptr, node_ptr->right_child));
-    #define DEF_FUNC(code, ...) case code: return func_ ## code(eval(tree_ptr, node_ptr->left_child), eval(tree_ptr, node_ptr->right_child));
+    #define DEF_OP(code, ...)                                                                                       \ 
+        case code:                                                                                                  \
+            val1 = eval(tree_ptr, node_ptr->left_child);                                                            \
+            val2 = eval(tree_ptr, node_ptr->right_child);                                                           \
+                                                                                                                    \
+            if(val1 != NAN && val2 != NAN)                                                                          \
+            {                                                                                                       \
+                return func_ ## code(eval(tree_ptr, node_ptr->left_child), eval(tree_ptr, node_ptr->right_child));  \   
+            }                                                                                                       \
+            ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)                                                             \     
+            return NAN;                                                                                             \
+            
+    #define DEF_FUNC(code, ...)                                                                                 \ 
+    case code:                                                                                                  \
+        val1 = eval(tree_ptr, node_ptr->left_child);                                                            \
+        val2 = eval(tree_ptr, node_ptr->right_child);                                                           \
+                                                                                                                \
+        if(val1 != NAN && val2 != NAN)                                                                          \
+        {                                                                                                       \
+            return func_ ## code(eval(tree_ptr, node_ptr->left_child), eval(tree_ptr, node_ptr->right_child));  \   
+        }                                                                                                       \
+        ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)                                                             \    
+        return NAN;                                                                                             \
 
     #include "def_cmd.h"
 
@@ -102,11 +131,13 @@ Node* input_tree(Tree* tree_ptr) // ok
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
         {
             GET_CUR_TOK()
+            tree_ptr->num_found_vars++;
             return create_node(tree_ptr, 0, IS_VARIB, tree_ptr->toks[cur_tok].text);
         }
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_CNST_VAR)
         {
             GET_CUR_TOK()
+            tree_ptr->num_found_vars++;
             return create_node(tree_ptr, 0, IS_CNST_VAR, tree_ptr->toks[cur_tok].text);
         }
 
@@ -205,7 +236,9 @@ int get_into_buff(Tree* tree_ptr, char* file_name) // ok
 {
     FILE* file_inp_ptr = fopen(file_name, "rb");
     if(file_inp_ptr == nullptr)
-    {
+    {  
+        tree_ptr->error_code = ERR_CANNOT_OPEN_INPUT;
+        ERROR_MESSAGE(stderr, ERR_CANNOT_OPEN_INPUT)
         return ERR_CANNOT_OPEN_INPUT;
     }
 
@@ -213,25 +246,25 @@ int get_into_buff(Tree* tree_ptr, char* file_name) // ok
 
     if(tree_ptr->tree_buff == nullptr)
     {
-        // tree_ptr->err_code = ERR_TO_CALLOC_ASM_BUF;
-        // dump_asm(tree_ptr, FUNC_NAME, FUNC_LINE, FUNC_FILE);
-        // dtor_asm(tree_ptr);
-        // return tree_ptr->err_code;
+        tree_ptr->error_code = ERR_TO_CALLOC_BUFFER;
+        ERROR_MESSAGE(stderr, ERR_TO_CALLOC_BUFFER)
+        return tree_ptr->error_code;
     }
 
     int num_read = fread(tree_ptr->tree_buff, sizeof(char), tree_ptr->size, file_inp_ptr); // Reads the file into the buffer
     
     if((num_read <= 0) && (num_read > tree_ptr->size))
     {
-        // tree_ptr->err_code = ERR_READ_TO_ASM_BUF;
-        // dump_asm(tree_ptr, FUNC_NAME, FUNC_LINE, FUNC_FILE);
-        // dtor_asm(tree_ptr);
-        // return tree_ptr->err_code;       
+        tree_ptr->error_code = ERR_EMPTY_INP_FILE;
+        ERROR_MESSAGE(stderr, ERR_EMPTY_INP_FILE)
+        return tree_ptr->error_code;       
     }
     tree_ptr->tree_buff[tree_ptr->size] = '\0'; // Makes form the file null-terminated string
 
     if(fclose(file_inp_ptr) == EOF)
     {   
+        tree_ptr->error_code = ERR_CANNOT_CLOSE_INPUT;
+        ERROR_MESSAGE(stderr, ERR_CANNOT_CLOSE_INPUT)
         return ERR_CANNOT_CLOSE_INPUT;
     }
     file_inp_ptr = nullptr;

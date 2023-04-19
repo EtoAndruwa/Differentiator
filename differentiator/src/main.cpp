@@ -15,6 +15,8 @@ int main()
     tree_ptr_2->root = input_tree(tree_ptr_2);
     create_graph_jpg(tree_ptr_2, "tree_ptr_2");
 
+    printf("\nResult: %lf\n", eval(tree_ptr_2, tree_ptr_2->root));
+
     tree_ptr_2->root = full_diff(tree_ptr_2);
     create_graph_jpg(tree_ptr_2, "tree_ptr_2");
 
