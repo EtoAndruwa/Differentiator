@@ -823,7 +823,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                     return ADD_NODE(short_left, short_right)
                 }
             }
-        case Sub:
+        case Sub: // OK ??? 
             {
                 if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // ok
                     NODE_RIGHT_CHILD->type == IS_VARIB)
@@ -937,6 +937,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 {
                     return NUM_NODE(NODE_RIGHT_CHILD->value.node_value * NODE_LEFT_CHILD->value.node_value)
                 }
+                return MUL_NODE(NODE_LEFT_CHILD, NODE_RIGHT_CHILD)
             }
         case Div:
             {
@@ -960,11 +961,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 {
                     return NUM_NODE(NODE_RIGHT_CHILD->value.node_value * NODE_LEFT_CHILD->value.node_value)
                 }
-                else
-                {
-
-
-                }
+                return DIV_NODE(NODE_LEFT_CHILD, NODE_RIGHT_CHILD)
             }
         default:
             ERROR_MESSAGE(stderr, ERR_UNKNOWN_OPERATOR)
@@ -976,7 +973,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
 
     switch(node_ptr->value.op_number)
     {        
-    case Sin:
+    case Sin: // ok
         {
             short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
             if(short_arg->type == IS_VAL)
@@ -984,6 +981,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 double argument = func_Sin(short_arg->value.node_value);
                 if(argument != NAN)
                 {
+                    dtor_childs(short_arg);
                     return NUM_NODE(argument)
                 }
                 ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
@@ -996,7 +994,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
             ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
             return nullptr;
         }
-    case Cos:
+    case Cos: // ok
         {
             short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
             if(short_arg->type == IS_VAL)
@@ -1004,6 +1002,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 double argument = func_Sin(short_arg->value.node_value);
                 if(argument != NAN)
                 {
+                    dtor_childs(short_arg);
                     return NUM_NODE(argument)
                 }
                 ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
@@ -1014,7 +1013,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 return COS_NODE(short_arg)
             }
         }
-    case Tan:
+    case Tan: // ok
         {
             short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
             if(short_arg->type == IS_VAL)
@@ -1022,6 +1021,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 double argument = func_Tan(short_arg->value.node_value);
                 if(argument != NAN)
                 {
+                    dtor_childs(short_arg);
                     return NUM_NODE(argument)
                 }
                 ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
@@ -1032,7 +1032,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 return TAN_NODE(short_arg);
             }
         }
-    case Sqrt:
+    case Sqrt: // ok
         {
             short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
             if(short_arg->type == IS_VAL)
@@ -1040,6 +1040,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 double argument = func_Sqrt(short_arg->value.node_value);
                 if(argument != NAN)
                 {
+                    dtor_childs(short_arg);
                     return NUM_NODE(argument)
                 }
                 ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
@@ -1050,7 +1051,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 return SQRT_NODE(short_arg);
             }
         }
-    case Asin:
+    case Asin: // ok
         {
             short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
             if(short_arg->type == IS_VAL)
@@ -1058,6 +1059,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 double argument = func_Asin(short_arg->value.node_value);
                 if(argument != NAN)
                 {
+                    dtor_childs(short_arg);
                     return NUM_NODE(argument)
                 }
                 ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
@@ -1068,7 +1070,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 return ASIN_NODE(short_arg);
             }
         }
-    case Acos:
+    case Acos: // ok
         {
             short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
             if(short_arg->type == IS_VAL)
@@ -1076,6 +1078,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 double argument = func_Acos(short_arg->value.node_value);
                 if(argument != NAN)
                 {
+                    dtor_childs(short_arg);
                     return NUM_NODE(argument)
                 }
                 ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
@@ -1086,7 +1089,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 return ACOS_NODE(short_arg);
             }
         }
-    case Log:
+    case Log: // ok
         {
             short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
             if(short_arg->type == IS_VAL)
@@ -1094,6 +1097,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 double argument = func_Log(short_arg->value.node_value);
                 if(argument != NAN)
                 {
+                    dtor_childs(short_arg);
                     return NUM_NODE(argument)
                 }
                 ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
@@ -1104,7 +1108,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 return LN_NODE(short_arg);
             }
         }
-    case Exp:
+    case Exp: // ok
         {
             short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
             if(short_arg->type == IS_VAL)
@@ -1112,6 +1116,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 double argument = func_Exp(short_arg->value.node_value);
                 if(argument != NAN)
                 {
+                    dtor_childs(short_arg);
                     return NUM_NODE(argument)
                 }
                 ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
@@ -1122,7 +1127,7 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 return EXP_NODE(short_arg);
             }
         }
-    case Pow:
+    case Pow: // ok
         {
             short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
             Node* short_arg_r = SHORT_CHILD(NODE_RIGHT_CHILD);
@@ -1132,6 +1137,8 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 double argument = func_Pow(short_arg->value.node_value, short_arg_r->value.node_value);
                 if(argument != NAN)
                 {
+                    dtor_childs(short_arg);
+                    dtor_childs(short_arg_r);
                     return NUM_NODE(argument)
                 }
                 ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
