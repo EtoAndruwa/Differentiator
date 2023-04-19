@@ -16,8 +16,10 @@ int main()
     tree_ptr_2->root = input_tree(tree_ptr_2);
     create_graph_jpg(tree_ptr_2, "tree_ptr_2");
 
-    tree_ptr_2->root = shortener(tree_ptr_2, tree_ptr_2->root);
-    create_graph_jpg(tree_ptr_2, "tree_ptr_2");
+    tree_ptr_3->root = shortener(tree_ptr_2, tree_ptr_2->root);
+    create_graph_jpg(tree_ptr_3, "tree_ptr_3");
+    // tree_ptr_4->root = shortener(tree_ptr_3, tree_ptr_3->root);
+    // create_graph_jpg(tree_ptr_4, "tree_ptr_4");
 
     // tree_ptr_2->root = copy_subtree(tree_ptr_2, tree_ptr_2->root);
     // create_graph_jpg(tree_ptr_2, "tree_ptr_3");
@@ -30,6 +32,7 @@ int main()
     create_html(OUTPUT_NAME);
     tree_dtor(tree_ptr_1);
     tree_dtor(tree_ptr_2);
+    tree_dtor(tree_ptr_3);
 
     return 0;
 }
