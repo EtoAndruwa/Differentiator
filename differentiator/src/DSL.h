@@ -30,8 +30,13 @@
 #define SIN_NODE(left_child)              create_node(tree_ptr, Sin, IS_FUNC, nullptr, left_child);
 #define COS_NODE(left_child)              create_node(tree_ptr, Cos, IS_FUNC, nullptr, left_child);
 #define SQRT_NODE(left_child)             create_node(tree_ptr, Sqrt, IS_FUNC, nullptr, left_child);
+#define TAN_NODE(left_child)              create_node(tree_ptr, Tan, IS_FUNC, nullptr, left_child);
+#define COT_NODE(left_child)              create_node(tree_ptr, Cot, IS_FUNC, nullptr, left_child);
+#define ASIN_NODE(left_child)             create_node(tree_ptr, Asin, IS_FUNC, nullptr, left_child);
+#define ACOS_NODE(left_child)             create_node(tree_ptr, Acos, IS_FUNC, nullptr, left_child);
 #define LN_NODE(left_child)               create_node(tree_ptr, Log, IS_FUNC, nullptr, left_child);
 #define POW_NODE(base, exp)               create_node(tree_ptr, Pow, IS_FUNC, nullptr, base, exp);
+#define EXP_NODE(exp)                     create_node(tree_ptr, Exp, IS_FUNC, nullptr, exp);
 #define VARIB_NODE(text)                  create_node(tree_ptr, 0, IS_VARIB,  text);
 #define CNST_VARIB_NODE(text)             create_node(tree_ptr, 0, IS_CNST_VAR, text);
 

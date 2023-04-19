@@ -864,19 +864,154 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
         }
     }
 
+    Node* short_arg = 0;
+
     switch(node_ptr->value.op_number)
     {        
     case Sin:
         {
-            Node* short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+            short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
             if(short_arg->type == IS_VAL)
             {
-                dtor_childs(node_ptr);
-                return NUM_NODE(func_Sin(short_arg->value.node_value))
+                double argument = func_Sin(short_arg->value.node_value);
+                if(argument != NAN)
+                {
+                    return NUM_NODE(argument)
+                }
             }
             else
             {
                 return SIN_NODE(short_arg)
+            }
+        }
+    case Cos:
+        {
+            short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+            if(short_arg->type == IS_VAL)
+            {
+                double argument = func_Sin(short_arg->value.node_value);
+                if(argument != NAN)
+                {
+                    return NUM_NODE(argument)
+                }
+            }
+            else
+            {
+                return COS_NODE(short_arg)
+            }
+        }
+    case Tan:
+        {
+            short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+            if(short_arg->type == IS_VAL)
+            {
+                double argument = func_Tan(short_arg->value.node_value);
+                if(argument != NAN)
+                {
+                    return NUM_NODE(argument)
+                }
+            }
+            else
+            {
+                return TAN_NODE(short_arg);
+            }
+        }
+    case Sqrt:
+        {
+            short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+            if(short_arg->type == IS_VAL)
+            {
+                double argument = func_Sqrt(short_arg->value.node_value);
+                if(argument != NAN)
+                {
+                    return NUM_NODE(argument)
+                }
+            }
+            else
+            {
+                return SQRT_NODE(short_arg);
+            }
+        }
+    case Asin:
+        {
+            short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+            if(short_arg->type == IS_VAL)
+            {
+                double argument = func_Asin(short_arg->value.node_value);
+                if(argument != NAN)
+                {
+                    return NUM_NODE(argument)
+                }
+            }
+            else
+            {
+                return ASIN_NODE(short_arg);
+            }
+        }
+    case Acos:
+        {
+            short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+            if(short_arg->type == IS_VAL)
+            {
+                double argument = func_Acos(short_arg->value.node_value);
+                if(argument != NAN)
+                {
+                    return NUM_NODE(argument)
+                }
+            }
+            else
+            {
+                return ACOS_NODE(short_arg);
+            }
+        }
+    case Log:
+        {
+            short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+            if(short_arg->type == IS_VAL)
+            {
+                double argument = func_Log(short_arg->value.node_value);
+                if(argument != NAN)
+                {
+                    return NUM_NODE(argument)
+                }
+            }
+            else
+            {
+                return LN_NODE(short_arg);
+            }
+        }
+    case Exp:
+        {
+            short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+            if(short_arg->type == IS_VAL)
+            {
+                double argument = func_Exp(short_arg->value.node_value);
+                if(argument != NAN)
+                {
+                    return NUM_NODE(argument)
+                }
+            }
+            else
+            {
+                return EXP_NODE(short_arg);
+            }
+        }
+    case Pow:
+        {
+            short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+            Node* short_arg_r = SHORT_CHILD(NODE_RIGHT_CHILD);
+
+            if(short_arg->type == IS_VAL && short_arg_r->type == IS_VAL)
+            {
+                double argument = func_Pow(short_arg->value.node_value, short_arg_r->value.node_value);
+                if(argument != NAN)
+                {
+                    return NUM_NODE(argument)
+                }
+            }
+            else
+            {
+                return POW_NODE(short_arg, short_arg_r);
             }
         }
     default:
