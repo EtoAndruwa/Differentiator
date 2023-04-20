@@ -1023,29 +1023,113 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                     return MUL_NODE(short_left, short_right)
                 }
             }
-        case Div:
+        case Div: // OK ???
             {
-                if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO && 
+                if(NODE_RIGHT_CHILD->type == IS_VAL && fabs(NODE_RIGHT_CHILD->value.node_value - 1) <= EPS && NODE_LEFT_CHILD->type != IS_OP) // ok
+                {
+                    return NODE_LEFT_CHILD;
+                }
+                else if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO && // ok
                     NODE_RIGHT_CHILD->type != IS_VAL)
                 {
                     return NUM_NODE(0)
                 }
-                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO)
-                {
-                    ERROR_MESSAGE(stderr, ERR_DIV_TO_ZERO)
-                    return nullptr;
-                }
-                else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO 
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO // ok
                         && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO)
                 {
                     ERROR_MESSAGE(stderr, ERR_UNCERTAINTY)
                     return nullptr;
                 }
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO) // ok
+                {
+                    ERROR_MESSAGE(stderr, ERR_DIV_TO_ZERO)
+                    return nullptr;
+                }
                 else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL)
                 {
-                    return NUM_NODE(NODE_RIGHT_CHILD->value.node_value * NODE_LEFT_CHILD->value.node_value)
+                    return NUM_NODE(NODE_LEFT_CHILD->value.node_value / NODE_RIGHT_CHILD->value.node_value)
                 }
-                return DIV_NODE(NODE_LEFT_CHILD, NODE_RIGHT_CHILD)
+                else
+                {
+                    short_left  = SHORT_CHILD(NODE_LEFT_CHILD);
+                    short_right = SHORT_CHILD(NODE_RIGHT_CHILD);
+
+                    if(short_right->type == IS_VAL && fabs(short_right->value.node_value - 1) <= EPS) // ok
+                    {
+                        dtor_childs(short_right);
+                        return short_left;
+                    }
+                    if(short_left->type == IS_VAL && is_poisitive(short_left->value.node_value) == IS_ZERO && // ok
+                    short_right->type != IS_VAL)
+                    {
+                        dtor_childs(short_left);
+                        dtor_childs(short_right);
+                        return NUM_NODE(0)
+                    }
+                    else if(short_right->type == IS_VAL && short_left->type == IS_VAL && is_poisitive(short_right->value.node_value) == IS_ZERO // ok
+                            && is_poisitive(short_left->value.node_value) == IS_ZERO)
+                    {
+                        dtor_childs(short_left);
+                        dtor_childs(short_right);
+                        ERROR_MESSAGE(stderr, ERR_UNCERTAINTY)
+                        return nullptr;
+                    }
+                    else if(short_right->type == IS_VAL && is_poisitive(short_right->value.node_value) == IS_ZERO) // ok
+                    {
+                        dtor_childs(short_left);
+                        dtor_childs(short_right);
+                        ERROR_MESSAGE(stderr, ERR_DIV_TO_ZERO)
+                        return nullptr;
+                    }
+                    else if(short_right->type == IS_VAL && short_left->type == IS_VAL) // ok
+                    {
+                        double value = short_left->value.node_value / short_right->value.node_value;
+                        dtor_childs(short_left);
+                        dtor_childs(short_right);
+                        return NUM_NODE(value)
+                    }
+                    else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Div  // ok
+                        && short_left->right_child->type == IS_VAL)
+                    {
+                        Node* left_short_l = copy_subtree(tree_ptr, short_left->left_child);
+                        Node* sort_sum = NUM_NODE(short_right->value.node_value * short_left->right_child->value.node_value)
+                        dtor_childs(short_left);
+                        dtor_childs(short_right);
+                        Node* div = DIV_NODE(left_short_l, sort_sum)
+                        return SHORT_CHILD(div);
+                    }
+                    else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Div  // ok
+                        && short_left->left_child->type == IS_VAL) 
+                    {
+                        Node* left_short_r = copy_subtree(tree_ptr, short_left->right_child);
+                        Node* sort_sum = NUM_NODE(short_left->left_child->value.node_value / short_right->value.node_value)
+                        dtor_childs(short_left);
+                        dtor_childs(short_right);
+                        Node* div = DIV_NODE(sort_sum, left_short_r)
+                        return SHORT_CHILD(div);
+                    }
+                    else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Div // ok
+                        && short_right->left_child->type == IS_VAL)
+                    {
+                        Node* right_short_r = copy_subtree(tree_ptr, short_right->right_child);
+                        Node* sort_sum = NUM_NODE(short_left->value.node_value / short_right->left_child->value.node_value)
+                        dtor_childs(short_left);
+                        dtor_childs(short_right);
+                        Node* mul = MUL_NODE(right_short_r, sort_sum)
+                        return SHORT_CHILD(mul);
+                    }
+                    else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Div  // ok
+                        && short_right->right_child->type == IS_VAL)
+                    {
+                        Node* right_short_l = copy_subtree(tree_ptr, short_right->left_child);
+                        Node* sort_sum = NUM_NODE(short_left->value.node_value * short_right->right_child->value.node_value)
+                        dtor_childs(short_left);
+                        dtor_childs(short_right);
+                        Node* div = DIV_NODE(sort_sum, right_short_l)
+                        return SHORT_CHILD(div);
+                    }
+                    return DIV_NODE(short_left, short_right)
+                }
             }
         default:
             ERROR_MESSAGE(stderr, ERR_UNKNOWN_OPERATOR)
