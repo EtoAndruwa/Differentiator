@@ -20,25 +20,37 @@ void tree_dtor(Tree* tree_ptr)
     dtor_childs(tree_ptr->root);
     tree_ptr->root = nullptr;
 
-    free(tree_ptr->tree_buff);
+    if(tree_ptr->tree_buff != nullptr)
+    {
+        free(tree_ptr->tree_buff);
+    }
     tree_ptr->tree_buff   = nullptr;
     tree_ptr->cur_pos_str = POISON;
 
     tree_ptr->file_ptr = nullptr;
     tree_ptr->size     = POISON;
 
-    free(tree_ptr->toks);
+    if(tree_ptr->toks != nullptr)
+    {
+        free(tree_ptr->toks);
+    }
     tree_ptr->toks        = nullptr;
     tree_ptr->num_of_toks = POISON;
     tree_ptr->cur_tok     = POISON;
 
-    free(tree_ptr->vars);
+    if(tree_ptr->vars != nullptr)
+    {
+        free(tree_ptr->vars);
+    }
     tree_ptr->vars        = nullptr;
     tree_ptr->num_of_vars = POISON;
 
     tree_ptr->error_code = TREE_OK;
 
-    free(tree_ptr);
+    if(tree_ptr != nullptr)
+    {
+        free(tree_ptr);
+    }
     tree_ptr = nullptr;
 }
 
@@ -58,8 +70,11 @@ void dtor_childs(Node* node_ptr)
     node_ptr->value.node_value = POISON;
     node_ptr->value.op_number  = POISON;
 
-    free(node_ptr);
-    node_ptr = nullptr;
+    if(node_ptr != nullptr)
+    {
+        free(node_ptr);
+        node_ptr = nullptr;
+    }
 }
 
 Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, Node* left_child, Node* right_child)

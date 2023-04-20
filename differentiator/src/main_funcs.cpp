@@ -749,23 +749,23 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
 
         switch(node_ptr->value.op_number)
         {
-        case Add: // ok
+        case Add: // OK ???
             { 
-                if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // zero
+                if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // ok
                     NODE_RIGHT_CHILD->type == IS_VARIB)
                 {
                     return VARIB_NODE(NODE_RIGHT_CHILD->value.text)
                 }
-                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO &&  // zero
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO &&  // ok
                     NODE_LEFT_CHILD->type == IS_VARIB)
                 {
                     return VARIB_NODE(NODE_LEFT_CHILD->value.text)
                 }
-                else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL) // val val
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL) // ok 
                 {
                     return NUM_NODE(NODE_RIGHT_CHILD->value.node_value + NODE_LEFT_CHILD->value.node_value)
                 }
-                else if(NODE_RIGHT_CHILD->type == IS_VARIB && NODE_LEFT_CHILD->type == IS_VARIB) // varib varib
+                else if(NODE_RIGHT_CHILD->type == IS_VARIB && NODE_LEFT_CHILD->type == IS_VARIB) //  ok
                 {
                     return copy_subtree(tree_ptr, node_ptr);
                 }
@@ -774,51 +774,68 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                     short_left  = SHORT_CHILD(NODE_LEFT_CHILD);
                     short_right = SHORT_CHILD(NODE_RIGHT_CHILD);
                     
-                    if(short_left->type == IS_VAL && is_poisitive(short_left->value.node_value) == IS_ZERO && 
+                    if(short_left->type == IS_VAL && is_poisitive(short_left->value.node_value) == IS_ZERO &&  // ok
                         short_right->type == IS_VARIB)
                     {
-                        return VARIB_NODE(short_right->value.text)
+                        dtor_childs(short_left);
+                        return short_right;
                     }
-                    else if(short_right->type == IS_VAL && is_poisitive(short_right->value.node_value) == IS_ZERO && 
+                    else if(short_right->type == IS_VAL && is_poisitive(short_right->value.node_value) == IS_ZERO && // ok
                         short_left->type == IS_VARIB)
                     {
-                        return VARIB_NODE(short_left->value.text)
+                        dtor_childs(short_right);
+                        return short_left;
                     }
-                    else if(short_right->type == IS_VAL && short_left->type == IS_VAL)
+                    else if(short_right->type == IS_VAL && short_left->type == IS_VAL) // ok
                     {
-                        return NUM_NODE(short_right->value.node_value + short_left->value.node_value)
+                        double value = short_left->value.node_value + short_right->value.node_value;
+                        dtor_childs(short_left);
+                        dtor_childs(short_right);
+                        return NUM_NODE(value)
                     }
-                    else if(short_right->type == IS_VAL && short_left->type == IS_VARIB || short_right->type == IS_VARIB && short_left->type == IS_VAL)
+                    else if(short_right->type == IS_VAL && short_left->type == IS_VARIB || short_right->type == IS_VARIB && short_left->type == IS_VAL) // ok
                     {
                         return ADD_NODE(short_right, short_left)
                     }
-                    else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Add 
+                    else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Add // ok
                         && short_left->right_child->type == IS_VAL)
                     {
                         Node* left_short_l = copy_subtree(tree_ptr, short_left->left_child);
                         Node* sort_sum = NUM_NODE(short_right->value.node_value + short_left->right_child->value.node_value)
-                        return ADD_NODE(left_short_l, sort_sum)
+                        Node* add = ADD_NODE(left_short_l, sort_sum)
+                        dtor_childs(short_right);
+                        dtor_childs(short_left);
+                        return SHORT_CHILD(add);
                     }
-                    else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Add 
+                    else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Add // ok
                         && short_left->left_child->type == IS_VAL)
                     {
                         Node* left_short_r = copy_subtree(tree_ptr, short_left->right_child);
                         Node* sort_sum = NUM_NODE(short_right->value.node_value + short_left->left_child->value.node_value)
-                        return ADD_NODE(left_short_r, sort_sum)
+                        Node* add = ADD_NODE(left_short_r, sort_sum)
+                        dtor_childs(short_right);
+                        dtor_childs(short_left);
+                        return SHORT_CHILD(add);
                     }
-                    else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Add 
+                    else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Add // ok
                         && short_right->left_child->type == IS_VAL)
                     {
                         Node* right_short_r = copy_subtree(tree_ptr, short_right->right_child);
                         Node* sort_sum = NUM_NODE(short_left->value.node_value + short_right->left_child->value.node_value)
-                        return ADD_NODE(right_short_r, sort_sum)
+                        Node* add = ADD_NODE(right_short_r, sort_sum)
+                        dtor_childs(short_right);
+                        dtor_childs(short_left);
+                        return SHORT_CHILD(add);
                     }
-                    else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Add 
+                    else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Add  // ok
                         && short_right->right_child->type == IS_VAL)
                     {
                         Node* right_short_l = copy_subtree(tree_ptr, short_right->left_child);
                         Node* sort_sum = NUM_NODE(short_left->value.node_value + short_right->right_child->value.node_value)
-                        return ADD_NODE(right_short_l, sort_sum)
+                        Node* add = ADD_NODE(right_short_l, sort_sum)
+                        dtor_childs(short_right);
+                        dtor_childs(short_left);
+                        return SHORT_CHILD(add);
                     }
                     return ADD_NODE(short_left, short_right)
                 }
