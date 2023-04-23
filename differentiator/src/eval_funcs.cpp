@@ -37,7 +37,7 @@ double func_Sin(double value_1, double value_2) // ok
 double func_Tan(double value_1, double value_2) // ok
 {
     double cos_val = func_Cos(value_1);
-    if(is_poisitive(cos_val) == IS_ZERO)
+    if(is_positive(cos_val) == IS_ZERO)
     {
         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
         return NAN;
@@ -49,7 +49,7 @@ double func_Tan(double value_1, double value_2) // ok
 double func_Cot(double value_1, double value_2) // ok
 {
     double sin_val = func_Sin(value_1);
-    if(is_poisitive(sin_val) == IS_ZERO)
+    if(is_positive(sin_val) == IS_ZERO)
     {
         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
         return NAN;
@@ -82,11 +82,11 @@ double func_Acos(double value_1, double value_2) // ok
 
 double func_Sqrt(double value_1, double value_2) // ok
 {
-    if(is_poisitive(value_1) == IS_POSITIVE)
+    if(is_positive(value_1) == IS_POSITIVE)
     {
         return sqrt(value_1);
     }
-    else if(is_poisitive(value_1) == IS_ZERO)
+    else if(is_positive(value_1) == IS_ZERO)
     {
         return 0;
     }
@@ -102,7 +102,7 @@ double func_Exp(double value_1, double value_2) // ok
 
 double func_Log(double value_1, double value_2) // ok
 {
-    if(is_poisitive(value_1) == IS_POSITIVE)
+    if(is_positive(value_1) == IS_POSITIVE)
     {
         return log(value_1);
     }
@@ -116,7 +116,7 @@ double func_Pow(double value_1, double value_2) // ok
     return pow(value_1, value_2);
 }
 
-int is_poisitive(double value) // ok
+int is_positive(double value) // ok
 {
     if((fabs(value - fabs(value)) < EPS) && (fabs(value) > EPS))
     {

@@ -122,7 +122,7 @@ Node* get_recur_tree(Tree* const tree_ptr);
 size_t length_double(char* str_double);
 char* get_string_func(size_t func_code);
 Node* full_diff(Tree* tree_ptr);
-int is_poisitive(double value);
+int is_positive(double value);
 size_t skip_spaces(Tree* tree_ptr);
 Node* copy_subtree(Tree* tree_ptr, Node* node_ptr);
 

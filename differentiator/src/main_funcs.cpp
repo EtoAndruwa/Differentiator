@@ -729,6 +729,11 @@ int get_vars(Tree* tree_ptr) // ok
 
 Node* shortener(Tree* tree_ptr, Node* node_ptr)
 {
+    if(tree_ptr->num_found_vars != tree_ptr->num_of_vars)
+    {   
+        ERROR_MESSAGE(stderr, ERR_FOUND_DIFF_NUM_VARS)
+        return 0;
+    }
     if(node_ptr == nullptr)
     {
         return nullptr;
@@ -751,12 +756,12 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
         {
         case Add: // OK ???
             { 
-                if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // ok
+                if(NODE_LEFT_CHILD->type == IS_VAL && is_positive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // ok
                     NODE_RIGHT_CHILD->type == IS_VARIB)
                 {
                     return VARIB_NODE(NODE_RIGHT_CHILD->value.text)
                 }
-                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO &&  // ok
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO &&  // ok
                     NODE_LEFT_CHILD->type == IS_VARIB)
                 {
                     return VARIB_NODE(NODE_LEFT_CHILD->value.text)
@@ -774,13 +779,13 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                     short_left  = SHORT_CHILD(NODE_LEFT_CHILD);
                     short_right = SHORT_CHILD(NODE_RIGHT_CHILD);
                     
-                    if(short_left->type == IS_VAL && is_poisitive(short_left->value.node_value) == IS_ZERO &&  // ok
+                    if(short_left->type == IS_VAL && is_positive(short_left->value.node_value) == IS_ZERO &&  // ok
                         short_right->type == IS_VARIB)
                     {
                         dtor_childs(short_left);
                         return short_right;
                     }
-                    else if(short_right->type == IS_VAL && is_poisitive(short_right->value.node_value) == IS_ZERO && // ok
+                    else if(short_right->type == IS_VAL && is_positive(short_right->value.node_value) == IS_ZERO && // ok
                         short_left->type == IS_VARIB)
                     {
                         dtor_childs(short_right);
@@ -842,14 +847,14 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
             }
         case Sub: // OK ??? 
             {
-                if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // ok
+                if(NODE_LEFT_CHILD->type == IS_VAL && is_positive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // ok
                     NODE_RIGHT_CHILD->type == IS_VARIB)
                 {
                     Node* minus = NUM_NODE(-1)
                     Node* varib = VARIB_NODE(NODE_RIGHT_CHILD->value.text)
                     return MUL_NODE(minus, varib)
                 }
-                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO &&  // ok
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO &&  // ok
                     NODE_LEFT_CHILD->type == IS_VARIB)
                 {
                     return VARIB_NODE(NODE_LEFT_CHILD->value.text)
@@ -867,14 +872,14 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                     short_left  = SHORT_CHILD(NODE_LEFT_CHILD);
                     short_right = SHORT_CHILD(NODE_RIGHT_CHILD);
                     
-                    if(short_left->type == IS_VAL && is_poisitive(short_left->value.node_value) == IS_ZERO &&  //ok
+                    if(short_left->type == IS_VAL && is_positive(short_left->value.node_value) == IS_ZERO &&  //ok
                         short_right->type == IS_VARIB)
                     {
                         Node* minus = NUM_NODE(-1)
                         dtor_childs(short_left);
                         return MUL_NODE(minus, short_right)
                     }
-                    else if(short_right->type == IS_VAL && is_poisitive(short_right->value.node_value) == IS_ZERO &&  // ok
+                    else if(short_right->type == IS_VAL && is_positive(short_right->value.node_value) == IS_ZERO &&  // ok
                         short_left->type == IS_VARIB)
                     {
                         dtor_childs(short_right);
@@ -940,12 +945,12 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
             }
         case Mul: // OK???
             {
-                if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // ok
+                if(NODE_LEFT_CHILD->type == IS_VAL && is_positive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // ok
                     NODE_RIGHT_CHILD->type != IS_VAL)
                 {
                     return NUM_NODE(0)
                 }
-                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO && // ok
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO && // ok
                     NODE_LEFT_CHILD->type != IS_VAL)
                 {
                     return NUM_NODE(0)
@@ -959,14 +964,14 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                     short_left  = SHORT_CHILD(NODE_LEFT_CHILD);
                     short_right = SHORT_CHILD(NODE_RIGHT_CHILD);
 
-                    if(short_left->type == IS_VAL && is_poisitive(short_left->value.node_value) == IS_ZERO &&  // ok
+                    if(short_left->type == IS_VAL && is_positive(short_left->value.node_value) == IS_ZERO &&  // ok
                     short_right->type != IS_VAL)
                     {
                         dtor_childs(short_left);
                         dtor_childs(short_right);
                         return NUM_NODE(0)
                     }
-                    else if(short_right->type == IS_VAL && is_poisitive(short_right->value.node_value) == IS_ZERO && // ok
+                    else if(short_right->type == IS_VAL && is_positive(short_right->value.node_value) == IS_ZERO && // ok
                     short_left->type != IS_VAL)
                     {
                         dtor_childs(short_left);
@@ -1025,22 +1030,26 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
             }
         case Div: // OK ???
             {
-                if(NODE_RIGHT_CHILD->type == IS_VAL && fabs(NODE_RIGHT_CHILD->value.node_value - 1) <= EPS && NODE_LEFT_CHILD->type != IS_OP) // ok
+                if(NODE_RIGHT_CHILD->type == IS_VAL && fabs(NODE_RIGHT_CHILD->value.node_value -1) <= EPS)
+                {
+                    return NODE_RIGHT_CHILD;
+                }
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && fabs(NODE_RIGHT_CHILD->value.node_value - 1) <= EPS && NODE_LEFT_CHILD->type != IS_OP) // ok
                 {
                     return NODE_LEFT_CHILD;
                 }
-                else if(NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO && // ok
+                else if(NODE_LEFT_CHILD->type == IS_VAL && is_positive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO && // ok
                     NODE_RIGHT_CHILD->type != IS_VAL)
                 {
                     return NUM_NODE(0)
                 }
-                else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO // ok
-                        && is_poisitive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO)
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL && is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO // ok
+                        && is_positive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO)
                 {
                     ERROR_MESSAGE(stderr, ERR_UNCERTAINTY)
                     return nullptr;
                 }
-                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_poisitive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO) // ok
+                else if(NODE_RIGHT_CHILD->type == IS_VAL && is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO) // ok
                 {
                     ERROR_MESSAGE(stderr, ERR_DIV_TO_ZERO)
                     return nullptr;
@@ -1059,22 +1068,22 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                         dtor_childs(short_right);
                         return short_left;
                     }
-                    if(short_left->type == IS_VAL && is_poisitive(short_left->value.node_value) == IS_ZERO && // ok
+                    if(short_left->type == IS_VAL && is_positive(short_left->value.node_value) == IS_ZERO && // ok
                     short_right->type != IS_VAL)
                     {
                         dtor_childs(short_left);
                         dtor_childs(short_right);
                         return NUM_NODE(0)
                     }
-                    else if(short_right->type == IS_VAL && short_left->type == IS_VAL && is_poisitive(short_right->value.node_value) == IS_ZERO // ok
-                            && is_poisitive(short_left->value.node_value) == IS_ZERO)
+                    else if(short_right->type == IS_VAL && short_left->type == IS_VAL && is_positive(short_right->value.node_value) == IS_ZERO // ok
+                            && is_positive(short_left->value.node_value) == IS_ZERO)
                     {
                         dtor_childs(short_left);
                         dtor_childs(short_right);
                         ERROR_MESSAGE(stderr, ERR_UNCERTAINTY)
                         return nullptr;
                     }
-                    else if(short_right->type == IS_VAL && is_poisitive(short_right->value.node_value) == IS_ZERO) // ok
+                    else if(short_right->type == IS_VAL && is_positive(short_right->value.node_value) == IS_ZERO) // ok
                     {
                         dtor_childs(short_left);
                         dtor_childs(short_right);
@@ -1314,10 +1323,25 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
             }
             else
             {
+                if(short_arg_r->type == IS_VAL)
+                {
+                    if(fabs(short_arg_r->value.node_value - 1.0) <= EPS)
+                    {
+                        dtor_childs(short_arg_r);
+                        return short_arg;
+                    }
+                    if(is_positive(short_arg_r->value.node_value) == IS_ZERO)
+                    {
+                        dtor_childs(short_arg_r);
+                        dtor_childs(short_arg);
+                        return NUM_NODE(1);
+                    } 
+                }
                 return POW_NODE(short_arg, short_arg_r);
             }
         }
     default:
+        printf("TYPE: %ld, TEXT: %s, OP_VAL: %ld\n", node_ptr->type, node_ptr->value.text, node_ptr->value.op_number);
         ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
         return nullptr;
     }
