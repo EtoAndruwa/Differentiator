@@ -15,6 +15,7 @@
 #define PI  3.14159265  // Used in calculations
 const static size_t MAX_LEN_VARIB = 21; // The maximum length of the variable text = 20 + 1 terminating symbol
 const static char* LATEX_FILE_NAME = "Tree.tex";
+const static char* LATEX_DIR_NAME = "latex/";
 
 /*####################################################################################################################################################################*/
 
@@ -145,6 +146,7 @@ int print_footer(FILE* tex_file_ptr);
 int create_latex(Node* root_node_ptr);
 int add_equation(Node* node_ptr, FILE* tex_file_ptr);
 int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr);
+int convert_tex_pdf(char* file_dir_name);
 
 /*####################################################################################################################################################################*/
 

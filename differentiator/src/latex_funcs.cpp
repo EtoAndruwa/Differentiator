@@ -23,7 +23,14 @@ int print_footer(FILE* tex_file_ptr)
 
 int create_latex(Node* root_node_ptr)
 {
-    FILE* tex_file_ptr = fopen(LATEX_FILE_NAME, "w");
+    char* file_dir_name = cat_file_directory((char*)LATEX_FILE_NAME, (char*)LATEX_DIR_NAME, "");
+    char* local_dir = cat_file_directory(file_dir_name, "./", "");
+
+
+    printf("\n\n\n\nDIR_FILE_NAME: %s\n\n\n\n", local_dir);
+
+
+    FILE* tex_file_ptr = fopen(local_dir, "w");
     if(tex_file_ptr == nullptr)
     {
         ERROR_MESSAGE(stderr, ERR_OPEN_LATEX_FILE)
@@ -49,6 +56,10 @@ int create_latex(Node* root_node_ptr)
         ERROR_MESSAGE(stderr, ERR_CLOSE_LATEX_FILE)
         return ERR_CLOSE_LATEX_FILE;
     }
+
+    convert_tex_pdf(file_dir_name);
+    free(file_dir_name);
+    free(local_dir);
 }
 
 int add_equation(Node* node_ptr, FILE* tex_file_ptr)
@@ -144,12 +155,75 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
                 fprintf(tex_file_ptr, ")");
                 break;
             }
+        case Asin:
+            {
+                fprintf(tex_file_ptr, "asin(");
+                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                fprintf(tex_file_ptr, ")");
+                break;
+            }
+        case Acos:
+            {
+                fprintf(tex_file_ptr, "acos(");
+                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                fprintf(tex_file_ptr, ")");
+                break;
+            }
+        case Sqrt:
+            {
+                fprintf(tex_file_ptr, "\\sqrt{");
+                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                fprintf(tex_file_ptr, "}");
+                break;
+            }
+        case Exp:
+            {
+                fprintf(tex_file_ptr, "\\exp(");
+                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                fprintf(tex_file_ptr, ")");
+                break;
+            }
+        case Log:
+            {
+                fprintf(tex_file_ptr, "ln(");
+                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                fprintf(tex_file_ptr, ")");
+                break;
+            }
+        case Cot:
+            {
+                fprintf(tex_file_ptr, "cot(");
+                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                fprintf(tex_file_ptr, ")");
+                break;
+            }
+        case Pow:
+            {
+                fprintf(tex_file_ptr, "(");
+                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                fprintf(tex_file_ptr, ")");
+                fprintf(tex_file_ptr, "^{(");
+                print_latex_eq(node_ptr->right_child, tex_file_ptr);
+                fprintf(tex_file_ptr, ")}");
+                break;
+            }
         default:
             fprintf(tex_file_ptr, "ERR_UNKNOWN_FUNC");
             ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
             break;
         }
     }
+}
+
+int convert_tex_pdf(char* file_dir_name)
+{
+    char  final_cmd[100];
+    char* compile_cmd = "pdflatex -output-directory=../differentiator/latex/ ../differentiator/";
+    strcpy(final_cmd, compile_cmd);
+    strcat(final_cmd, file_dir_name);
+    final_cmd[99] = '\0';
+    printf(final_cmd);
+    system(final_cmd);
 }
 
 
