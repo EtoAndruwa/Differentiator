@@ -14,6 +14,7 @@
 #define EPS 1e-7        // Used in comparisson of doubles
 #define PI  3.14159265  // Used in calculations
 const static size_t MAX_LEN_VARIB = 21; // The maximum length of the variable text = 20 + 1 terminating symbol
+const static char* LATEX_FILE_NAME = "Tree.tex";
 
 /*####################################################################################################################################################################*/
 
@@ -69,6 +70,9 @@ enum error_codes_diff
     ERR_UNKNOWN_OPERATOR    = -20,
     ERR_DIV_TO_ZERO         = -21,
     ERR_UNCERTAINTY         = -22,
+    ERR_OPEN_LATEX_FILE     = -23,
+    ERR_CLOSE_LATEX_FILE    = -24,
+    ERR_PRINT_LATEX         = -25,
 };
 
 /*####################################################################################################################################################################*/
@@ -78,6 +82,8 @@ size_t output_tree(const Node* const root_node_ptr, char* file_name);
 double eval(const Tree* const tree_ptr, const Node* const node_ptr);
 void   print_recur_code(const Node* const node_ptr, FILE* file_ptr);
 size_t generate_cpu_code(const Node* const root_node_ptr);
+
+/*####################################################################################################################################################################*/
 
 double func_Add(double value_1, double value_2);
 double func_Sub(double value_1, double value_2);
@@ -96,6 +102,8 @@ double func_Cot(double value_1, double value_2 = 0); // ok
 // double func_Log10(double value_1, double value_2 = 0); // ok
 double func_Pow(double value_1, double value_2); // ok
 
+/*####################################################################################################################################################################*/
+
 Node* input_tree(Tree* tree_ptr);
 size_t check_is_int(char* num_text);
 size_t check_is_float(char* num_text);
@@ -109,6 +117,8 @@ int get_vars(Tree* tree_ptr);
 Node* shortener(Tree* tree_ptr, Node* node_ptr);
 int get_eq_string(Tree* const tree_ptr, char* file_name);
 
+/*####################################################################################################################################################################*/
+
 Node* rule_N(Tree* const tree_ptr, FILE* log_ptr);
 Node* rule_G(Tree* const tree_ptr, FILE* log_ptr);
 Node* rule_E(Tree* const tree_ptr, FILE* log_ptr);
@@ -118,6 +128,8 @@ Node* rule_V(Tree* const tree_ptr, FILE* log_ptr);
 Node* rule_F(Tree* const tree_ptr, FILE* log_ptr);
 Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr);
 
+/*####################################################################################################################################################################*/
+
 Node* get_recur_tree(Tree* const tree_ptr);
 size_t length_double(char* str_double);
 char* get_string_func(size_t func_code);
@@ -125,6 +137,14 @@ Node* full_diff(Tree* tree_ptr);
 int is_positive(double value);
 size_t skip_spaces(Tree* tree_ptr);
 Node* copy_subtree(Tree* tree_ptr, Node* node_ptr);
+
+/*####################################################################################################################################################################*/
+
+int print_header(FILE* tex_file_ptr);
+int print_footer(FILE* tex_file_ptr);
+int create_latex(Node* root_node_ptr);
+int add_equation(Node* node_ptr, FILE* tex_file_ptr);
+int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr);
 
 /*####################################################################################################################################################################*/
 

@@ -6,3 +6,7 @@ logs/
 .vscode/
 *.html
 *.jpg
+*.aux
+*.log
+*.pdf
+*.tex
