@@ -19,8 +19,13 @@ all:  Make_d
 clean_d: 
 	cd $(DIR_DIFFERRENTIATOR) && make clean 
 
+clean_files: clean_df clean_gf
+
 clean_gf:
 	cd $(DIR_GRAPHVIZ) && make clean_files
+
+clean_df:
+	cd $(DIR_DIFFERRENTIATOR) && make clean_files 
 
 clean_g:
 	cd $(DIR_GRAPHVIZ) && make clean

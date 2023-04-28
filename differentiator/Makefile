@@ -36,5 +36,8 @@ $(PREF_OBJ)%.o : $(PREF_GRV)%.cpp
 clean: 
 	rm $(TARGET).exe $(PREF_OBJ)*.o
 
+clean_files: 
+	rm ./latex/*.pdf ./latex/*.log ./latex/*.tex ./latex/*.aux 
+
 run:
 	$(EXE_FLAG) ./$(TARGET).exe
