@@ -71,9 +71,8 @@ int add_equation(Node* node_ptr, FILE* tex_file_ptr)
 
     fprintf(tex_file_ptr, "\\begin{align*}\n");
 
-    fprintf(tex_file_ptr, "$");
     print_latex_eq(node_ptr, tex_file_ptr);
-    fprintf(tex_file_ptr, "$\n");
+    fprintf(tex_file_ptr, "\n");
 
     fprintf(tex_file_ptr, "\\end{align*}\n");
 }
@@ -332,6 +331,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
                 if(number_of_ops == MAX_OPS_TO_CARR)
                 {
                     number_of_ops = 0;
+                    fprintf(tex_file_ptr, "\\\\");
                 }
 
                 number_of_ops++;
@@ -339,9 +339,9 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
                 fprintf(tex_file_ptr, "(");
                 print_latex_eq(node_ptr->left_child, tex_file_ptr);
                 fprintf(tex_file_ptr, ")");
-                fprintf(tex_file_ptr, "^{(");
+                fprintf(tex_file_ptr, " \\textsuperscript{$\\wedge$} (");
                 print_latex_eq(node_ptr->right_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ") \\\\ }");
+                fprintf(tex_file_ptr, ")");
                 break;
             }
         default:

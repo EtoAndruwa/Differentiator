@@ -71,9 +71,9 @@ double eval(const Tree* const tree_ptr, const Node* const node_ptr) // ok
     {
         for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
         {
-            if(node_ptr->value.text[0] == tree_ptr->vars[cur_var].var_text[0])
+            if(node_ptr->value.text[0] == tree_ptr->vars_enter[cur_var].var_text[0])
             {
-                return tree_ptr->vars[cur_var].var_value;
+                return tree_ptr->vars_enter[cur_var].var_value;
             }
         }
     }
@@ -123,6 +123,11 @@ Node* input_tree(Tree* tree_ptr) // ok
 {
     if(tree_ptr->cur_tok < tree_ptr->num_of_toks)
     {
+        if(tree_ptr->num_found_vars == -1)
+        {
+            tree_ptr->num_found_vars = 0; // set to zero to show that no varibs were found
+        }
+
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
         {   
             GET_CUR_TOK()
@@ -131,11 +136,22 @@ Node* input_tree(Tree* tree_ptr) // ok
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
         {
             GET_CUR_TOK()
+
+            if(tree_ptr->num_found_vars == -1)
+            {
+                tree_ptr->num_found_vars = 0;
+            }
+            
             tree_ptr->num_found_vars++;
             return VARIB_NODE(tree_ptr->toks[cur_tok].text)
         }
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_CNST_VAR)
         {
+            if(tree_ptr->num_found_vars == -1)
+            {
+                tree_ptr->num_found_vars = 0;
+            }
+
             GET_CUR_TOK()
             tree_ptr->num_found_vars++;
             return CNST_VARIB_NODE(tree_ptr->toks[cur_tok].text)
@@ -329,7 +345,7 @@ int get_tokens(Tree* tree_ptr) // ok
                 int is_const = IS_CNST_VAR;
                 for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
                 {
-                    if(strcmp(tree_ptr->vars[cur_var].var_text, token_val) == 0)
+                    if(strcmp(tree_ptr->vars_enter[cur_var].var_text, token_val) == 0)
                     {
                         strcpy(tree_ptr->toks[toks_num].text, token_val);
                         tree_ptr->toks[toks_num].type = IS_VARIB;
@@ -701,8 +717,8 @@ int get_vars(Tree* tree_ptr) // ok
         return ERR_INVALID_VAR_NUM;
     }
 
-    tree_ptr->vars = (Var*)calloc(tree_ptr->num_of_vars, sizeof(Var));
-    if(tree_ptr->vars == nullptr)
+    tree_ptr->vars_enter = (Var*)calloc(tree_ptr->num_of_vars, sizeof(Var));
+    if(tree_ptr->vars_enter == nullptr)
     {
         ERROR_MESSAGE(stderr, ERR_TO_CALLOC_VARS)
         return ERR_TO_CALLOC_VARS;
@@ -711,17 +727,17 @@ int get_vars(Tree* tree_ptr) // ok
     for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
     {
         printf("\n\nEnter the %ld variable:", cur_var);
-        scanf(" %s", &(tree_ptr->vars[cur_var].var_text));
-        tree_ptr->vars[cur_var].var_text[20] = '\0';
+        scanf(" %s", &(tree_ptr->vars_enter[cur_var].var_text));
+        tree_ptr->vars_enter[cur_var].var_text[20] = '\0';
 
-        if(isalpha((int)(tree_ptr->vars[cur_var].var_text[0])) == 0)
+        if(isalpha((int)(tree_ptr->vars_enter[cur_var].var_text[0])) == 0)
         {
             ERROR_MESSAGE(stderr, ERR_INVALID_VAR_TEXT)
             return ERR_INVALID_VAR_TEXT;
         }
 
-        printf("\nEnter the value of variable '%s':", tree_ptr->vars[cur_var].var_text);
-        scanf(" %lf", &(tree_ptr->vars[cur_var].var_value));
+        printf("\nEnter the value of variable '%s':", tree_ptr->vars_enter[cur_var].var_text);
+        scanf(" %lf", &(tree_ptr->vars_enter[cur_var].var_value));
     }
 
     return RETURN_OK;
@@ -729,11 +745,13 @@ int get_vars(Tree* tree_ptr) // ok
 
 Node* shortener(Tree* tree_ptr, Node* node_ptr)
 {
-    if(tree_ptr->num_found_vars != tree_ptr->num_of_vars)
-    {   
-        ERROR_MESSAGE(stderr, ERR_FOUND_DIFF_NUM_VARS)
-        return 0;
-    }
+    // if(tree_ptr->num_found_vars != tree_ptr->num_of_vars)
+    // {   
+    //     printf("FOUND %ld\n", tree_ptr->num_found_vars);
+    //     printf("WAS ENTERED %ld\n", tree_ptr->num_of_vars);
+    //     ERROR_MESSAGE(stderr, ERR_FOUND_DIFF_NUM_VARS)
+    //     return 0;
+    // }
     if(node_ptr == nullptr)
     {
         return nullptr;
@@ -1375,21 +1393,22 @@ Node* full_diff(Tree* tree_ptr) // ok
     if(tree_ptr->num_of_vars == 0)
     {
         dtor_childs(tree_ptr->root);
-        return diff_tree(tree_ptr, tree_ptr->vars[0].var_text);
+        return diff_tree(tree_ptr, tree_ptr->vars_enter[0].var_text);
     }
     else
     {
-        Node* first_diff = diff_tree(tree_ptr, tree_ptr->vars[0].var_text);
+        Node* first_diff = diff_tree(tree_ptr, tree_ptr->vars_enter[0].var_text);
         tree_ptr->cur_tok = 0; // Needs to be set to zero because diff tree increases the cor_tok value every time it diff the tree
 
         for(size_t cur_diff = 1; cur_diff < tree_ptr->num_of_vars; cur_diff++)
         {
-            first_diff = ADD_NODE(first_diff, diff_tree(tree_ptr, tree_ptr->vars[cur_diff].var_text));
+            first_diff = ADD_NODE(first_diff, diff_tree(tree_ptr, tree_ptr->vars_enter[cur_diff].var_text));
             tree_ptr->cur_tok = 0; // Needs to be set to zero because diff tree increases the cor_tok value every time it diff the tree
         }
 
 
         dtor_childs(tree_ptr->root);
+
         return first_diff;
     }
 }
@@ -1413,3 +1432,10 @@ Node* copy_subtree(Tree* tree_ptr, Node* node_ptr) // ok
         return create_node(tree_ptr, node_ptr->value.op_number, node_ptr->type, nullptr, copy_subtree(tree_ptr, node_ptr->left_child), copy_subtree(tree_ptr, node_ptr->right_child));
     }
 }
+
+Var* realloc_found_vars(Var* found_vars_ptr)
+{
+
+
+}
+

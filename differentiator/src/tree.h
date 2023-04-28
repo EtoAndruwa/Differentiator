@@ -107,15 +107,17 @@ typedef struct Tree
     char*   tree_buff   = nullptr;  /// \brief The pointer to the buffer with the tree equation
     FILE*   file_ptr    = nullptr;  /// \brief The pointer to the file with the tree equation
     Tokens* toks        = nullptr;  /// \brief The pointer to the array of token structs
-    Var*    vars        = nullptr;  /// \brief The pointer to the array of var structs
+    Var*    vars_enter  = nullptr;  /// \brief The pointer to the array of var structs
+    Var*    vars_found  = nullptr; 
 
     size_t  size           = 0;        /// \brief The total size of the buffer with the tree equation
     size_t  num_of_toks    = 1;        /// \brief The total number of tokens
     size_t  cur_tok        = 0;        /// \brief The current number of tok in the array of tokens
-    size_t  num_of_vars    = 0;        /// \brief The total number of variables in the tree
+    int     num_of_vars    = -1;        /// \brief The total number of variables in the tree
     size_t  cur_pos_str    = 0;        /// \brief The current position in the buffer with the tree equation
     size_t  error_code     = TREE_OK;  /// \brief The error code of the struct
-    size_t  num_found_vars = 0;
+    int     num_found_vars = -1;
+
 }Tree;
 
 /*####################################################################################################################################################################*/

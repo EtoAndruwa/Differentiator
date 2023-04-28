@@ -11,6 +11,14 @@ Tree* tree_ctor()
         return nullptr;
     }
     tree_ptr->error_code = TREE_OK;
+    tree_ptr->size           = 0;        
+    tree_ptr->num_of_toks    = 1;        
+    tree_ptr->cur_tok        = 0;        
+    tree_ptr->num_of_vars    = -1;        
+    tree_ptr->cur_pos_str    = 0;       
+    tree_ptr->error_code     = TREE_OK;  
+    tree_ptr->num_found_vars = -1;
+
 
     return tree_ptr;
 }
@@ -38,11 +46,11 @@ void tree_dtor(Tree* tree_ptr)
     tree_ptr->num_of_toks = POISON;
     tree_ptr->cur_tok     = POISON;
 
-    if(tree_ptr->vars != nullptr)
+    if(tree_ptr->vars_enter != nullptr)
     {
-        free(tree_ptr->vars);
+        free(tree_ptr->vars_enter);
     }
-    tree_ptr->vars        = nullptr;
+    tree_ptr->vars_enter        = nullptr;
     tree_ptr->num_of_vars = POISON;
 
     tree_ptr->error_code = TREE_OK;
