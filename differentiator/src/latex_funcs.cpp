@@ -79,7 +79,6 @@ int add_equation(Node* node_ptr, FILE* tex_file_ptr)
 
 int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
 {
-    printf("\nnumber_of_ops = %ld\n", number_of_ops);
 
     if(node_ptr == nullptr)
     {

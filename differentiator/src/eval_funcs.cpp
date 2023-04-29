@@ -21,6 +21,7 @@ double func_Div(double value_1, double value_2) // ok
     {
         return NAN;
     }
+
     return value_1 / value_2;
 }
 

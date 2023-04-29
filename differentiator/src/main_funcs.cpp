@@ -53,26 +53,31 @@ size_t output_tree(const Node* const root_node_ptr, char* file_name) // ok
 
 double eval(const Tree* const tree_ptr, const Node* const node_ptr) // ok
 {
-    if(tree_ptr->num_found_vars != tree_ptr->num_of_vars)
+    if(node_ptr->type == IS_CNST_VAR)
     {   
         ERROR_MESSAGE(stderr, ERR_FOUND_DIFF_NUM_VARS)
-        return 0;
+        return NAN;
     }
 
     if(node_ptr == nullptr)
     {
-        return 0;
+        // printf("nullptr\n");
+        return NAN;
     }
     if(node_ptr->type == IS_VAL)
     {
+        // printf("IS_VAL %f\n", node_ptr->value.node_value);
         return node_ptr->value.node_value;
     }
     if(node_ptr->type == IS_VARIB)
     {
         for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
         {
-            if(node_ptr->value.text[0] == tree_ptr->vars_enter[cur_var].var_text[0])
+            // printf("cur_var %d\n", cur_var);
+            // printf("tree_ptr->num_of_vars %d\n", tree_ptr->num_of_vars);
+            if(strcmp(node_ptr->value.text, tree_ptr->vars_enter[cur_var].var_text) == 0)
             {
+                // printf("\nIndex of var = %ld. Var's (%s) value was returned: %f\n", cur_var, node_ptr->value.text, tree_ptr->vars_enter[cur_var].var_value);
                 return tree_ptr->vars_enter[cur_var].var_value;
             }
         }
@@ -80,6 +85,7 @@ double eval(const Tree* const tree_ptr, const Node* const node_ptr) // ok
 
     double val1 = 0;
     double val2 = 0;
+    double result = 0;
 
     switch(node_ptr->value.op_number)
     {
@@ -91,22 +97,32 @@ double eval(const Tree* const tree_ptr, const Node* const node_ptr) // ok
                                                                                                                     \
             if(val1 != NAN && val2 != NAN)                                                                          \
             {                                                                                                       \
-                return func_ ## code(eval(tree_ptr, node_ptr->left_child), eval(tree_ptr, node_ptr->right_child));  \   
+                return func_ ## code(val1, val2);                                                                   \   
             }                                                                                                       \
             ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)                                                             \     
             return NAN;                                                                                             \
             
-    #define DEF_FUNC(code, ...)                                                                                 \ 
-    case code:                                                                                                  \
-        val1 = eval(tree_ptr, node_ptr->left_child);                                                            \
-        val2 = eval(tree_ptr, node_ptr->right_child);                                                           \
-                                                                                                                \
-        if(val1 != NAN && val2 != NAN)                                                                          \
-        {                                                                                                       \
-            return func_ ## code(eval(tree_ptr, node_ptr->left_child), eval(tree_ptr, node_ptr->right_child));  \   
-        }                                                                                                       \
-        ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)                                                             \    
-        return NAN;                                                                                             \
+    #define DEF_FUNC(code, ...)                                                                                     \ 
+    case code:                                                                                                      \   
+        if(code == Pow)                                                                                             \
+        {                                                                                                           \
+            val1 = eval(tree_ptr, node_ptr->left_child);                                                            \
+            val2 = eval(tree_ptr, node_ptr->right_child);                                                           \
+                                                                                                                    \
+            if(val1 != NAN && val2 != NAN)                                                                          \
+            {                                                                                                       \
+                return func_ ## code(val1, val2);                                                                   \   
+            }                                                                                                       \
+            ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)                                                             \    
+            return NAN;                                                                                             \
+        }                                                                                                           \
+        val1 = eval(tree_ptr, node_ptr->left_child);                                                                \
+        if(val1 != NAN)                                                                                             \ 
+        {                                                                                                           \
+            return func_ ## code(val1, 0);                                                                          \   
+        }                                                                                                           \
+        ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)                                                                 \    
+        return NAN;                                                                                                 \
 
     #include "def_cmd.h"
 
@@ -123,11 +139,6 @@ Node* input_tree(Tree* tree_ptr) // ok
 {
     if(tree_ptr->cur_tok < tree_ptr->num_of_toks)
     {
-        if(tree_ptr->num_found_vars == -1)
-        {
-            tree_ptr->num_found_vars = 0; // set to zero to show that no varibs were found
-        }
-
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VAL)
         {   
             GET_CUR_TOK()
@@ -136,24 +147,11 @@ Node* input_tree(Tree* tree_ptr) // ok
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_VARIB)
         {
             GET_CUR_TOK()
-
-            if(tree_ptr->num_found_vars == -1)
-            {
-                tree_ptr->num_found_vars = 0;
-            }
-            
-            tree_ptr->num_found_vars++;
             return VARIB_NODE(tree_ptr->toks[cur_tok].text)
         }
         if(tree_ptr->toks[tree_ptr->cur_tok].type == IS_CNST_VAR)
         {
-            if(tree_ptr->num_found_vars == -1)
-            {
-                tree_ptr->num_found_vars = 0;
-            }
-
             GET_CUR_TOK()
-            tree_ptr->num_found_vars++;
             return CNST_VARIB_NODE(tree_ptr->toks[cur_tok].text)
         }
 
@@ -745,13 +743,6 @@ int get_vars(Tree* tree_ptr) // ok
 
 Node* shortener(Tree* tree_ptr, Node* node_ptr)
 {
-    // if(tree_ptr->num_found_vars != tree_ptr->num_of_vars)
-    // {   
-    //     printf("FOUND %ld\n", tree_ptr->num_found_vars);
-    //     printf("WAS ENTERED %ld\n", tree_ptr->num_of_vars);
-    //     ERROR_MESSAGE(stderr, ERR_FOUND_DIFF_NUM_VARS)
-    //     return 0;
-    // }
     if(node_ptr == nullptr)
     {
         return nullptr;
@@ -1406,7 +1397,6 @@ Node* full_diff(Tree* tree_ptr) // ok
             tree_ptr->cur_tok = 0; // Needs to be set to zero because diff tree increases the cor_tok value every time it diff the tree
         }
 
-
         dtor_childs(tree_ptr->root);
 
         return first_diff;
@@ -1433,9 +1423,4 @@ Node* copy_subtree(Tree* tree_ptr, Node* node_ptr) // ok
     }
 }
 
-Var* realloc_found_vars(Var* found_vars_ptr)
-{
-
-
-}
 
