@@ -13,9 +13,9 @@
 
 #define EPS 1e-7        // Used in comparisson of doubles
 #define PI  3.14159265  // Used in calculations
-const static size_t MAX_LEN_VARIB = 21; // The maximum length of the variable text = 20 + 1 terminating symbol
-const static char* LATEX_FILE_NAME = "Tree.tex";
-const static char* LATEX_DIR_NAME = "latex/";
+static const size_t MAX_LEN_VARIB = 21; // The maximum length of the variable text = 20 + 1 terminating symbol
+static const char* LATEX_FILE_NAME = "Tree.tex";
+static const char* LATEX_DIR_NAME = "latex/";
 
 /*####################################################################################################################################################################*/
 
@@ -105,7 +105,7 @@ double func_Pow(double value_1, double value_2); // ok
 
 /*####################################################################################################################################################################*/
 
-Node* input_tree(Tree* tree_ptr);
+Node* input_tree_old(Tree* tree_ptr);
 size_t check_is_int(char* num_text);
 size_t check_is_float(char* num_text);
 int get_into_buff(Tree* tree_ptr, char* file_name);
@@ -138,6 +138,7 @@ Node* full_diff_old(Tree* tree_ptr);
 int is_positive(double value);
 size_t skip_spaces(Tree* tree_ptr);
 Node* copy_subtree(Tree* tree_ptr, Node* node_ptr);
+Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text);
 
 /*####################################################################################################################################################################*/
 
@@ -147,6 +148,7 @@ int create_latex(Node* root_node_ptr);
 int add_equation(Node* node_ptr, FILE* tex_file_ptr);
 int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr);
 int convert_tex_pdf(char* file_dir_name);
+Node* diff_tree(Tree* tree_ptr, char* varib_text);
 
 /*####################################################################################################################################################################*/
 

@@ -187,7 +187,16 @@ Node* rule_V(Tree* const tree_ptr, FILE* log_ptr) // ok
     if(STRING(POSITION) != '(' && old_pos != POSITION) // closing bracket is on pos old_pos if func
     {
         PRINT_PARSE_LOG(log_ptr, RULE_V, RULE_V_WAIT, RULE_OK);
-        return create_node(tree_ptr, 0, IS_VARIB, var_name);
+
+        for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
+        {
+            if(strcmp(var_name, tree_ptr->vars_enter[cur_var].var_text) == 0)
+            {
+                return create_node(tree_ptr, 0, IS_VARIB, var_name);
+            }
+        }
+
+        return create_node(tree_ptr, 0, IS_CNST_VAR, var_name);
     }
     else
     {

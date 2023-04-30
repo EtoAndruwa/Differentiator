@@ -1,5 +1,7 @@
 #include "Differentiator.h"
 
+static int latex_equation_num = 0;
+
 int print_header(FILE* tex_file_ptr)
 {
     fprintf(tex_file_ptr, "\\documentclass[a4paper, 10pt]{article}\n");
@@ -19,7 +21,7 @@ int create_latex(Node* root_node_ptr)
     char* local_dir = cat_file_directory(file_dir_name, "./", "");
 
 
-    FILE* tex_file_ptr = fopen(local_dir, "w");
+    FILE* tex_file_ptr = fopen(local_dir, "a+");
     if(tex_file_ptr == nullptr)
     {
         ERROR_MESSAGE(stderr, ERR_OPEN_LATEX_FILE)
@@ -53,7 +55,15 @@ int create_latex(Node* root_node_ptr)
 
 int add_equation(Node* node_ptr, FILE* tex_file_ptr)
 {
+    latex_equation_num++;
+    fprintf(tex_file_ptr, "\\section*{Equation %d}\n", latex_equation_num);
     fprintf(tex_file_ptr, "\\begin{dmath}\n");
+
+    // for()
+    // {
+
+    // }
+
     fprintf(tex_file_ptr, "f(x) = ");
     print_latex_eq(node_ptr, tex_file_ptr);
     fprintf(tex_file_ptr, "\\end{dmath}\n");
