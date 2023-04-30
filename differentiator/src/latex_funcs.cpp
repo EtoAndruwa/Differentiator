@@ -1,29 +1,15 @@
 #include "Differentiator.h"
 
-static int number_of_ops = 0;
-static const int MAX_OPS_TO_CARR = 12;
-
 int print_header(FILE* tex_file_ptr)
 {
-    fprintf(tex_file_ptr, "\\documentclass[a4paper, 12pt]{article}\n");
-    fprintf(tex_file_ptr, "\\usepackage[T2A,T1]{fontenc}\n");
-    fprintf(tex_file_ptr, "\\usepackage[utf8]{inputenc}\n");
-    fprintf(tex_file_ptr, "\\usepackage[english]{babel}\n");
-    fprintf(tex_file_ptr, "\\usepackage{amsfonts}\n");
-    fprintf(tex_file_ptr, "\\usepackage{pgfplots}\n");
-    fprintf(tex_file_ptr, "\\usepackage{breqn}\n");
-    fprintf(tex_file_ptr, "\\usepackage{amsmath,amssymb}\n");
-    fprintf(tex_file_ptr, "\\allowdisplaybreaks\n");
-
+    fprintf(tex_file_ptr, "\\documentclass[a4paper, 10pt]{article}\n");
     fprintf(tex_file_ptr, "\\begin{document}\n");
-
     return RETURN_OK;
 }
 
 int print_footer(FILE* tex_file_ptr)
 {
     fprintf(tex_file_ptr, "\\end{document}\n");
-
     return RETURN_OK;
 }
 
@@ -67,26 +53,26 @@ int create_latex(Node* root_node_ptr)
 
 int add_equation(Node* node_ptr, FILE* tex_file_ptr)
 {
-    number_of_ops = 0;
-
-    fprintf(tex_file_ptr, "\\begin{align*}\n");
-
+    fprintf(tex_file_ptr, "\\begin{dmath}\n");
+    fprintf(tex_file_ptr, "f(x) = ");
     print_latex_eq(node_ptr, tex_file_ptr);
-    fprintf(tex_file_ptr, "\n");
-
-    fprintf(tex_file_ptr, "\\end{align*}\n");
+    fprintf(tex_file_ptr, "\\end{dmath}\n");
 }
 
 int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
 {
-
     if(node_ptr == nullptr)
     {
         return 0;
     }
-    else if(node_ptr->type == IS_VAL)
+    else if(node_ptr->type == IS_VAL) // ok
     {
-        // fprintf(tex_file_ptr, "(");
+        int flag_brack = is_positive(node_ptr->value.node_value);  // to print brack around the negative value
+
+        if(flag_brack == IS_NEGATIVE)
+        {
+            fprintf(tex_file_ptr, "(");
+        }
         int tail_length = 0;
 
         char double_as_char[50];
@@ -104,8 +90,11 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
             tail_length = full_length - (dot_pos - (char*)double_as_char) - 1;
             fprintf(tex_file_ptr, "%.*f", tail_length, node_ptr->value.node_value); 
         }
-
-        // fprintf(tex_file_ptr, ")");
+        
+        if(flag_brack == IS_NEGATIVE)
+        {
+            fprintf(tex_file_ptr, ")");
+        }
     }
     else if(node_ptr->type == IS_VARIB || node_ptr->type == IS_CNST_VAR)
     {
@@ -117,52 +106,41 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
         {
         case Mul:
             {
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
-
-                if(number_of_ops == MAX_OPS_TO_CARR)
+                if(node_ptr->left_child->type == IS_OP && (node_ptr->left_child->value.op_number == Sub || node_ptr->left_child->value.op_number == Add))
                 {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, "\\\\ ");
+                    fprintf(tex_file_ptr, "(");
                 }
-                number_of_ops++;
-
+                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                if(node_ptr->left_child->type == IS_OP && (node_ptr->left_child->value.op_number == Sub || node_ptr->left_child->value.op_number == Add))
+                {
+                    fprintf(tex_file_ptr, ")");
+                }
                 fprintf(tex_file_ptr, " \\cdot ");
+
+                if(node_ptr->right_child->type == IS_OP && (node_ptr->right_child->value.op_number == Sub || node_ptr->right_child->value.op_number == Add))
+                {
+                    fprintf(tex_file_ptr, "(");
+                }
                 print_latex_eq(node_ptr->right_child, tex_file_ptr);
+                if(node_ptr->right_child->type == IS_OP && (node_ptr->right_child->value.op_number == Sub || node_ptr->right_child->value.op_number == Add))
+                {
+                    fprintf(tex_file_ptr, ")");
+                }
 
                 break;
             }
         case Add:
             {
-                fprintf(tex_file_ptr, "(");
                 print_latex_eq(node_ptr->left_child, tex_file_ptr);
-
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, "\\\\ ");
-                }
-                number_of_ops++;
-
                 fprintf(tex_file_ptr, " + ");
                 print_latex_eq(node_ptr->right_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
                 break;
             }
         case Sub:
             {
-                fprintf(tex_file_ptr, "(");
                 print_latex_eq(node_ptr->left_child, tex_file_ptr);
-
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, "\\\\ ");
-                }
-                number_of_ops++;
-
                 fprintf(tex_file_ptr, " - ");
                 print_latex_eq(node_ptr->right_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
                 break;
             }
         case Div:
@@ -170,14 +148,9 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
                 fprintf(tex_file_ptr, "(");
                 print_latex_eq(node_ptr->left_child, tex_file_ptr);
                 fprintf(tex_file_ptr, ")");
+
                 fprintf(tex_file_ptr, "\\cdot ");
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, "\\\\ ");
-                }
-                number_of_ops++;
-                
+
                 fprintf(tex_file_ptr, "(");
                 print_latex_eq(node_ptr->right_child, tex_file_ptr);
                 fprintf(tex_file_ptr, ")^{-1}");
@@ -193,161 +166,85 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
     {
         switch(node_ptr->value.op_number)
         {
-        case Sin:
-            {
-                if(number_of_ops == MAX_OPS_TO_CARR)
+            case Sin:
                 {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, "\\\\ ");
+                    fprintf(tex_file_ptr, "sin(");
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    fprintf(tex_file_ptr, ")");
+                    break;
                 }
-                number_of_ops++;
+            case Cos:
+                {
+                    fprintf(tex_file_ptr, "cos(");
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    fprintf(tex_file_ptr, ")");
+                    break;
+                }
+            case Tan:
+                {
+                    fprintf(tex_file_ptr, "tan(");
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    fprintf(tex_file_ptr, ")");
+                    break;
+                }
+            case Asin:
+                {
+                    fprintf(tex_file_ptr, "asin(");
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    fprintf(tex_file_ptr, ")");
+                    break;
+                }
+            case Acos:
+                {
+                    fprintf(tex_file_ptr, "acos(");
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    fprintf(tex_file_ptr, ")");
+                    break;
+                }
+            case Sqrt:
+                {
+                    fprintf(tex_file_ptr, "\\sqrt{");
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    fprintf(tex_file_ptr, "}");
+                    break;
+                }
+            case Exp:
+                {
+                    fprintf(tex_file_ptr, "\\exp(");
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    fprintf(tex_file_ptr, ")");
+                    break;
+                }
+            case Log:
+                {
+                    fprintf(tex_file_ptr, "ln(");
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    fprintf(tex_file_ptr, ")");
+                    break;
+                }
+            case Cot:
+                {
+                    fprintf(tex_file_ptr, "cot(");
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    fprintf(tex_file_ptr, ")");
+                    break;
+                }
+            case Pow:
+                {
+                    fprintf(tex_file_ptr, "(");
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    fprintf(tex_file_ptr, ")");
 
-                fprintf(tex_file_ptr, "sin(");
-
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
+                    fprintf(tex_file_ptr, " \\textsuperscript{$\\wedge$} (");
+                    print_latex_eq(node_ptr->right_child, tex_file_ptr);
+                    fprintf(tex_file_ptr, ")");
+                    break;
+                }
+            default:
+                fprintf(tex_file_ptr, "ERR_UNKNOWN_FUNC");
+                ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
                 break;
             }
-        case Cos:
-            {
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, "\\\\ ");
-                }
-                number_of_ops++;
-
-                fprintf(tex_file_ptr, "cos(");
-
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
-                break;
-            }
-        case Tan:
-            {
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, "\\\\ ");
-                }
-                number_of_ops++;
-
-                fprintf(tex_file_ptr, "tan(");
-
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
-                break;
-            }
-        case Asin:
-            {
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, "\\\\ ");
-                }
-                number_of_ops++;
-
-                fprintf(tex_file_ptr, "asin(");
-
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
-                break;
-            }
-        case Acos:
-            {
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, "\\\\ ");
-                }
-                number_of_ops++;
-
-                fprintf(tex_file_ptr, "acos(");
-
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
-                break;
-            }
-        case Sqrt:
-            {
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, " \\\\ ");
-                }
-                number_of_ops++;
-
-                fprintf(tex_file_ptr, "\\sqrt{");
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                fprintf(tex_file_ptr, "}");
-                break;
-            }
-        case Exp:
-            {
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, " \\\\ ");
-                }
-                number_of_ops++;
-    
-                fprintf(tex_file_ptr, "\\exp(");
-
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
-                break;
-            }
-        case Log:
-            {
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, " \\\\ ");
-                }
-                number_of_ops++;
-                fprintf(tex_file_ptr, "ln(");
-
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
-                break;
-            }
-        case Cot:
-            {
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, " \\\\ ");
-                }
-
-                fprintf(tex_file_ptr, "cot(");
-
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
-                break;
-            }
-        case Pow:
-            {
-                if(number_of_ops == MAX_OPS_TO_CARR)
-                {
-                    number_of_ops = 0;
-                    fprintf(tex_file_ptr, "\\\\");
-                }
-
-                number_of_ops++;
-
-                fprintf(tex_file_ptr, "(");
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
-                fprintf(tex_file_ptr, " \\textsuperscript{$\\wedge$} (");
-                print_latex_eq(node_ptr->right_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")");
-                break;
-            }
-        default:
-            fprintf(tex_file_ptr, "ERR_UNKNOWN_FUNC");
-            ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
-            break;
-        }
     }
 }
 

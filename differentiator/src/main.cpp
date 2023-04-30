@@ -27,8 +27,9 @@ int main()
 
     // printf("\nResult: %lf\n", eval(tree_ptr_2, tree_ptr_2->root));
 
-    tree_ptr_2->root = full_diff(tree_ptr_2);
+    tree_ptr_2->root = full_diff_old(tree_ptr_2);
     create_graph_jpg(tree_ptr_2, "tree_ptr_2");
+    create_latex(tree_ptr_2->root);
 
     printf("Eval %f\n", eval(tree_ptr_2, tree_ptr_2->root));
 
