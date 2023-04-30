@@ -1447,13 +1447,13 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
     {
         case Add:
             {
-                node_ptr->left_child = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                node_ptr->left_child  = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
                 node_ptr->right_child = diff_tree(tree_ptr, node_ptr->right_child, varib_text);
                 return node_ptr;
             }
         case Sub:
             {
-                node_ptr->left_child = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                node_ptr->left_child  = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
                 node_ptr->right_child = diff_tree(tree_ptr, node_ptr->right_child, varib_text);
                 return node_ptr;
             }
@@ -1473,8 +1473,8 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
             }
         case Div:
             {
-                Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
-                Node* pre_diff_r = copy_subtree(tree_ptr, node_ptr->right_child);
+                Node* pre_diff_l  = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* pre_diff_r  = copy_subtree(tree_ptr, node_ptr->right_child);
                 Node* bot_right_1 = copy_subtree(tree_ptr, node_ptr->right_child);
                 Node* bot_right_2 = copy_subtree(tree_ptr, node_ptr->right_child);
 
@@ -1482,13 +1482,91 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* diff_r = diff_tree(tree_ptr, node_ptr->right_child, varib_text);
 
                 free(node_ptr);
-                Node* mul_l = MUL_NODE(diff_l, pre_diff_r)
-                Node* mul_r = MUL_NODE(diff_r, pre_diff_l)
-                Node* sub   = SUB_NODE(mul_l, mul_r)
+                Node* mul_l   = MUL_NODE(diff_l, pre_diff_r)
+                Node* mul_r   = MUL_NODE(diff_r, pre_diff_l)
+                Node* sub     = SUB_NODE(mul_l, mul_r)
                 Node* mul_bot = MUL_NODE(bot_right_1, bot_right_2)
 
                 return DIV_NODE(sub, mul_bot)
             }
+        case Sin:
+            {
+                Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* diff_l     = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+
+                free(node_ptr);
+                Node* cos = COS_NODE(pre_diff_l)
+
+                return MUL_NODE(cos, diff_l);
+            }
+        case Cos:
+            {
+                Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* diff_l     = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+
+                free(node_ptr);
+                Node* minus_one = NUM_NODE(-1)
+                Node* sin = SIN_NODE(pre_diff_l)
+                Node* mul = MUL_NODE(minus_one, sin)
+
+                return MUL_NODE(mul, diff_l);
+            }
+        case Tan:
+            {
+                Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* diff_l     = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                
+                free(node_ptr);
+                Node* cos_1   = COS_NODE(pre_diff_l)
+                Node* cos_2   = COS_NODE(copy_subtree(tree_ptr, pre_diff_l))
+                Node* bot_mul = MUL_NODE(cos_1, cos_2)
+
+                return DIV_NODE(diff_l, bot_mul);
+            }
+        case Log: 
+            {
+                Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* diff_l     = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+
+                free(node_ptr);
+                return DIV_NODE(diff_l, pre_diff_l);
+            }
+
+        case Exp:
+            {
+                Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* diff_l     = diff_tree(tree_ptr, pre_diff_l, varib_text);
+
+                return MUL_NODE(node_ptr, diff_l)
+            }
+        case Cot:
+            {
+                Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* diff_l     = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                
+                free(node_ptr);
+                Node* sin_1   = SIN_NODE(pre_diff_l)
+                Node* sin_2   = SIN_NODE(copy_subtree(tree_ptr, pre_diff_l))
+                Node* bot_mul = MUL_NODE(sin_1, sin_2)
+                Node* minus_one = NUM_NODE(-1)
+                Node* mul_top   = MUL_NODE(minus_one, diff_l)
+
+                return DIV_NODE(mul_top, bot_mul);
+            }
+        case Sqrt:
+            {
+                Node* node_copy = copy_subtree(tree_ptr, node_ptr);
+                Node* diff_l    = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                
+                free(node_ptr);
+                Node* two     = NUM_NODE(2)
+                Node* bot_mul = MUL_NODE(two, node_copy)
+
+                return DIV_NODE(diff_l, bot_mul);
+            }
+        default:
+            ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
+            return nullptr;
     }
 }
 
