@@ -1497,7 +1497,7 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 free(node_ptr);
                 Node* cos = COS_NODE(pre_diff_l)
 
-                return MUL_NODE(cos, diff_l);
+                return MUL_NODE(cos, diff_l)
             }
         case Cos:
             {
@@ -1509,7 +1509,7 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* sin = SIN_NODE(pre_diff_l)
                 Node* mul = MUL_NODE(minus_one, sin)
 
-                return MUL_NODE(mul, diff_l);
+                return MUL_NODE(mul, diff_l)
             }
         case Tan:
             {
@@ -1521,7 +1521,7 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* cos_2   = COS_NODE(copy_subtree(tree_ptr, pre_diff_l))
                 Node* bot_mul = MUL_NODE(cos_1, cos_2)
 
-                return DIV_NODE(diff_l, bot_mul);
+                return DIV_NODE(diff_l, bot_mul)
             }
         case Log: 
             {
@@ -1529,7 +1529,7 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* diff_l     = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
 
                 free(node_ptr);
-                return DIV_NODE(diff_l, pre_diff_l);
+                return DIV_NODE(diff_l, pre_diff_l)
             }
 
         case Exp:
@@ -1551,7 +1551,7 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* minus_one = NUM_NODE(-1)
                 Node* mul_top   = MUL_NODE(minus_one, diff_l)
 
-                return DIV_NODE(mul_top, bot_mul);
+                return DIV_NODE(mul_top, bot_mul)
             }
         case Sqrt:
             {
@@ -1562,7 +1562,66 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* two     = NUM_NODE(2)
                 Node* bot_mul = MUL_NODE(two, node_copy)
 
-                return DIV_NODE(diff_l, bot_mul);
+                return DIV_NODE(diff_l, bot_mul)
+            }
+        case Asin:
+            {
+                Node* node_copy_1 = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* node_copy_2 = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* diff_l    = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                
+                free(node_ptr);
+                Node* one     = NUM_NODE(1)
+                Node* mul     = MUL_NODE(node_copy_1, node_copy_2)
+                Node* sub     = SUB_NODE(one, mul)
+                Node* sqrt    = SQRT_NODE(sub)
+
+                return DIV_NODE(diff_l, sqrt)
+            }
+        case Acos:
+            {
+                Node* node_copy_1 = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* node_copy_2 = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* diff_l    = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                
+                free(node_ptr);
+                Node* one     = NUM_NODE(1)
+                Node* mul     = MUL_NODE(node_copy_1, node_copy_2)
+                Node* sub     = SUB_NODE(one, mul)
+                Node* sqrt    = SQRT_NODE(sub)
+                Node* minus_one = NUM_NODE(-1)
+                Node* div       = DIV_NODE(diff_l, sqrt)
+
+                return MUL_NODE(minus_one, div)
+            }
+        case Pow:
+            {
+                if(node_ptr->left_child->type == IS_VAL && node_ptr->right_child->type == IS_VAL)
+                {
+                    dtor_childs(node_ptr);
+                    return NUM_NODE(0)
+                }
+
+                Node* copy_base = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* copy_exp  = copy_subtree(tree_ptr, node_ptr->right_child);
+                Node* ln        = LN_NODE(copy_base)
+
+                Node* copy_ln_1  = copy_subtree(tree_ptr, ln);
+                Node* copy_ln_2  = copy_subtree(tree_ptr, ln);
+                Node* copy_exp_1 = copy_subtree(tree_ptr, copy_exp);
+                Node* copy_exp_2 = copy_subtree(tree_ptr, copy_exp);
+
+                dtor_childs(node_ptr);
+                Node* e_exp = MUL_NODE(copy_exp_1, ln)
+                Node* exp   = EXP_NODE(e_exp)
+
+                Node* diff_base = diff_tree(tree_ptr, copy_ln_1, varib_text);
+                Node* diff_exp  = diff_tree(tree_ptr, copy_exp_2, varib_text);
+                Node* mul_1     = MUL_NODE(diff_exp, copy_ln_2)
+                Node* mul_2     = MUL_NODE(diff_base, copy_exp)
+                Node* add       = ADD_NODE(mul_1, mul_2)
+
+                return MUL_NODE(exp, add)
             }
         default:
             ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
