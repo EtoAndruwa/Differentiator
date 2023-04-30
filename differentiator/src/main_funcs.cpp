@@ -412,293 +412,293 @@ Node* diff_tree_old(Tree* tree_ptr, char* varib_text) // ok
 
         switch(tree_ptr->toks[tree_ptr->cur_tok].value.int_val)
         {
-        case Mul:  // ok 
-            {
-                tree_ptr->cur_tok++;
-                size_t saved_frst_tok_num = tree_ptr->cur_tok; // stores hte cur tok for creation of sub trees
-
-                left  = diff_tree_old(tree_ptr, varib_text);
-                right = diff_tree_old(tree_ptr, varib_text);
-
-                tree_ptr->cur_tok    = saved_frst_tok_num;   // to get first pre dif sub_tree
-                Node* left_pre_diff  = input_tree_old(tree_ptr); // from the array of tokens
-                Node* right_pre_diff = input_tree_old(tree_ptr); // from the array of tokens
-                Node* mul1 = MUL_NODE(left, right_pre_diff)
-                Node* mul2 = MUL_NODE(left_pre_diff, right)
-
-                return ADD_NODE(mul1, mul2)
-            }
-        case Sub:  // ok
-            {
-                tree_ptr->cur_tok++;                 
-                left  = diff_tree_old(tree_ptr, varib_text); // from the array of tokens                  
-                right = diff_tree_old(tree_ptr, varib_text); // from the array of tokens                                             
-                return SUB_NODE(left, right)
-            }
-        case Add: // ok
-            {
-                tree_ptr->cur_tok++;                 
-                left  = diff_tree_old(tree_ptr, varib_text);                         
-                right = diff_tree_old(tree_ptr, varib_text);                                                                   
-                return ADD_NODE(left, right)
-            }
-        case Div: // ok
-            {
-                tree_ptr->cur_tok++;                 
-                size_t saved_frst_tok_num = tree_ptr->cur_tok; // stores hte cur tok for creation of sub trees
-
-                left  = diff_tree_old(tree_ptr, varib_text);
-                right = diff_tree_old(tree_ptr, varib_text);
-
-                tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
-                Node* left_pre_diff = input_tree_old(tree_ptr);
-
-                size_t dub_tree_bot_id = tree_ptr->cur_tok; // to get bottom sub trees
-                Node* right_pre_diff_top = input_tree_old(tree_ptr);
-
-                tree_ptr->cur_tok = dub_tree_bot_id;
-                Node* right_pre_diff_b1 = input_tree_old(tree_ptr);
-
-                tree_ptr->cur_tok = dub_tree_bot_id;
-                Node* right_pre_diff_b2 = input_tree_old(tree_ptr);
-
-                Node* mul_1 = MUL_NODE(left, right_pre_diff_top)
-                Node* mul_2 = MUL_NODE(left_pre_diff, right)
-
-                Node* top    = SUB_NODE(mul_1, mul_2)
-                Node* bottom = MUL_NODE(right_pre_diff_b1, right_pre_diff_b2)
-
-                return DIV_NODE(top, bottom)
-            }
-        case Cos: //ok
-            {
-                size_t saved_frst_tok_num = tree_ptr->cur_tok;
-                tree_ptr->cur_tok++;
-                left = diff_tree_old(tree_ptr, varib_text);
-
-                tree_ptr->cur_tok = saved_frst_tok_num + 1; // to get first pre dif sub_tree (inner of cos)
-                Node* left_pre_diff_inner = input_tree_old(tree_ptr); 
-                Node* sin   = SIN_NODE(left_pre_diff_inner)
-                Node* minus = NUM_NODE(-1)
-                Node* mul   = MUL_NODE(minus, sin)
-                 
-                return MUL_NODE(mul, left)
-            }
-        case Sin: // ok
-            {
-                size_t saved_frst_tok_num = tree_ptr->cur_tok;
-                tree_ptr->cur_tok++;
-                left = diff_tree_old(tree_ptr, varib_text);
-
-                tree_ptr->cur_tok = saved_frst_tok_num + 1; // to get first pre dif sub_tree(inner of sin)
-                Node* left_pre_diff_inner = input_tree_old(tree_ptr); 
-                Node* cos = COS_NODE(left_pre_diff_inner);
-                 
-                return MUL_NODE(cos, left);
-            }
-        case Log: // ok
-            {
-                tree_ptr->cur_tok++;
-                size_t saved_frst_tok_num = tree_ptr->cur_tok; 
-                left = diff_tree_old(tree_ptr, varib_text); 
-
-                tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
-                Node* left_pre_diff = input_tree_old(tree_ptr);
-
-                return DIV_NODE(left, left_pre_diff)
-            }
-        case Exp: // ok
-            {
-                size_t saved_frst_tok_num = tree_ptr->cur_tok;
-                tree_ptr->cur_tok++;
-                left = diff_tree_old(tree_ptr, varib_text);
-
-                tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
-                Node* left_pre_diff = input_tree_old(tree_ptr); 
-                 
-                return MUL_NODE(left_pre_diff, left)
-            }
-        case Sqrt: // ok
-            {
-                size_t saved_frst_tok_num = tree_ptr->cur_tok;
-                tree_ptr->cur_tok++;
-                left = diff_tree_old(tree_ptr, varib_text);
-
-                tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
-                Node* left_pre_diff = input_tree_old(tree_ptr);
-                Node* coef = NUM_NODE(2)
-                Node* mul  = MUL_NODE(coef, left_pre_diff)
-                 
-                return DIV_NODE(left, mul)
-            }
-        case Tan: //ok
-            {
-                tree_ptr->cur_tok++;
-                size_t saved_frst_tok_num = tree_ptr->cur_tok;
-                left = diff_tree_old(tree_ptr, varib_text);
-
-                tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree (inner of tan)
-                Node* left_pre_diff_1 = input_tree_old(tree_ptr);
-                tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree (inner of tan)
-                Node* left_pre_diff_2 = input_tree_old(tree_ptr);
-
-                Node* cos_1 = COS_NODE(left_pre_diff_1)
-                Node* cos_2 = COS_NODE(left_pre_diff_2)
-
-                Node* bottom = MUL_NODE(cos_1, cos_2)
-                 
-                return DIV_NODE(left, bottom)
-            }
-        case Cot: // ok
-            {
-                tree_ptr->cur_tok++;
-                size_t saved_frst_tok_num = tree_ptr->cur_tok;
-                left = diff_tree_old(tree_ptr, varib_text);
-
-                tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree (inner of cot)
-                Node* left_pre_diff_1 = input_tree_old(tree_ptr);
-                tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree (inner of cot)
-                Node* left_pre_diff_2 = input_tree_old(tree_ptr);
-
-                Node* sin_1 = SIN_NODE(left_pre_diff_1)
-                Node* sin_2 = SIN_NODE(left_pre_diff_2)
-
-                Node* coef   = NUM_NODE(-1)
-                Node* top    = MUL_NODE(coef, left)
-                Node* bottom = MUL_NODE(sin_1, sin_2)
-                 
-                return DIV_NODE(top, bottom)
-            }
-        // case Log10: //ok
-        //     {
-        //         tree_ptr->cur_tok++;
-        //         size_t saved_frst_tok_num = tree_ptr->cur_tok; 
-        //         left = diff_tree_old(tree_ptr); 
-
-        //         tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree (inner of log)
-        //         Node* left_pre_diff = input_tree_old(tree_ptr);
-        //         Node* coef   = NUM_NODE(10)
-        //         Node* bottom = MUL_NODE(coef, left_pre_diff)
-
-        //         return DIV_NODE(left, bottom)
-        //     }
-        case Asin:
-            {
-                tree_ptr->cur_tok++; 
-                size_t saved_frst_tok_num = tree_ptr->cur_tok; 
-                left = diff_tree_old(tree_ptr, varib_text);
-
-                tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree (inner of asin)
-                Node* left_pre_diff_1 = input_tree_old(tree_ptr);
-                tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree (inner of asin)
-                Node* left_pre_diff_2 = input_tree_old(tree_ptr);
-
-                Node* one = NUM_NODE(1)
-                Node* mul = MUL_NODE(left_pre_diff_1, left_pre_diff_2)
-                Node* sub = SUB_NODE(one, mul)
-                Node* srt = SQRT_NODE(sub)
-
-                return DIV_NODE(left, srt)
-            }
-        case Acos:
-            {
-                tree_ptr->cur_tok++; 
-                size_t saved_frst_tok_num = tree_ptr->cur_tok; 
-                left = diff_tree_old(tree_ptr, varib_text);
-
-                tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
-                Node* left_pre_diff_1 = input_tree_old(tree_ptr);
-                tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
-                Node* left_pre_diff_2 = input_tree_old(tree_ptr);
-
-                Node* one = NUM_NODE(1)
-                Node* mul = MUL_NODE(left_pre_diff_1, left_pre_diff_2)
-                Node* sub = SUB_NODE(one, mul)
-                Node* srt = SQRT_NODE(sub)
-
-                Node* min_one = NUM_NODE(-1)
-                Node* top     = MUL_NODE(min_one, left)
-
-                return DIV_NODE(top, srt)
-            }
-        case Pow:
-            {
-                size_t saved_frst_tok_num = tree_ptr->cur_tok;
-
-                tree_ptr->cur_tok++;
-                Node* base = input_tree_old(tree_ptr);
-
-                size_t saved_exp_id = tree_ptr->cur_tok;
-                Node*  exp          = input_tree_old(tree_ptr);
-                size_t last_id      = tree_ptr->cur_tok;
-
-                if(base->type == IS_VAL && exp->type == IS_VAL)
+            case Mul:  // ok 
                 {
-                    return NUM_NODE(0);
-                    free(base);
-                    free(exp);
+                    tree_ptr->cur_tok++;
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok; // stores hte cur tok for creation of sub trees
+
+                    left  = diff_tree_old(tree_ptr, varib_text);
+                    right = diff_tree_old(tree_ptr, varib_text);
+
+                    tree_ptr->cur_tok    = saved_frst_tok_num;   // to get first pre dif sub_tree
+                    Node* left_pre_diff  = input_tree_old(tree_ptr); // from the array of tokens
+                    Node* right_pre_diff = input_tree_old(tree_ptr); // from the array of tokens
+                    Node* mul1 = MUL_NODE(left, right_pre_diff)
+                    Node* mul2 = MUL_NODE(left_pre_diff, right)
+
+                    return ADD_NODE(mul1, mul2)
                 }
-                else if(base->type == IS_VAL)
+            case Sub:  // ok
                 {
-                    free(exp);
-                    tree_ptr->cur_tok = saved_frst_tok_num;
-                    Node* pre_dif_pow = input_tree_old(tree_ptr);
-                    Node* ln          = LN_NODE(base)
+                    tree_ptr->cur_tok++;                 
+                    left  = diff_tree_old(tree_ptr, varib_text); // from the array of tokens                  
+                    right = diff_tree_old(tree_ptr, varib_text); // from the array of tokens                                             
+                    return SUB_NODE(left, right)
+                }
+            case Add: // ok
+                {
+                    tree_ptr->cur_tok++;                 
+                    left  = diff_tree_old(tree_ptr, varib_text);                         
+                    right = diff_tree_old(tree_ptr, varib_text);                                                                   
+                    return ADD_NODE(left, right)
+                }
+            case Div: // ok
+                {
+                    tree_ptr->cur_tok++;                 
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok; // stores hte cur tok for creation of sub trees
 
-                    tree_ptr->cur_tok = saved_exp_id;
+                    left  = diff_tree_old(tree_ptr, varib_text);
+                    right = diff_tree_old(tree_ptr, varib_text);
+
+                    tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
+                    Node* left_pre_diff = input_tree_old(tree_ptr);
+
+                    size_t dub_tree_bot_id = tree_ptr->cur_tok; // to get bottom sub trees
+                    Node* right_pre_diff_top = input_tree_old(tree_ptr);
+
+                    tree_ptr->cur_tok = dub_tree_bot_id;
+                    Node* right_pre_diff_b1 = input_tree_old(tree_ptr);
+
+                    tree_ptr->cur_tok = dub_tree_bot_id;
+                    Node* right_pre_diff_b2 = input_tree_old(tree_ptr);
+
+                    Node* mul_1 = MUL_NODE(left, right_pre_diff_top)
+                    Node* mul_2 = MUL_NODE(left_pre_diff, right)
+
+                    Node* top    = SUB_NODE(mul_1, mul_2)
+                    Node* bottom = MUL_NODE(right_pre_diff_b1, right_pre_diff_b2)
+
+                    return DIV_NODE(top, bottom)
+                }
+            case Cos: //ok
+                {
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok;
+                    tree_ptr->cur_tok++;
                     left = diff_tree_old(tree_ptr, varib_text);
 
-                    Node* mul_1 = MUL_NODE(pre_dif_pow, ln);
-                    return MUL_NODE(mul_1, left);
+                    tree_ptr->cur_tok = saved_frst_tok_num + 1; // to get first pre dif sub_tree (inner of cos)
+                    Node* left_pre_diff_inner = input_tree_old(tree_ptr); 
+                    Node* sin   = SIN_NODE(left_pre_diff_inner)
+                    Node* minus = NUM_NODE(-1)
+                    Node* mul   = MUL_NODE(minus, sin)
+                    
+                    return MUL_NODE(mul, left)
                 }
-                else if((base->type == IS_FUNC || base->type == IS_VARIB) && exp->type == IS_VAL)
+            case Sin: // ok
                 {
-                    tree_ptr->cur_tok = saved_frst_tok_num;
-                    Node* pre_dif_pow = input_tree_old(tree_ptr);
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok;
+                    tree_ptr->cur_tok++;
+                    left = diff_tree_old(tree_ptr, varib_text);
 
-                    double new_exp_val = exp->value.node_value - 1.0; // decreasing exp val
-                    Node* coef = NUM_NODE(exp->value.node_value);
-                    exp->value.node_value = new_exp_val; // changing old exp val
-
-                    Node* new_pow = create_node(tree_ptr, Pow, IS_FUNC, nullptr, base, exp);
-                    Node* mul     = MUL_NODE(coef, new_pow);
-
-                    tree_ptr->cur_tok = saved_frst_tok_num + 1;
-                    left              = diff_tree_old(tree_ptr, varib_text);
-                    tree_ptr->cur_tok = last_id;
-
-                    return MUL_NODE(mul, left);
+                    tree_ptr->cur_tok = saved_frst_tok_num + 1; // to get first pre dif sub_tree(inner of sin)
+                    Node* left_pre_diff_inner = input_tree_old(tree_ptr); 
+                    Node* cos = COS_NODE(left_pre_diff_inner);
+                    
+                    return MUL_NODE(cos, left);
                 }
+            case Log: // ok
+                {
+                    tree_ptr->cur_tok++;
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok; 
+                    left = diff_tree_old(tree_ptr, varib_text); 
 
-                Node* one          = NUM_NODE(1); // 1
-                Node* new_exp_base = SUB_NODE(exp, one); // v - 1
-                Node* new_pow      = POW_NODE(base, new_exp_base); // u^(v-1)
+                    tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
+                    Node* left_pre_diff = input_tree_old(tree_ptr);
 
-                tree_ptr->cur_tok = saved_exp_id;
-                Node* old_exp     = input_tree_old(tree_ptr); // v
-                tree_ptr->cur_tok = saved_frst_tok_num + 1; 
-                Node* diff_base   = diff_tree_old(tree_ptr, varib_text); // du/dx
+                    return DIV_NODE(left, left_pre_diff)
+                }
+            case Exp: // ok
+                {
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok;
+                    tree_ptr->cur_tok++;
+                    left = diff_tree_old(tree_ptr, varib_text);
 
-                Node* mul_1 = MUL_NODE(old_exp, new_pow); // v * u^(v-1) 
-                Node* mul_2 = MUL_NODE(mul_1, diff_base);  // v * u^(v-1) * (du/dx)
+                    tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
+                    Node* left_pre_diff = input_tree_old(tree_ptr); 
+                    
+                    return MUL_NODE(left_pre_diff, left)
+                }
+            case Sqrt: // ok
+                {
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok;
+                    tree_ptr->cur_tok++;
+                    left = diff_tree_old(tree_ptr, varib_text);
 
-                tree_ptr->cur_tok = saved_frst_tok_num;
-                Node* old_pow     = input_tree_old(tree_ptr); // u^v
-                tree_ptr->cur_tok = saved_frst_tok_num + 1;
-                Node* old_base    = input_tree_old(tree_ptr); // u
-                Node* ln_base     = LN_NODE(old_base); // ln(u)
+                    tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree
+                    Node* left_pre_diff = input_tree_old(tree_ptr);
+                    Node* coef = NUM_NODE(2)
+                    Node* mul  = MUL_NODE(coef, left_pre_diff)
+                    
+                    return DIV_NODE(left, mul)
+                }
+            case Tan: //ok
+                {
+                    tree_ptr->cur_tok++;
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok;
+                    left = diff_tree_old(tree_ptr, varib_text);
 
-                Node* mul_3 = MUL_NODE(old_pow, ln_base); // u^v * ln(u)
+                    tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree (inner of tan)
+                    Node* left_pre_diff_1 = input_tree_old(tree_ptr);
+                    tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree (inner of tan)
+                    Node* left_pre_diff_2 = input_tree_old(tree_ptr);
 
-                tree_ptr->cur_tok = saved_exp_id;
-                Node* diff_exp    = diff_tree_old(tree_ptr, varib_text); // (dv/dx)
-                Node* mul_4       = MUL_NODE(mul_3, diff_exp); // u^v * ln(u) * (dv/dx)
+                    Node* cos_1 = COS_NODE(left_pre_diff_1)
+                    Node* cos_2 = COS_NODE(left_pre_diff_2)
 
-                return ADD_NODE(mul_2, mul_4);
-            }
-        default:
-            ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
-            return nullptr;
+                    Node* bottom = MUL_NODE(cos_1, cos_2)
+                    
+                    return DIV_NODE(left, bottom)
+                }
+            case Cot: // ok
+                {
+                    tree_ptr->cur_tok++;
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok;
+                    left = diff_tree_old(tree_ptr, varib_text);
+
+                    tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree (inner of cot)
+                    Node* left_pre_diff_1 = input_tree_old(tree_ptr);
+                    tree_ptr->cur_tok = saved_frst_tok_num; // to get first pre dif sub_tree (inner of cot)
+                    Node* left_pre_diff_2 = input_tree_old(tree_ptr);
+
+                    Node* sin_1 = SIN_NODE(left_pre_diff_1)
+                    Node* sin_2 = SIN_NODE(left_pre_diff_2)
+
+                    Node* coef   = NUM_NODE(-1)
+                    Node* top    = MUL_NODE(coef, left)
+                    Node* bottom = MUL_NODE(sin_1, sin_2)
+                    
+                    return DIV_NODE(top, bottom)
+                }
+            // case Log10: //ok
+            //     {
+            //         tree_ptr->cur_tok++;
+            //         size_t saved_frst_tok_num = tree_ptr->cur_tok; 
+            //         left = diff_tree_old(tree_ptr); 
+
+            //         tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree (inner of log)
+            //         Node* left_pre_diff = input_tree_old(tree_ptr);
+            //         Node* coef   = NUM_NODE(10)
+            //         Node* bottom = MUL_NODE(coef, left_pre_diff)
+
+            //         return DIV_NODE(left, bottom)
+            //     }
+            case Asin:
+                {
+                    tree_ptr->cur_tok++; 
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok; 
+                    left = diff_tree_old(tree_ptr, varib_text);
+
+                    tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree (inner of asin)
+                    Node* left_pre_diff_1 = input_tree_old(tree_ptr);
+                    tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree (inner of asin)
+                    Node* left_pre_diff_2 = input_tree_old(tree_ptr);
+
+                    Node* one = NUM_NODE(1)
+                    Node* mul = MUL_NODE(left_pre_diff_1, left_pre_diff_2)
+                    Node* sub = SUB_NODE(one, mul)
+                    Node* srt = SQRT_NODE(sub)
+
+                    return DIV_NODE(left, srt)
+                }
+            case Acos:
+                {
+                    tree_ptr->cur_tok++; 
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok; 
+                    left = diff_tree_old(tree_ptr, varib_text);
+
+                    tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
+                    Node* left_pre_diff_1 = input_tree_old(tree_ptr);
+                    tree_ptr->cur_tok = saved_frst_tok_num;  // to get inner sub tree
+                    Node* left_pre_diff_2 = input_tree_old(tree_ptr);
+
+                    Node* one = NUM_NODE(1)
+                    Node* mul = MUL_NODE(left_pre_diff_1, left_pre_diff_2)
+                    Node* sub = SUB_NODE(one, mul)
+                    Node* srt = SQRT_NODE(sub)
+
+                    Node* min_one = NUM_NODE(-1)
+                    Node* top     = MUL_NODE(min_one, left)
+
+                    return DIV_NODE(top, srt)
+                }
+            case Pow:
+                {
+                    size_t saved_frst_tok_num = tree_ptr->cur_tok;
+
+                    tree_ptr->cur_tok++;
+                    Node* base = input_tree_old(tree_ptr);
+
+                    size_t saved_exp_id = tree_ptr->cur_tok;
+                    Node*  exp          = input_tree_old(tree_ptr);
+                    size_t last_id      = tree_ptr->cur_tok;
+
+                    if(base->type == IS_VAL && exp->type == IS_VAL)
+                    {
+                        return NUM_NODE(0);
+                        free(base);
+                        free(exp);
+                    }
+                    else if(base->type == IS_VAL)
+                    {
+                        free(exp);
+                        tree_ptr->cur_tok = saved_frst_tok_num;
+                        Node* pre_dif_pow = input_tree_old(tree_ptr);
+                        Node* ln          = LN_NODE(base)
+
+                        tree_ptr->cur_tok = saved_exp_id;
+                        left = diff_tree_old(tree_ptr, varib_text);
+
+                        Node* mul_1 = MUL_NODE(pre_dif_pow, ln);
+                        return MUL_NODE(mul_1, left);
+                    }
+                    else if((base->type == IS_FUNC || base->type == IS_VARIB) && exp->type == IS_VAL)
+                    {
+                        tree_ptr->cur_tok = saved_frst_tok_num;
+                        Node* pre_dif_pow = input_tree_old(tree_ptr);
+
+                        double new_exp_val = exp->value.node_value - 1.0; // decreasing exp val
+                        Node* coef = NUM_NODE(exp->value.node_value);
+                        exp->value.node_value = new_exp_val; // changing old exp val
+
+                        Node* new_pow = create_node(tree_ptr, Pow, IS_FUNC, nullptr, base, exp);
+                        Node* mul     = MUL_NODE(coef, new_pow);
+
+                        tree_ptr->cur_tok = saved_frst_tok_num + 1;
+                        left              = diff_tree_old(tree_ptr, varib_text);
+                        tree_ptr->cur_tok = last_id;
+
+                        return MUL_NODE(mul, left);
+                    }
+
+                    Node* one          = NUM_NODE(1); // 1
+                    Node* new_exp_base = SUB_NODE(exp, one); // v - 1
+                    Node* new_pow      = POW_NODE(base, new_exp_base); // u^(v-1)
+
+                    tree_ptr->cur_tok = saved_exp_id;
+                    Node* old_exp     = input_tree_old(tree_ptr); // v
+                    tree_ptr->cur_tok = saved_frst_tok_num + 1; 
+                    Node* diff_base   = diff_tree_old(tree_ptr, varib_text); // du/dx
+
+                    Node* mul_1 = MUL_NODE(old_exp, new_pow); // v * u^(v-1) 
+                    Node* mul_2 = MUL_NODE(mul_1, diff_base);  // v * u^(v-1) * (du/dx)
+
+                    tree_ptr->cur_tok = saved_frst_tok_num;
+                    Node* old_pow     = input_tree_old(tree_ptr); // u^v
+                    tree_ptr->cur_tok = saved_frst_tok_num + 1;
+                    Node* old_base    = input_tree_old(tree_ptr); // u
+                    Node* ln_base     = LN_NODE(old_base); // ln(u)
+
+                    Node* mul_3 = MUL_NODE(old_pow, ln_base); // u^v * ln(u)
+
+                    tree_ptr->cur_tok = saved_exp_id;
+                    Node* diff_exp    = diff_tree_old(tree_ptr, varib_text); // (dv/dx)
+                    Node* mul_4       = MUL_NODE(mul_3, diff_exp); // u^v * ln(u) * (dv/dx)
+
+                    return ADD_NODE(mul_2, mul_4);
+                }
+            default:
+                ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
+                return nullptr;
         }
     }
 }
@@ -1443,10 +1443,53 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
         return NUM_NODE(0)
     }
 
-    // switch(tree_ptr->toks[tree_ptr->cur_tok].value.int_val)
-    // {
+    switch(node_ptr->value.op_number)
+    {
+        case Add:
+            {
+                node_ptr->left_child = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                node_ptr->right_child = diff_tree(tree_ptr, node_ptr->right_child, varib_text);
+                return node_ptr;
+            }
+        case Sub:
+            {
+                node_ptr->left_child = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                node_ptr->right_child = diff_tree(tree_ptr, node_ptr->right_child, varib_text);
+                return node_ptr;
+            }
+        case Mul:
+            {
+                Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* pre_diff_r = copy_subtree(tree_ptr, node_ptr->right_child);
 
-    // }
+                Node* diff_l = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                Node* diff_r = diff_tree(tree_ptr, node_ptr->right_child, varib_text);
+
+                free(node_ptr);
+                Node* mul_l = MUL_NODE(pre_diff_l, diff_r)
+                Node* mul_r = MUL_NODE(diff_l, pre_diff_r)
+
+                return ADD_NODE(mul_l, mul_r)
+            }
+        case Div:
+            {
+                Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
+                Node* pre_diff_r = copy_subtree(tree_ptr, node_ptr->right_child);
+                Node* bot_right_1 = copy_subtree(tree_ptr, node_ptr->right_child);
+                Node* bot_right_2 = copy_subtree(tree_ptr, node_ptr->right_child);
+
+                Node* diff_l = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                Node* diff_r = diff_tree(tree_ptr, node_ptr->right_child, varib_text);
+
+                free(node_ptr);
+                Node* mul_l = MUL_NODE(diff_l, pre_diff_r)
+                Node* mul_r = MUL_NODE(diff_r, pre_diff_l)
+                Node* sub   = SUB_NODE(mul_l, mul_r)
+                Node* mul_bot = MUL_NODE(bot_right_1, bot_right_2)
+
+                return DIV_NODE(sub, mul_bot)
+            }
+    }
 }
 
 

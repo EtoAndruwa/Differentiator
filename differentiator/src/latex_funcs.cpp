@@ -159,7 +159,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
                 print_latex_eq(node_ptr->left_child, tex_file_ptr);
                 fprintf(tex_file_ptr, ")");
 
-                fprintf(tex_file_ptr, "\\cdot ");
+                fprintf(tex_file_ptr, " \\cdot ");
 
                 fprintf(tex_file_ptr, "(");
                 print_latex_eq(node_ptr->right_child, tex_file_ptr);
