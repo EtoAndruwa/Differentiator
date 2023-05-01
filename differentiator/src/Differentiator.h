@@ -147,12 +147,12 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text);
 int print_header_latex();
 int print_footer_latex(Node* node_ptr);
 int add_equation_diff_latex(Node* node_ptr);
-int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key);
+int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key, char* var_name, Tree* tree_ptr);
 int convert_tex_pdf(char* file_dir_name);
 Node* diff_tree_latex(Tree* tree_ptr, char* varib_text);
 int add_preamble_latex(Node* node_ptr);
 int add_final_diff_latex(Node* node_ptr);
-int print_plot_latex(Node* node_ptr, char* var_name);
+int print_plot_latex(Node* node_ptr, char* var_name, Tree* tree_ptr);
 
 /*####################################################################################################################################################################*/
 

@@ -18,7 +18,7 @@ int print_header_latex()
     fprintf(tex_file_ptr, "\\documentclass[a4paper, 10pt]{article}\n");
     fprintf(tex_file_ptr, "\\usepackage{tikz}\n");
     fprintf(tex_file_ptr, "\\usepackage{pgfplots}\n");
-
+    fprintf(tex_file_ptr, "\\pgfplotsset{compat=1.15}\n");
     fprintf(tex_file_ptr, "\\begin{document}\n");
 
     if(fclose(tex_file_ptr) == EOF)
@@ -78,7 +78,7 @@ int add_equation_diff_latex(Node* node_ptr)
     fprintf(tex_file_ptr, " \\begin{center}\n ");
 
     fprintf(tex_file_ptr, " y^{\\text{'}} = ");
-    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_LATEX);
+    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_LATEX, nullptr, nullptr);
     fprintf(tex_file_ptr, "\\\\");
     fprintf(tex_file_ptr, " \\end{center}\n ");
 
@@ -94,7 +94,7 @@ int add_equation_diff_latex(Node* node_ptr)
     return RETURN_OK;
 }
 
-int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
+int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key, char* var_name, Tree* tree_ptr)
 {
     if(node_ptr == nullptr)
     {
@@ -133,7 +133,55 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
     }
     else if(node_ptr->type == IS_VARIB || node_ptr->type == IS_CNST_VAR)
     {
-        fprintf(tex_file_ptr, "%s", node_ptr->value.text);
+        if(key == EQ_FOR_LATEX)
+        {
+            fprintf(tex_file_ptr, "%s", node_ptr->value.text);
+        }
+        else
+        {
+            if(strcmp(var_name, node_ptr->value.text) == 0)
+            {
+                fprintf(tex_file_ptr, "x");
+            }
+            else
+            {
+                for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
+                {
+                    if(strcmp(tree_ptr->vars_enter[cur_var].var_text, node_ptr->value.text) == 0)
+                    {
+                        int flag_brack = is_positive(tree_ptr->vars_enter[cur_var].var_value);  // to print brack around the negative value
+
+                        if(flag_brack == IS_NEGATIVE)
+                        {
+                            fprintf(tex_file_ptr, "(");
+                        }
+                        int tail_length = 0;
+
+                        char double_as_char[50];
+                        sprintf(double_as_char, "%f", tree_ptr->vars_enter[cur_var].var_value);
+
+                        size_t full_length = length_double(double_as_char);
+                        char* dot_pos = strchr((char*)double_as_char, '.');
+
+                        if(dot_pos == nullptr)
+                        {
+                            fprintf(tex_file_ptr, "%d", atoi(double_as_char));   
+                        }
+                        else
+                        {
+                            tail_length = full_length - (dot_pos - (char*)double_as_char) - 1;
+                            fprintf(tex_file_ptr, "%.*f", tail_length, tree_ptr->vars_enter[cur_var].var_value); 
+                        }
+                        
+                        if(flag_brack == IS_NEGATIVE)
+                        {
+                            fprintf(tex_file_ptr, ")");
+                        }
+                        break;
+                    }
+                }
+            }
+        }
     }
     else if(node_ptr->type == IS_OP)
     {
@@ -145,7 +193,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                 {
                     fprintf(tex_file_ptr, "(");
                 }
-                print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
                 if(node_ptr->left_child->type == IS_OP && (node_ptr->left_child->value.op_number == Sub || node_ptr->left_child->value.op_number == Add))
                 {
                     fprintf(tex_file_ptr, ")");
@@ -164,7 +212,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                 {
                     fprintf(tex_file_ptr, "(");
                 }
-                print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
+                print_latex_eq(node_ptr->right_child, tex_file_ptr, key, var_name, tree_ptr);
                 if(node_ptr->right_child->type == IS_OP && (node_ptr->right_child->value.op_number == Sub || node_ptr->right_child->value.op_number == Add))
                 {
                     fprintf(tex_file_ptr, ")");
@@ -174,22 +222,22 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
             }
         case Add:
             {
-                print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
                 fprintf(tex_file_ptr, " + ");
-                print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
+                print_latex_eq(node_ptr->right_child, tex_file_ptr, key, var_name, tree_ptr);
                 break;
             }
         case Sub:
             {
-                print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
                 fprintf(tex_file_ptr, " - ");
-                print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
+                print_latex_eq(node_ptr->right_child, tex_file_ptr, key, var_name, tree_ptr);
                 break;
             }
         case Div:
             {
                 fprintf(tex_file_ptr, "(");
-                print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
                 fprintf(tex_file_ptr, ")");
 
                 if(key == EQ_FOR_LATEX)
@@ -197,7 +245,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                     fprintf(tex_file_ptr, " \\cdot ");
 
                     fprintf(tex_file_ptr, "(");
-                    print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->right_child, tex_file_ptr, key, var_name, tree_ptr);
                     fprintf(tex_file_ptr, ")^{-1}");
                 }
                 else
@@ -205,7 +253,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                     fprintf(tex_file_ptr, "*");
 
                     fprintf(tex_file_ptr, "(");
-                    print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->right_child, tex_file_ptr, key, var_name, tree_ptr);
                     fprintf(tex_file_ptr, ")^(-1)");
                 }
                 break;
@@ -231,7 +279,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                         fprintf(tex_file_ptr, "sin(deg(");
                     }
 
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
 
                     if(key == EQ_FOR_LATEX)
                     {
@@ -254,7 +302,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                         fprintf(tex_file_ptr, "cos(deg(");
                     }
 
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
 
                     if(key == EQ_FOR_LATEX)
                     {
@@ -277,7 +325,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                         fprintf(tex_file_ptr, "tan(deg(");
                     }
 
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
 
                     if(key == EQ_FOR_LATEX)
                     {
@@ -300,7 +348,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                         fprintf(tex_file_ptr, "(deg(asin(");
                     }
 
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
 
                     if(key == EQ_FOR_LATEX)
                     {
@@ -322,7 +370,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                     {
                         fprintf(tex_file_ptr, "(deg(acos(");
                     }
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
 
                     if(key == EQ_FOR_LATEX)
                     {
@@ -339,13 +387,13 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                     if(key == EQ_FOR_LATEX)
                     {
                         fprintf(tex_file_ptr, "\\sqrt{");
-                        print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                        print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
                         fprintf(tex_file_ptr, "}");
                     }
                     else
                     {
                         fprintf(tex_file_ptr, "(");
-                        print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                        print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
                         fprintf(tex_file_ptr, ")^(0.5)");
                     }
                     break;
@@ -361,14 +409,14 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                         fprintf(tex_file_ptr, "e^(");
                     }
 
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
                     fprintf(tex_file_ptr, ")");
                     break;
                 }
             case Log:
                 {
                     fprintf(tex_file_ptr, "ln(");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
                     fprintf(tex_file_ptr, ")");
                     break;
                 }
@@ -383,7 +431,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                         fprintf(tex_file_ptr, "cot(deg(");
                     }
 
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
 
                     if(key == EQ_FOR_LATEX)
                     {
@@ -398,7 +446,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
             case Pow:
                 {
                     fprintf(tex_file_ptr, "(");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
                     fprintf(tex_file_ptr, ")");
 
                     if(key == EQ_FOR_LATEX)
@@ -409,7 +457,7 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
                     {
                         fprintf(tex_file_ptr, " ^(");
                     }
-                    print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
+                    print_latex_eq(node_ptr->right_child, tex_file_ptr, key, var_name, tree_ptr);
                     fprintf(tex_file_ptr, ")");
                     break;
                 }
@@ -463,7 +511,7 @@ int add_preamble_latex(Node* node_ptr)
 
     fprintf(tex_file_ptr, " \\begin{center}\n ");
     fprintf(tex_file_ptr, " y = ");
-    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_LATEX);
+    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_LATEX, nullptr, nullptr);
     fprintf(tex_file_ptr, "\\\\");
     fprintf(tex_file_ptr, " \\end{center}\\\\\n ");
 
@@ -496,7 +544,7 @@ int add_final_diff_latex(Node* node_ptr)
 
     fprintf(tex_file_ptr, " \\begin{center}\n ");
     fprintf(tex_file_ptr, " y^{\\text{'}} = ");
-    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_LATEX);
+    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_LATEX, nullptr, nullptr);
     fprintf(tex_file_ptr, "\\\\");
     fprintf(tex_file_ptr, " \\end{center}\\\\\n ");
 
@@ -512,7 +560,7 @@ int add_final_diff_latex(Node* node_ptr)
     return RETURN_OK;
 }
 
-int print_plot_latex(Node* node_ptr, char* var_name)
+int print_plot_latex(Node* node_ptr, char* var_name, Tree* tree_ptr)
 {
     char* file_dir_name = cat_file_directory((char*)LATEX_FILE_NAME, (char*)LATEX_DIR_NAME, "");
     char* local_dir = cat_file_directory(file_dir_name, "./", "");
@@ -528,13 +576,20 @@ int print_plot_latex(Node* node_ptr, char* var_name)
     fprintf(tex_file_ptr, " \\begin{axis}[\n ");
 
     fprintf(tex_file_ptr, " title={Derivative of equation by var - '%s'},\n", var_name);
+    fprintf(tex_file_ptr, " ymin = -5, ymax = 5,\n ");
+    fprintf(tex_file_ptr, " xmin = -5, xmax = 5,\n ");
     fprintf(tex_file_ptr, " xlabel={x},\n ");
     fprintf(tex_file_ptr, " ylabel={y},\n ");
-    fprintf(tex_file_ptr, " legend pos=north west,\n ");
+    // fprintf(tex_file_ptr, " width=8cm, height=8cm,\n ");
+    fprintf(tex_file_ptr, " major grid style = {lightgray},\n ");
+    fprintf(tex_file_ptr, " minor grid style = {lightgray!25},\n ");
+    fprintf(tex_file_ptr, " legend pos = north west,\n ");
     fprintf(tex_file_ptr, " grid= major,\n ");
-    fprintf(tex_file_ptr, " scale mode=auto]\n ");
-    fprintf(tex_file_ptr, " \\addplot[red, very thick, mark=none] {");
-    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_PLOT);
+    fprintf(tex_file_ptr, " scale mode = auto]\n ");
+    fprintf(tex_file_ptr, " \\addplot [samples=20,red, smooth] {");
+
+    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_PLOT, var_name, tree_ptr);
+
     fprintf(tex_file_ptr, "};\n ");
 
 
@@ -553,3 +608,4 @@ int print_plot_latex(Node* node_ptr, char* var_name)
 
     return RETURN_OK;
 }
+

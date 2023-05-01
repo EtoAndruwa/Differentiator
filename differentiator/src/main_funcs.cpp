@@ -1294,6 +1294,25 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr)
                 return LN_NODE(short_arg);
             }
         }
+    case Cot: // ok
+        {
+            short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
+            if(short_arg->type == IS_VAL)
+            {
+                double argument = func_Cot(short_arg->value.node_value);
+                if(argument != NAN)
+                {
+                    dtor_childs(short_arg);
+                    return NUM_NODE(argument)
+                }
+                ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
+                return nullptr;
+            }
+            else
+            {
+                return COT_NODE(short_arg);
+            }
+        }
     case Exp: // ok
         {
             short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
@@ -1906,7 +1925,7 @@ int full_diff(Tree* tree_ptr) // ok
     {
         tree_ptr->root = diff_tree(tree_ptr, tree_ptr->root, tree_ptr->vars_enter[0].var_text);
 
-        int err_code = print_plot_latex(tree_ptr->root, tree_ptr->vars_enter[0].var_text);
+        int err_code = print_plot_latex(tree_ptr->root, tree_ptr->vars_enter[0].var_text, tree_ptr);
         if(err_code != RETURN_OK)
         {
             ERROR_MESSAGE(stderr, err_code)
@@ -1918,10 +1937,8 @@ int full_diff(Tree* tree_ptr) // ok
     else
     {
         Node* first_diff = diff_tree(tree_ptr, copy_subtree(tree_ptr, tree_ptr->root), tree_ptr->vars_enter[0].var_text);
-        
-        printf("\n\nfirst_diff %p\n\n", first_diff);
 
-        int err_code = print_plot_latex(first_diff, tree_ptr->vars_enter[0].var_text);
+        int err_code = print_plot_latex(first_diff, tree_ptr->vars_enter[0].var_text, tree_ptr);
         if(err_code != RETURN_OK)
         {
             ERROR_MESSAGE(stderr, err_code)
@@ -1933,7 +1950,7 @@ int full_diff(Tree* tree_ptr) // ok
         {
             diff_next_var = diff_tree(tree_ptr, copy_subtree(tree_ptr, tree_ptr->root), tree_ptr->vars_enter[cur_diff].var_text);
 
-            int err_code = print_plot_latex(diff_next_var, tree_ptr->vars_enter[cur_diff].var_text);
+            int err_code = print_plot_latex(diff_next_var, tree_ptr->vars_enter[cur_diff].var_text, tree_ptr);
             if(err_code != RETURN_OK)
             {
                 ERROR_MESSAGE(stderr, err_code)
