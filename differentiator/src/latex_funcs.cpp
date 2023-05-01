@@ -16,6 +16,9 @@ int print_header_latex()
     }
 
     fprintf(tex_file_ptr, "\\documentclass[a4paper, 10pt]{article}\n");
+    fprintf(tex_file_ptr, "\\usepackage{tikz}\n");
+    fprintf(tex_file_ptr, "\\usepackage{pgfplots}\n");
+
     fprintf(tex_file_ptr, "\\begin{document}\n");
 
     if(fclose(tex_file_ptr) == EOF)
@@ -75,7 +78,7 @@ int add_equation_diff_latex(Node* node_ptr)
     fprintf(tex_file_ptr, " \\begin{center}\n ");
 
     fprintf(tex_file_ptr, " y^{\\text{'}} = ");
-    print_latex_eq(node_ptr, tex_file_ptr);
+    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_LATEX);
     fprintf(tex_file_ptr, "\\\\");
     fprintf(tex_file_ptr, " \\end{center}\n ");
 
@@ -91,7 +94,7 @@ int add_equation_diff_latex(Node* node_ptr)
     return RETURN_OK;
 }
 
-int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
+int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key)
 {
     if(node_ptr == nullptr)
     {
@@ -142,18 +145,26 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
                 {
                     fprintf(tex_file_ptr, "(");
                 }
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
                 if(node_ptr->left_child->type == IS_OP && (node_ptr->left_child->value.op_number == Sub || node_ptr->left_child->value.op_number == Add))
                 {
                     fprintf(tex_file_ptr, ")");
                 }
-                fprintf(tex_file_ptr, " \\cdot ");
+
+                if(key == EQ_FOR_LATEX)
+                {
+                    fprintf(tex_file_ptr, " \\cdot ");
+                }
+                else
+                {
+                    fprintf(tex_file_ptr, "*");
+                }
 
                 if(node_ptr->right_child->type == IS_OP && (node_ptr->right_child->value.op_number == Sub || node_ptr->right_child->value.op_number == Add))
                 {
                     fprintf(tex_file_ptr, "(");
                 }
-                print_latex_eq(node_ptr->right_child, tex_file_ptr);
+                print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
                 if(node_ptr->right_child->type == IS_OP && (node_ptr->right_child->value.op_number == Sub || node_ptr->right_child->value.op_number == Add))
                 {
                     fprintf(tex_file_ptr, ")");
@@ -163,29 +174,40 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
             }
         case Add:
             {
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
                 fprintf(tex_file_ptr, " + ");
-                print_latex_eq(node_ptr->right_child, tex_file_ptr);
+                print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
                 break;
             }
         case Sub:
             {
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
                 fprintf(tex_file_ptr, " - ");
-                print_latex_eq(node_ptr->right_child, tex_file_ptr);
+                print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
                 break;
             }
         case Div:
             {
                 fprintf(tex_file_ptr, "(");
-                print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
                 fprintf(tex_file_ptr, ")");
 
-                fprintf(tex_file_ptr, " \\cdot ");
+                if(key == EQ_FOR_LATEX)
+                {
+                    fprintf(tex_file_ptr, " \\cdot ");
 
-                fprintf(tex_file_ptr, "(");
-                print_latex_eq(node_ptr->right_child, tex_file_ptr);
-                fprintf(tex_file_ptr, ")^{-1}");
+                    fprintf(tex_file_ptr, "(");
+                    print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
+                    fprintf(tex_file_ptr, ")^{-1}");
+                }
+                else
+                {
+                    fprintf(tex_file_ptr, "*");
+
+                    fprintf(tex_file_ptr, "(");
+                    print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
+                    fprintf(tex_file_ptr, ")^(-1)");
+                }
                 break;
             }
         default:
@@ -200,75 +222,194 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
         {
             case Sin:
                 {
-                    fprintf(tex_file_ptr, "sin(");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                    fprintf(tex_file_ptr, ")");
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, "sin(");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "sin(deg(");
+                    }
+
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, ")");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "))");
+                    }
                     break;
                 }
             case Cos:
                 {
-                    fprintf(tex_file_ptr, "cos(");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                    fprintf(tex_file_ptr, ")");
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, "cos(");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "cos(deg(");
+                    }
+
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, ")");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "))");
+                    }
                     break;
                 }
             case Tan:
                 {
-                    fprintf(tex_file_ptr, "tan(");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                    fprintf(tex_file_ptr, ")");
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, "tan(");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "tan(deg(");
+                    }
+
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, ")");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "))");
+                    }
                     break;
                 }
             case Asin:
                 {
-                    fprintf(tex_file_ptr, "asin(");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                    fprintf(tex_file_ptr, ")");
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, "asin(");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "(deg(asin(");
+                    }
+
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, ")");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, ")))");
+                    }
                     break;
                 }
             case Acos:
                 {
-                    fprintf(tex_file_ptr, "acos(");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                    fprintf(tex_file_ptr, ")");
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, "acos(");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "(deg(acos(");
+                    }
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, ")");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, ")))");
+                    }
                     break;
                 }
             case Sqrt:
                 {
-                    fprintf(tex_file_ptr, "\\sqrt{");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                    fprintf(tex_file_ptr, "}");
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, "\\sqrt{");
+                        print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                        fprintf(tex_file_ptr, "}");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "(");
+                        print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+                        fprintf(tex_file_ptr, ")^(0.5)");
+                    }
                     break;
                 }
             case Exp:
                 {
-                    fprintf(tex_file_ptr, "\\exp(");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, "\\exp(");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "e^(");
+                    }
+
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
                     fprintf(tex_file_ptr, ")");
                     break;
                 }
             case Log:
                 {
                     fprintf(tex_file_ptr, "ln(");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
                     fprintf(tex_file_ptr, ")");
                     break;
                 }
             case Cot:
                 {
-                    fprintf(tex_file_ptr, "cot(");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
-                    fprintf(tex_file_ptr, ")");
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, "cot(");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "cot(deg(");
+                    }
+
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
+
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, ")");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, "))");
+                    }
                     break;
                 }
             case Pow:
                 {
                     fprintf(tex_file_ptr, "(");
-                    print_latex_eq(node_ptr->left_child, tex_file_ptr);
+                    print_latex_eq(node_ptr->left_child, tex_file_ptr, key);
                     fprintf(tex_file_ptr, ")");
 
-                    fprintf(tex_file_ptr, " \\textsuperscript{$\\wedge$} (");
-                    print_latex_eq(node_ptr->right_child, tex_file_ptr);
+                    if(key == EQ_FOR_LATEX)
+                    {
+                        fprintf(tex_file_ptr, " \\textsuperscript{$\\wedge$} (");
+                    }
+                    else
+                    {
+                        fprintf(tex_file_ptr, " ^(");
+                    }
+                    print_latex_eq(node_ptr->right_child, tex_file_ptr, key);
                     fprintf(tex_file_ptr, ")");
                     break;
                 }
@@ -322,7 +463,7 @@ int add_preamble_latex(Node* node_ptr)
 
     fprintf(tex_file_ptr, " \\begin{center}\n ");
     fprintf(tex_file_ptr, " y = ");
-    print_latex_eq(node_ptr, tex_file_ptr);
+    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_LATEX);
     fprintf(tex_file_ptr, "\\\\");
     fprintf(tex_file_ptr, " \\end{center}\\\\\n ");
 
@@ -350,13 +491,12 @@ int add_final_diff_latex(Node* node_ptr)
         return ERR_OPEN_LATEX_FILE;
     }
 
-
     fprintf(tex_file_ptr, " \\section*{Full differential of our equation}\n ");
     fprintf(tex_file_ptr, " Finally... I took it: \n ");
 
     fprintf(tex_file_ptr, " \\begin{center}\n ");
     fprintf(tex_file_ptr, " y^{\\text{'}} = ");
-    print_latex_eq(node_ptr, tex_file_ptr);
+    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_LATEX);
     fprintf(tex_file_ptr, "\\\\");
     fprintf(tex_file_ptr, " \\end{center}\\\\\n ");
 
@@ -372,3 +512,44 @@ int add_final_diff_latex(Node* node_ptr)
     return RETURN_OK;
 }
 
+int print_plot_latex(Node* node_ptr, char* var_name)
+{
+    char* file_dir_name = cat_file_directory((char*)LATEX_FILE_NAME, (char*)LATEX_DIR_NAME, "");
+    char* local_dir = cat_file_directory(file_dir_name, "./", "");
+
+    FILE* tex_file_ptr = fopen(local_dir, "a+");
+    if(tex_file_ptr == nullptr)
+    {
+        ERROR_MESSAGE(stderr, ERR_OPEN_LATEX_FILE)
+        return ERR_OPEN_LATEX_FILE;
+    }
+
+    fprintf(tex_file_ptr, " \\begin{tikzpicture}\n ");
+    fprintf(tex_file_ptr, " \\begin{axis}[\n ");
+
+    fprintf(tex_file_ptr, " title={Derivative of equation by var - '%s'},\n", var_name);
+    fprintf(tex_file_ptr, " xlabel={x},\n ");
+    fprintf(tex_file_ptr, " ylabel={y},\n ");
+    fprintf(tex_file_ptr, " legend pos=north west,\n ");
+    fprintf(tex_file_ptr, " grid= major,\n ");
+    fprintf(tex_file_ptr, " scale mode=auto]\n ");
+    fprintf(tex_file_ptr, " \\addplot[red, very thick, mark=none] {");
+    print_latex_eq(node_ptr, tex_file_ptr, EQ_FOR_PLOT);
+    fprintf(tex_file_ptr, "};\n ");
+
+
+    fprintf(tex_file_ptr, " \\end{axis}\n ");
+    fprintf(tex_file_ptr, " \\end{tikzpicture}\n ");
+
+
+    if(fclose(tex_file_ptr) == EOF)
+    {
+        ERROR_MESSAGE(stderr, ERR_CLOSE_LATEX_FILE)
+        return ERR_CLOSE_LATEX_FILE;
+    }
+
+    free(file_dir_name);
+    free(local_dir);
+
+    return RETURN_OK;
+}

@@ -1899,21 +1899,48 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
     }
 }
 
-void full_diff(Tree* tree_ptr) // ok
+int full_diff(Tree* tree_ptr) // ok
 {
     print_header_latex();
     if(tree_ptr->num_of_vars == 0)
     {
         tree_ptr->root = diff_tree(tree_ptr, tree_ptr->root, tree_ptr->vars_enter[0].var_text);
+
+        int err_code = print_plot_latex(tree_ptr->root, tree_ptr->vars_enter[0].var_text);
+        if(err_code != RETURN_OK)
+        {
+            ERROR_MESSAGE(stderr, err_code)
+            return err_code;
+        }
+
         print_footer_latex(tree_ptr->root);
     }
     else
     {
         Node* first_diff = diff_tree(tree_ptr, copy_subtree(tree_ptr, tree_ptr->root), tree_ptr->vars_enter[0].var_text);
+        
+        printf("\n\nfirst_diff %p\n\n", first_diff);
 
+        int err_code = print_plot_latex(first_diff, tree_ptr->vars_enter[0].var_text);
+        if(err_code != RETURN_OK)
+        {
+            ERROR_MESSAGE(stderr, err_code)
+            return err_code;
+        }
+
+        Node* diff_next_var = nullptr;
         for(size_t cur_diff = 1; cur_diff < tree_ptr->num_of_vars; cur_diff++)
         {
-            first_diff = ADD_NODE(first_diff, diff_tree(tree_ptr, copy_subtree(tree_ptr, tree_ptr->root), tree_ptr->vars_enter[cur_diff].var_text));
+            diff_next_var = diff_tree(tree_ptr, copy_subtree(tree_ptr, tree_ptr->root), tree_ptr->vars_enter[cur_diff].var_text);
+
+            int err_code = print_plot_latex(diff_next_var, tree_ptr->vars_enter[cur_diff].var_text);
+            if(err_code != RETURN_OK)
+            {
+                ERROR_MESSAGE(stderr, err_code)
+                return err_code;
+            }
+
+            first_diff = ADD_NODE(first_diff, diff_next_var);
         }
 
         dtor_childs(tree_ptr->root);
@@ -1921,3 +1948,4 @@ void full_diff(Tree* tree_ptr) // ok
         print_footer_latex(tree_ptr->root);
     }
 }
+
