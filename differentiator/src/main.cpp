@@ -18,10 +18,9 @@ int main()
     // create_graph_jpg(tree_ptr_2, "tree_ptr_3");
 
     // printf("\nResult: %lf\n", eval(tree_ptr_2, tree_ptr_2->root));
-
-    tree_ptr_1->root = diff_tree(tree_ptr_1, tree_ptr_1->root, (char*)"x");
+    full_diff(tree_ptr_1);
     create_graph_jpg(tree_ptr_1, "tree_ptr_1 after diff");
-    create_latex(tree_ptr_1->root);
+    
 
     // printf("Eval %f\n", eval(tree_ptr_2, tree_ptr_2->root));
 

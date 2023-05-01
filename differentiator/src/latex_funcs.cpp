@@ -2,20 +2,7 @@
 
 static int latex_equation_num = 0;
 
-int print_header(FILE* tex_file_ptr)
-{
-    fprintf(tex_file_ptr, "\\documentclass[a4paper, 10pt]{article}\n");
-    fprintf(tex_file_ptr, "\\begin{document}\n");
-    return RETURN_OK;
-}
-
-int print_footer(FILE* tex_file_ptr)
-{
-    fprintf(tex_file_ptr, "\\end{document}\n");
-    return RETURN_OK;
-}
-
-int create_latex(Node* root_node_ptr)
+int print_header_latex()
 {
     char* file_dir_name = cat_file_directory((char*)LATEX_FILE_NAME, (char*)LATEX_DIR_NAME, "");
     char* local_dir = cat_file_directory(file_dir_name, "./", "");
@@ -28,19 +15,8 @@ int create_latex(Node* root_node_ptr)
         return ERR_OPEN_LATEX_FILE;
     }
 
-    if(print_header(tex_file_ptr) != RETURN_OK)
-    {
-        ERROR_MESSAGE(stderr, ERR_PRINT_LATEX)
-        return ERR_PRINT_LATEX;
-    }
-
-    add_equation(root_node_ptr, tex_file_ptr);
-
-    if(print_footer(tex_file_ptr) != RETURN_OK)
-    {
-        ERROR_MESSAGE(stderr, ERR_PRINT_LATEX)
-        return ERR_PRINT_LATEX; 
-    }
+    fprintf(tex_file_ptr, "\\documentclass[a4paper, 10pt]{article}\n");
+    fprintf(tex_file_ptr, "\\begin{document}\n");
 
     if(fclose(tex_file_ptr) == EOF)
     {
@@ -48,25 +24,71 @@ int create_latex(Node* root_node_ptr)
         return ERR_CLOSE_LATEX_FILE;
     }
 
+    free(file_dir_name);
+    free(local_dir);
+
+    return RETURN_OK;
+}
+
+int print_footer_latex(Node* node_ptr)
+{
+    char* file_dir_name = cat_file_directory((char*)LATEX_FILE_NAME, (char*)LATEX_DIR_NAME, "");
+    char* local_dir = cat_file_directory(file_dir_name, "./", "");
+
+
+    FILE* tex_file_ptr = fopen(local_dir, "a+");
+    if(tex_file_ptr == nullptr)
+    {
+        ERROR_MESSAGE(stderr, ERR_OPEN_LATEX_FILE)
+        return ERR_OPEN_LATEX_FILE;
+    }
+
+    add_final_diff_latex(node_ptr);
+
+    fprintf(tex_file_ptr, "\\end{document}\n");
+
+    if(fclose(tex_file_ptr) == EOF)
+    {
+        ERROR_MESSAGE(stderr, ERR_CLOSE_LATEX_FILE)
+        return ERR_CLOSE_LATEX_FILE;
+    }
     convert_tex_pdf(file_dir_name);
     free(file_dir_name);
     free(local_dir);
+
+    return RETURN_OK;
 }
 
-int add_equation(Node* node_ptr, FILE* tex_file_ptr)
+int add_equation_diff_latex(Node* node_ptr)
 {
-    latex_equation_num++;
-    fprintf(tex_file_ptr, "\\section*{Equation %d}\n", latex_equation_num);
-    fprintf(tex_file_ptr, "\\begin{dmath}\n");
+    char* file_dir_name = cat_file_directory((char*)LATEX_FILE_NAME, (char*)LATEX_DIR_NAME, "");
+    char* local_dir = cat_file_directory(file_dir_name, "./", "");
 
-    // for()
-    // {
 
-    // }
+    FILE* tex_file_ptr = fopen(local_dir, "a+");
+    if(tex_file_ptr == nullptr)
+    {
+        ERROR_MESSAGE(stderr, ERR_OPEN_LATEX_FILE)
+        return ERR_OPEN_LATEX_FILE;
+    }
+    fprintf(tex_file_ptr, " It was so \\textbf{easy} for me to take this differential:\n ");
+    fprintf(tex_file_ptr, " \\begin{center}\n ");
 
-    fprintf(tex_file_ptr, "f(x) = ");
+    fprintf(tex_file_ptr, " y^{\\text{'}} = ");
     print_latex_eq(node_ptr, tex_file_ptr);
-    fprintf(tex_file_ptr, "\\end{dmath}\n");
+    fprintf(tex_file_ptr, "\\\\");
+    fprintf(tex_file_ptr, " \\end{center}\n ");
+
+    if(fclose(tex_file_ptr) == EOF)
+    {
+        ERROR_MESSAGE(stderr, ERR_CLOSE_LATEX_FILE)
+        return ERR_CLOSE_LATEX_FILE;
+    }
+
+    free(file_dir_name);
+    free(local_dir);
+
+    return RETURN_OK;
 }
 
 int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
@@ -253,9 +275,11 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr)
             default:
                 fprintf(tex_file_ptr, "ERR_UNKNOWN_FUNC");
                 ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
-                break;
+                return ERR_UNKNOWN_FUNC;
             }
     }
+
+    return RETURN_OK;
 }
 
 int convert_tex_pdf(char* file_dir_name)
@@ -267,6 +291,84 @@ int convert_tex_pdf(char* file_dir_name)
     final_cmd[99] = '\0';
     printf(final_cmd);
     system(final_cmd);
+
+    return RETURN_OK;
 }
 
+int add_preamble_latex(Node* node_ptr)
+{
+    char* file_dir_name = cat_file_directory((char*)LATEX_FILE_NAME, (char*)LATEX_DIR_NAME, "");
+    char* local_dir = cat_file_directory(file_dir_name, "./", "");
+
+    FILE* tex_file_ptr = fopen(local_dir, "a+");
+    if(tex_file_ptr == nullptr)
+    {
+        ERROR_MESSAGE(stderr, ERR_OPEN_LATEX_FILE)
+        return ERR_OPEN_LATEX_FILE;
+    }
+
+    if(latex_equation_num == 0)
+    {
+        fprintf(tex_file_ptr, " \\section*{Our main function}\n");
+        fprintf(tex_file_ptr, "Now I will try to differentiate this equation:\n ");
+        latex_equation_num++;
+    }
+    else
+    {
+        fprintf(tex_file_ptr, " \\section*{Differentiation of equation №%d}\n ", latex_equation_num);
+        fprintf(tex_file_ptr, " So, now we have equation: \n ");
+        latex_equation_num++;
+    }
+
+    fprintf(tex_file_ptr, " \\begin{center}\n ");
+    fprintf(tex_file_ptr, " y = ");
+    print_latex_eq(node_ptr, tex_file_ptr);
+    fprintf(tex_file_ptr, "\\\\");
+    fprintf(tex_file_ptr, " \\end{center}\\\\\n ");
+
+    if(fclose(tex_file_ptr) == EOF)
+    {
+        ERROR_MESSAGE(stderr, ERR_CLOSE_LATEX_FILE)
+        return ERR_CLOSE_LATEX_FILE;
+    }
+
+    free(file_dir_name);
+    free(local_dir);
+
+    return RETURN_OK;
+}
+
+int add_final_diff_latex(Node* node_ptr)
+{
+    char* file_dir_name = cat_file_directory((char*)LATEX_FILE_NAME, (char*)LATEX_DIR_NAME, "");
+    char* local_dir = cat_file_directory(file_dir_name, "./", "");
+
+    FILE* tex_file_ptr = fopen(local_dir, "a+");
+    if(tex_file_ptr == nullptr)
+    {
+        ERROR_MESSAGE(stderr, ERR_OPEN_LATEX_FILE)
+        return ERR_OPEN_LATEX_FILE;
+    }
+
+
+    fprintf(tex_file_ptr, " \\section*{Full differential of our equation}\n ");
+    fprintf(tex_file_ptr, " Finally... I took it: \n ");
+
+    fprintf(tex_file_ptr, " \\begin{center}\n ");
+    fprintf(tex_file_ptr, " y^{\\text{'}} = ");
+    print_latex_eq(node_ptr, tex_file_ptr);
+    fprintf(tex_file_ptr, "\\\\");
+    fprintf(tex_file_ptr, " \\end{center}\\\\\n ");
+
+    if(fclose(tex_file_ptr) == EOF)
+    {
+        ERROR_MESSAGE(stderr, ERR_CLOSE_LATEX_FILE)
+        return ERR_CLOSE_LATEX_FILE;
+    }
+
+    free(file_dir_name);
+    free(local_dir);
+
+    return RETURN_OK;
+}
 

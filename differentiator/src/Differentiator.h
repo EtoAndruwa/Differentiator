@@ -134,7 +134,7 @@ Node* rule_Pow(Tree* const tree_ptr, FILE* log_ptr);
 Node* get_recur_tree(Tree* const tree_ptr);
 size_t length_double(char* str_double);
 char* get_string_func(size_t func_code);
-Node* full_diff_old(Tree* tree_ptr);
+void full_diff(Tree* tree_ptr); // ok
 int is_positive(double value);
 size_t skip_spaces(Tree* tree_ptr);
 Node* copy_subtree(Tree* tree_ptr, Node* node_ptr);
@@ -142,13 +142,14 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text);
 
 /*####################################################################################################################################################################*/
 
-int print_header(FILE* tex_file_ptr);
-int print_footer(FILE* tex_file_ptr);
-int create_latex(Node* root_node_ptr);
-int add_equation(Node* node_ptr, FILE* tex_file_ptr);
+int print_header_latex();
+int print_footer_latex(Node* node_ptr);
+int add_equation_diff_latex(Node* node_ptr);
 int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr);
 int convert_tex_pdf(char* file_dir_name);
-Node* diff_tree(Tree* tree_ptr, char* varib_text);
+Node* diff_tree_latex(Tree* tree_ptr, char* varib_text);
+int add_preamble_latex(Node* node_ptr);
+int add_final_diff_latex(Node* node_ptr);
 
 /*####################################################################################################################################################################*/
 

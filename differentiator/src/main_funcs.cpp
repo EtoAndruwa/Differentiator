@@ -1389,7 +1389,6 @@ Node* full_diff_old(Tree* tree_ptr) // ok
     else
     {
         Node* first_diff = diff_tree_old(tree_ptr, tree_ptr->vars_enter[0].var_text);
-        create_latex(first_diff);
         tree_ptr->cur_tok = 0; // Needs to be set to zero because diff tree increases the cor_tok value every time it diff the tree
 
         for(size_t cur_diff = 1; cur_diff < tree_ptr->num_of_vars; cur_diff++)
@@ -1426,39 +1425,126 @@ Node* copy_subtree(Tree* tree_ptr, Node* node_ptr) // ok
 
 Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
 {
+    int err_code = RETURN_OK;
+
     if(node_ptr->type == IS_VAL)
     {   
+        err_code = add_preamble_latex(node_ptr);
+        if(err_code != RETURN_OK)
+        {
+            ERROR_MESSAGE(stderr, err_code)
+            return nullptr;
+        }
+
+        Node* return_node = NUM_NODE(0)
+
+        err_code = add_equation_diff_latex(return_node);
+        if(err_code != RETURN_OK)
+        {
+            ERROR_MESSAGE(stderr, err_code)
+            return nullptr;
+        }
+
         dtor_childs(node_ptr);
-        return NUM_NODE(0)
+        return return_node;
     }
     if(node_ptr->type == IS_VARIB && strcmp(varib_text, node_ptr->value.text) == 0)
     {
+        err_code = add_preamble_latex(node_ptr);
+        if(err_code != RETURN_OK)
+        {
+            ERROR_MESSAGE(stderr, err_code)
+            return nullptr;
+        }
+
+        Node* return_node = NUM_NODE(1)
+
+        err_code = add_equation_diff_latex(return_node);
+        if(err_code != RETURN_OK)
+        {
+            ERROR_MESSAGE(stderr, err_code)
+            return nullptr;
+        }
+
         dtor_childs(node_ptr);
-        return NUM_NODE(1)
+        return return_node;
     }
     if((node_ptr->type == IS_CNST_VAR) || (node_ptr->type == IS_VARIB 
             && strcmp(varib_text, node_ptr->value.text) != 0))
     {
+        err_code = add_preamble_latex(node_ptr);
+        if(err_code != RETURN_OK)
+        {
+            ERROR_MESSAGE(stderr, err_code)
+            return nullptr;
+        }
+
+        Node* return_node = NUM_NODE(0)
+
+        err_code = add_equation_diff_latex(return_node);
+        if(err_code != RETURN_OK)
+        {
+            ERROR_MESSAGE(stderr, err_code)
+            return nullptr;
+        }
+
         dtor_childs(node_ptr);
-        return NUM_NODE(0)
+        return return_node;
     }
 
     switch(node_ptr->value.op_number)
     {
         case Add:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 node_ptr->left_child  = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
                 node_ptr->right_child = diff_tree(tree_ptr, node_ptr->right_child, varib_text);
+
+                err_code = add_equation_diff_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 return node_ptr;
             }
         case Sub:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 node_ptr->left_child  = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
                 node_ptr->right_child = diff_tree(tree_ptr, node_ptr->right_child, varib_text);
+
+                err_code = add_equation_diff_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 return node_ptr;
             }
         case Mul:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* pre_diff_r = copy_subtree(tree_ptr, node_ptr->right_child);
 
@@ -1469,10 +1555,25 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* mul_l = MUL_NODE(pre_diff_l, diff_r)
                 Node* mul_r = MUL_NODE(diff_l, pre_diff_r)
 
-                return ADD_NODE(mul_l, mul_r)
+                Node* return_node = ADD_NODE(mul_l, mul_r)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
         case Div:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 Node* pre_diff_l  = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* pre_diff_r  = copy_subtree(tree_ptr, node_ptr->right_child);
                 Node* bot_right_1 = copy_subtree(tree_ptr, node_ptr->right_child);
@@ -1487,20 +1588,50 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* sub     = SUB_NODE(mul_l, mul_r)
                 Node* mul_bot = MUL_NODE(bot_right_1, bot_right_2)
 
-                return DIV_NODE(sub, mul_bot)
+                Node* return_node = DIV_NODE(sub, mul_bot)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
         case Sin:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* diff_l     = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
 
                 free(node_ptr);
                 Node* cos = COS_NODE(pre_diff_l)
 
-                return MUL_NODE(cos, diff_l)
+                Node* return_node = MUL_NODE(cos, diff_l)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
         case Cos:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* diff_l     = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
 
@@ -1509,10 +1640,25 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* sin = SIN_NODE(pre_diff_l)
                 Node* mul = MUL_NODE(minus_one, sin)
 
-                return MUL_NODE(mul, diff_l)
+                Node* return_node = MUL_NODE(mul, diff_l)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
         case Tan:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* diff_l     = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
                 
@@ -1521,26 +1667,73 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* cos_2   = COS_NODE(copy_subtree(tree_ptr, pre_diff_l))
                 Node* bot_mul = MUL_NODE(cos_1, cos_2)
 
-                return DIV_NODE(diff_l, bot_mul)
+                Node* return_node = DIV_NODE(diff_l, bot_mul)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
         case Log: 
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* diff_l     = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
 
                 free(node_ptr);
-                return DIV_NODE(diff_l, pre_diff_l)
+
+                Node* return_node = DIV_NODE(diff_l, pre_diff_l)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
 
         case Exp:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* diff_l     = diff_tree(tree_ptr, pre_diff_l, varib_text);
 
-                return MUL_NODE(node_ptr, diff_l)
+
+                Node* return_node = MUL_NODE(node_ptr, diff_l)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
         case Cot:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* diff_l     = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
                 
@@ -1551,10 +1744,25 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* minus_one = NUM_NODE(-1)
                 Node* mul_top   = MUL_NODE(minus_one, diff_l)
 
-                return DIV_NODE(mul_top, bot_mul)
+                Node* return_node = DIV_NODE(mul_top, bot_mul)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
         case Sqrt:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 Node* node_copy = copy_subtree(tree_ptr, node_ptr);
                 Node* diff_l    = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
                 
@@ -1562,10 +1770,25 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* two     = NUM_NODE(2)
                 Node* bot_mul = MUL_NODE(two, node_copy)
 
-                return DIV_NODE(diff_l, bot_mul)
+                Node* return_node = DIV_NODE(diff_l, bot_mul)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
         case Asin:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 Node* node_copy_1 = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* node_copy_2 = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* diff_l    = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
@@ -1576,10 +1799,25 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* sub     = SUB_NODE(one, mul)
                 Node* sqrt    = SQRT_NODE(sub)
 
-                return DIV_NODE(diff_l, sqrt)
+                Node* return_node = DIV_NODE(diff_l, sqrt)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
         case Acos:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 Node* node_copy_1 = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* node_copy_2 = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* diff_l    = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
@@ -1592,14 +1830,38 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* minus_one = NUM_NODE(-1)
                 Node* div       = DIV_NODE(diff_l, sqrt)
 
-                return MUL_NODE(minus_one, div)
+                Node* return_node = MUL_NODE(minus_one, div)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
         case Pow:
             {
+                err_code = add_preamble_latex(node_ptr);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
                 if(node_ptr->left_child->type == IS_VAL && node_ptr->right_child->type == IS_VAL)
                 {
                     dtor_childs(node_ptr);
-                    return NUM_NODE(0)
+
+                    Node* return_node = NUM_NODE(0)
+                    err_code = add_equation_diff_latex(return_node);
+                    if(err_code != RETURN_OK)
+                    {
+                        ERROR_MESSAGE(stderr, err_code)
+                        return nullptr;
+                    }
+
+                    return return_node;
                 }
 
                 Node* copy_base = copy_subtree(tree_ptr, node_ptr->left_child);
@@ -1621,7 +1883,15 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
                 Node* mul_2     = MUL_NODE(diff_base, copy_exp)
                 Node* add       = ADD_NODE(mul_1, mul_2)
 
-                return MUL_NODE(exp, add)
+                Node* return_node = MUL_NODE(exp, add)
+                err_code = add_equation_diff_latex(return_node);
+                if(err_code != RETURN_OK)
+                {
+                    ERROR_MESSAGE(stderr, err_code)
+                    return nullptr;
+                }
+
+                return return_node;
             }
         default:
             ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
@@ -1629,30 +1899,25 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text)
     }
 }
 
+void full_diff(Tree* tree_ptr) // ok
+{
+    print_header_latex();
+    if(tree_ptr->num_of_vars == 0)
+    {
+        tree_ptr->root = diff_tree(tree_ptr, tree_ptr->root, tree_ptr->vars_enter[0].var_text);
+        print_footer_latex(tree_ptr->root);
+    }
+    else
+    {
+        Node* first_diff = diff_tree(tree_ptr, copy_subtree(tree_ptr, tree_ptr->root), tree_ptr->vars_enter[0].var_text);
 
-// }
+        for(size_t cur_diff = 1; cur_diff < tree_ptr->num_of_vars; cur_diff++)
+        {
+            first_diff = ADD_NODE(first_diff, diff_tree(tree_ptr, copy_subtree(tree_ptr, tree_ptr->root), tree_ptr->vars_enter[cur_diff].var_text));
+        }
 
-// Node* full_diff(Tree* tree_ptr) // ok
-// {
-//     tree_ptr->cur_tok = 0;
-//     if(tree_ptr->num_of_vars == 0)
-//     {
-//         dtor_childs(tree_ptr->root);
-//         return diff_tree_old(tree_ptr, tree_ptr->vars_enter[0].var_text);
-//     }
-//     else
-//     {
-//         Node* first_diff = diff_tree_old(tree_ptr, tree_ptr->vars_enter[0].var_text);
-//         tree_ptr->cur_tok = 0; // Needs to be set to zero because diff tree increases the cor_tok value every time it diff the tree
-
-//         for(size_t cur_diff = 1; cur_diff < tree_ptr->num_of_vars; cur_diff++)
-//         {
-//             first_diff = ADD_NODE(first_diff, diff_tree_old(tree_ptr, tree_ptr->vars_enter[cur_diff].var_text));
-//             tree_ptr->cur_tok = 0; // Needs to be set to zero because diff tree increases the cor_tok value every time it diff the tree
-//         }
-
-//         dtor_childs(tree_ptr->root);
-
-//         return first_diff;
-//     }
-// }
+        dtor_childs(tree_ptr->root);
+        tree_ptr->root = first_diff;
+        print_footer_latex(tree_ptr->root);
+    }
+}
