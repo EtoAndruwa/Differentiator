@@ -103,20 +103,18 @@ typedef struct Var
  */
 typedef struct Tree
 {
-    Node*   root        = nullptr;  /// \brief The pointer to the root node of the tree 
-    char*   tree_buff   = nullptr;  /// \brief The pointer to the buffer with the tree equation
-    FILE*   file_ptr    = nullptr;  /// \brief The pointer to the file with the tree equation
-    Tokens* toks        = nullptr;  /// \brief The pointer to the array of token structs
-    Var*    vars_enter  = nullptr;  /// \brief The pointer to the array of var structs
-    Var*    vars_found  = nullptr; 
+    Node*   root           = nullptr;  /// \brief The pointer to the root node of the tree 
+    char*   tree_buff      = nullptr;  /// \brief The pointer to the buffer with the tree equation
+    FILE*   file_ptr       = nullptr;  /// \brief The pointer to the file with the tree equation
+    Tokens* toks           = nullptr;  /// \brief (OLD) The pointer to the array of token structs
+    Var*    vars_arr       = nullptr;  /// \brief The pointer to the array of var structs
 
     size_t  size           = 0;        /// \brief The total size of the buffer with the tree equation
-    size_t  num_of_toks    = 1;        /// \brief The total number of tokens
-    size_t  cur_tok        = 0;        /// \brief The current number of tok in the array of tokens
-    int     num_of_vars    = -1;        /// \brief The total number of variables in the tree
+    size_t  num_of_toks    = 1;        /// \brief (OLD) The total number of tokens 
+    size_t  cur_tok        = 0;        /// \brief (OLD) The current number of tok in the array of tokens
+    int     num_of_vars    = 0;        /// \brief The total number of variables in the tree
     size_t  cur_pos_str    = 0;        /// \brief The current position in the buffer with the tree equation
     size_t  error_code     = TREE_OK;  /// \brief The error code of the struct
-    int     num_found_vars = -1;
 
 }Tree;
 
@@ -162,7 +160,7 @@ Node* create_node(Tree* tree_ptr, double node_value, int node_type = IS_VAL, cha
 /*####################################################################################################################################################################*/
 
 /**
- * @brief Prints all leaves of the node (or subtree)
+ * @brief (OLD) Prints all leaves of the node (or subtree)
  * @param node_ptr The pointer to the node (or subtree)
  */
 void print_leaves(Node* node_ptr);
@@ -170,7 +168,7 @@ void print_leaves(Node* node_ptr);
 /*####################################################################################################################################################################*/
 
 /**
- * @brief Prints the nodes in inorder format
+ * @brief (OLD) Prints the nodes in inorder format
  * @param node_ptr The pointer to the node (or subtree). Usually pointer to the tree's root node
  */
 void print_inorder(Node* node_ptr);
@@ -178,7 +176,7 @@ void print_inorder(Node* node_ptr);
 /*####################################################################################################################################################################*/
 
 /**
- * @brief Prints the nodes in preorder format
+ * @brief (OLD) Prints the nodes in preorder format
  * @param node_ptr The pointer to the node (or subtree). Usually pointer to the tree's root node
  */
 void print_preorder(Node* node_ptr);
@@ -186,7 +184,8 @@ void print_preorder(Node* node_ptr);
 /*####################################################################################################################################################################*/
 
 /**
- * @brief Prints the nodes in postorder format
+ * 
+ * @brief (OLD) Prints the nodes in postorder format
  * @param node_ptr The pointer to the node (or subtree). Usually pointer to the tree's root node
  */
 void print_postorder(Node* node_ptr);

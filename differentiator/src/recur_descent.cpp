@@ -190,7 +190,7 @@ Node* rule_V(Tree* const tree_ptr, FILE* log_ptr) // ok
 
         for(size_t cur_var = 0; cur_var < tree_ptr->num_of_vars; cur_var++)
         {
-            if(strcmp(var_name, tree_ptr->vars_enter[cur_var].var_text) == 0)
+            if(strcmp(var_name, tree_ptr->vars_arr[cur_var].var_text) == 0)
             {
                 return create_node(tree_ptr, 0, IS_VARIB, var_name);
             }
@@ -312,7 +312,7 @@ size_t length_double(char* str_double) // ok
     size_t old_length = strlen(str_double) - 1;
     size_t num_of_zeros = 0;
     size_t right_end_id = old_length;
-    for(;  right_end_id >= 0; right_end_id--)
+    for(;  right_end_id >= 0; right_end_id--) // from the right to the left in order ot search first non zero digit and calculate the lenght of float
     {
         if(str_double[right_end_id] != '0')
         {

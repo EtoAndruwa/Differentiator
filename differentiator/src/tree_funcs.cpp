@@ -1,6 +1,6 @@
 #include "Differentiator.h"
 
-Tree* tree_ctor()
+Tree* tree_ctor() // ok
 {
     Tree* tree_ptr = (Tree*)calloc(1, sizeof(Tree));
 
@@ -10,73 +10,61 @@ Tree* tree_ctor()
         ERROR_MESSAGE(stderr, ERR_TO_CALLOC_TREE);
         return nullptr;
     }
-    tree_ptr->error_code = TREE_OK;
-    tree_ptr->size           = 0;        
-    tree_ptr->num_of_toks    = 1;        
-    tree_ptr->cur_tok        = 0;        
-    tree_ptr->num_of_vars    = -1;        
-    tree_ptr->cur_pos_str    = 0;       
-    tree_ptr->error_code     = TREE_OK;  
-    tree_ptr->num_found_vars = -1;
+    tree_ptr->error_code  = TREE_OK;
+    tree_ptr->size        = 0;        
+    tree_ptr->num_of_toks = 1;        
+    tree_ptr->cur_tok     = 0;        
+    tree_ptr->num_of_vars = 0;        
+    tree_ptr->cur_pos_str = 0;       
 
-
+    tree_ptr->root       = nullptr;
+    tree_ptr->tree_buff  = nullptr;
+    tree_ptr->file_ptr   = nullptr;
+    tree_ptr->toks       = nullptr;
+    tree_ptr->vars_arr   = nullptr;
     return tree_ptr;
 }
 
-void tree_dtor(Tree* tree_ptr)
+void tree_dtor(Tree* tree_ptr) // ok
 {
     dtor_childs(tree_ptr->root);
-    tree_ptr->root = nullptr;
 
-    if(tree_ptr->tree_buff != nullptr)
-    {
-        free(tree_ptr->tree_buff);
-    }
+    free(tree_ptr->tree_buff);
+
     tree_ptr->tree_buff   = nullptr;
     tree_ptr->cur_pos_str = POISON;
 
     tree_ptr->file_ptr = nullptr;
     tree_ptr->size     = POISON;
 
-    if(tree_ptr->toks != nullptr)
-    {
-        free(tree_ptr->toks);
-    }
+    free(tree_ptr->toks);
     tree_ptr->toks        = nullptr;
     tree_ptr->num_of_toks = POISON;
     tree_ptr->cur_tok     = POISON;
 
-    if(tree_ptr->vars_enter != nullptr)
-    {
-        free(tree_ptr->vars_enter);
-    }
-    tree_ptr->vars_enter        = nullptr;
+    free(tree_ptr->vars_arr);
+    tree_ptr->vars_arr    = nullptr;
     tree_ptr->num_of_vars = POISON;
 
-    tree_ptr->error_code = TREE_OK;
+    tree_ptr->error_code = POISON;
 
-    if(tree_ptr != nullptr)
-    {
-        free(tree_ptr);
-    }
+    free(tree_ptr);
     tree_ptr = nullptr;
 }
 
-void dtor_childs(Node* node_ptr)
+void dtor_childs(Node* node_ptr) // ok
 {
     if(node_ptr->left_child != nullptr)
     {
         dtor_childs(node_ptr->left_child);
-        node_ptr->left_child = nullptr;
     }
     if(node_ptr->right_child != nullptr)
     {
         dtor_childs(node_ptr->right_child);
-        node_ptr->right_child = nullptr;
     }
 
     node_ptr->value.node_value = POISON;
-    node_ptr->value.op_number  = POISON;
+    node_ptr->type = POISON;
 
     if(node_ptr != nullptr)
     {
@@ -85,10 +73,11 @@ void dtor_childs(Node* node_ptr)
     }
 }
 
-Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, Node* left_child, Node* right_child)
+Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, Node* left_child, Node* right_child) // ok
 {
     if((node_type == IS_VAL || node_type == IS_VARIB || node_type == IS_CNST_VAR) && (left_child != nullptr || right_child != nullptr))
     {
+        tree_ptr->error_code = ERR_VAL_VAR_HAS_CHILD;
         ERROR_MESSAGE(stderr, ERR_VAL_VAR_HAS_CHILD)
         return nullptr;
     }
@@ -121,7 +110,7 @@ Node* create_node(Tree* tree_ptr, double node_value, int node_type, char* text, 
     return new_node_ptr;
 }
 
-void print_leaves(Node* node_ptr)
+void print_leaves(Node* node_ptr) // OLD
 {
     if(node_ptr->left_child == nullptr && node_ptr->right_child == nullptr && node_ptr->type == IS_VAL)
     {
@@ -138,7 +127,7 @@ void print_leaves(Node* node_ptr)
     }
 }
 
-void print_preorder(Node* node_ptr)
+void print_preorder(Node* node_ptr) // OLD
 {
     if(node_ptr == nullptr)
     {
@@ -158,7 +147,7 @@ void print_preorder(Node* node_ptr)
     printf(")");
 }
 
-void print_inorder(Node* node_ptr)
+void print_inorder(Node* node_ptr) // OLD
 {
     if(node_ptr == nullptr)
     {
@@ -182,7 +171,7 @@ void print_inorder(Node* node_ptr)
     printf(")");
 }
 
-void print_postorder(Node* node_ptr)
+void print_postorder(Node* node_ptr) // OLD
 {
     if(node_ptr == nullptr)
     {
