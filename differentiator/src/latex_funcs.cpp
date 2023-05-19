@@ -569,11 +569,11 @@ int print_latex_eq(Node* node_ptr, FILE* tex_file_ptr, int key, char* var_name, 
 
                     if(key == EQ_FOR_LATEX)
                     {
-                        fprintf(tex_file_ptr, " \\textsuperscript{$\\wedge$} (");
+                        fprintf(tex_file_ptr, "\\textsuperscript{$\\wedge$}(");
                     }
                     else
                     {
-                        fprintf(tex_file_ptr, " ^(");
+                        fprintf(tex_file_ptr, "^(");
                     }
                     err_code = print_latex_eq(node_ptr->left_child, tex_file_ptr, key, var_name, tree_ptr);
                     if(err_code != RETURN_OK)

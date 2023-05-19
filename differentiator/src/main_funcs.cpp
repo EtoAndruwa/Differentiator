@@ -745,102 +745,32 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr) // ok
     }
     if(node_ptr->type == IS_OP)
     {
-        double result = 0;
-        Node* short_left  = nullptr;
-        Node* short_right = nullptr;
+        node_ptr->left_child  = SHORT_CHILD(NODE_LEFT_CHILD);
+        node_ptr->right_child = SHORT_CHILD(NODE_RIGHT_CHILD);
 
         switch(node_ptr->value.op_number)
         {
-            case Add: 
+            case Add: // OK
                 { 
-                    if(NODE_LEFT_CHILD->type == IS_VAL && check_is_positive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // ok
-                        NODE_RIGHT_CHILD->type == IS_VARIB)
+                    if(NODE_LEFT_CHILD->type == IS_VAL && check_is_positive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO)
                     {
-                        return VARIB_NODE(NODE_RIGHT_CHILD->value.text)
+                        Node* sub_node = copy_subtree(tree_ptr, NODE_RIGHT_CHILD);
+                        dtor_childs(node_ptr);
+                        return sub_node;
                     }
-                    else if(NODE_RIGHT_CHILD->type == IS_VAL && check_is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO &&  // ok
-                        NODE_LEFT_CHILD->type == IS_VARIB)
+                    else if(NODE_RIGHT_CHILD->type == IS_VAL && check_is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO)
                     {
-                        return VARIB_NODE(NODE_LEFT_CHILD->value.text)
+                        Node* sub_node = copy_subtree(tree_ptr, NODE_LEFT_CHILD);
+                        dtor_childs(node_ptr);
+                        return sub_node;
                     }
                     else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL) // ok 
                     {
-                        return NUM_NODE(NODE_RIGHT_CHILD->value.node_value + NODE_LEFT_CHILD->value.node_value)
+                        Node* num_node = NUM_NODE(NODE_RIGHT_CHILD->value.node_value + NODE_LEFT_CHILD->value.node_value)
+                        dtor_childs(node_ptr);
+                        return num_node;
                     }
-                    else if(NODE_RIGHT_CHILD->type == IS_VARIB && NODE_LEFT_CHILD->type == IS_VARIB) //  ok
-                    {
-                        return copy_subtree(tree_ptr, node_ptr);
-                    }
-                    else
-                    {
-                        short_left  = SHORT_CHILD(NODE_LEFT_CHILD);
-                        short_right = SHORT_CHILD(NODE_RIGHT_CHILD);
-                        
-                        if(short_left->type == IS_VAL && check_is_positive(short_left->value.node_value) == IS_ZERO &&  // ok
-                            short_right->type == IS_VARIB)
-                        {
-                            dtor_childs(short_left);
-                            return short_right;
-                        }
-                        else if(short_right->type == IS_VAL && check_is_positive(short_right->value.node_value) == IS_ZERO && // ok
-                            short_left->type == IS_VARIB)
-                        {
-                            dtor_childs(short_right);
-                            return short_left;
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_VAL) // ok
-                        {
-                            double value = short_left->value.node_value + short_right->value.node_value;
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            return NUM_NODE(value)
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_VARIB || short_right->type == IS_VARIB && short_left->type == IS_VAL) // ok
-                        {
-                            return ADD_NODE(short_right, short_left)
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Add // ok
-                            && short_left->right_child->type == IS_VAL)
-                        {
-                            Node* left_short_l = copy_subtree(tree_ptr, short_left->left_child);
-                            Node* sort_sum = NUM_NODE(short_right->value.node_value + short_left->right_child->value.node_value)
-                            Node* add = ADD_NODE(left_short_l, sort_sum)
-                            dtor_childs(short_right);
-                            dtor_childs(short_left);
-                            return SHORT_CHILD(add);
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Add // ok
-                            && short_left->left_child->type == IS_VAL)
-                        {
-                            Node* left_short_r = copy_subtree(tree_ptr, short_left->right_child);
-                            Node* sort_sum = NUM_NODE(short_right->value.node_value + short_left->left_child->value.node_value)
-                            Node* add = ADD_NODE(left_short_r, sort_sum)
-                            dtor_childs(short_right);
-                            dtor_childs(short_left);
-                            return SHORT_CHILD(add);
-                        }
-                        else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Add // ok
-                            && short_right->left_child->type == IS_VAL)
-                        {
-                            Node* right_short_r = copy_subtree(tree_ptr, short_right->right_child);
-                            Node* sort_sum = NUM_NODE(short_left->value.node_value + short_right->left_child->value.node_value)
-                            Node* add = ADD_NODE(right_short_r, sort_sum)
-                            dtor_childs(short_right);
-                            dtor_childs(short_left);
-                            return SHORT_CHILD(add);
-                        }
-                        else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Add  // ok
-                            && short_right->right_child->type == IS_VAL)
-                        {
-                            Node* right_short_l = copy_subtree(tree_ptr, short_right->left_child);
-                            Node* sort_sum = NUM_NODE(short_left->value.node_value + short_right->right_child->value.node_value)
-                            Node* add = ADD_NODE(right_short_l, sort_sum)
-                            dtor_childs(short_right);
-                            dtor_childs(short_left);
-                            return SHORT_CHILD(add);
-                        }
-                        return ADD_NODE(short_left, short_right)
-                    }
+                    return node_ptr;
                 }
             case Sub: // OK ??? 
                 {
@@ -849,195 +779,70 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr) // ok
                     {
                         Node* minus = NUM_NODE(-1)
                         Node* varib = VARIB_NODE(NODE_RIGHT_CHILD->value.text)
+                        dtor_childs(node_ptr);
                         return MUL_NODE(minus, varib)
                     }
                     else if(NODE_RIGHT_CHILD->type == IS_VAL && check_is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO &&  // ok
                         NODE_LEFT_CHILD->type == IS_VARIB)
                     {
-                        return VARIB_NODE(NODE_LEFT_CHILD->value.text)
+                        Node* varib_node = VARIB_NODE(NODE_LEFT_CHILD->value.text)
+                        dtor_childs(node_ptr);
+                        return varib_node;
                     }
                     else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL) // ok
                     {
-                        return NUM_NODE(NODE_LEFT_CHILD->value.node_value - NODE_RIGHT_CHILD->value.node_value)
+                        Node* num_node = NUM_NODE(NODE_LEFT_CHILD->value.node_value - NODE_RIGHT_CHILD->value.node_value)
+                        dtor_childs(node_ptr);
+                        return num_node;
                     }
-                    else if(NODE_RIGHT_CHILD->type == IS_VARIB && NODE_LEFT_CHILD->type == IS_VARIB) // ok
-                    {
-                        return copy_subtree(tree_ptr, node_ptr);
-                    }
-                    else
-                    {
-                        short_left  = SHORT_CHILD(NODE_LEFT_CHILD);
-                        short_right = SHORT_CHILD(NODE_RIGHT_CHILD);
-                        
-                        if(short_left->type == IS_VAL && check_is_positive(short_left->value.node_value) == IS_ZERO &&  //ok
-                            short_right->type == IS_VARIB)
-                        {
-                            Node* minus = NUM_NODE(-1)
-                            dtor_childs(short_left);
-                            return MUL_NODE(minus, short_right)
-                        }
-                        else if(short_right->type == IS_VAL && check_is_positive(short_right->value.node_value) == IS_ZERO &&  // ok
-                            short_left->type == IS_VARIB)
-                        {
-                            dtor_childs(short_right);
-                            return short_left;
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_VAL) // ok
-                        {
-                            double value = short_left->value.node_value - short_right->value.node_value;
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            return NUM_NODE(value)
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_VARIB) // ok
-                        {
-                            return SUB_NODE(short_left, short_right)
-                        }
-                        else if(short_right->type == IS_VARIB && short_left->type == IS_VAL) // ok
-                        {
-                            return SUB_NODE(short_left, short_right)
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Sub  // ok
-                            && short_left->right_child->type == IS_VAL)
-                        {
-                            Node* left_short_l = copy_subtree(tree_ptr, short_left->left_child);
-                            Node* sort_sum = NUM_NODE(short_right->value.node_value + short_left->right_child->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* sub = SUB_NODE(left_short_l, sort_sum)
-                            return SHORT_CHILD(sub);
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Sub  // ok
-                            && short_left->left_child->type == IS_VAL) 
-                        {
-                            Node* left_short_r = copy_subtree(tree_ptr, short_left->right_child);
-                            Node* sort_sum = NUM_NODE(short_left->left_child->value.node_value - short_right->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* sub = SUB_NODE(sort_sum, left_short_r)
-                            return SHORT_CHILD(sub);
-                        }
-                        else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Sub // ok
-                            && short_right->left_child->type == IS_VAL)
-                        {
-                            Node* right_short_r = copy_subtree(tree_ptr, short_right->right_child);
-                            Node* sort_sum = NUM_NODE(short_left->value.node_value - short_right->left_child->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* add = ADD_NODE(right_short_r, sort_sum)
-                            return SHORT_CHILD(add);
-                        }
-                        else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Sub  // ok
-                            && short_right->right_child->type == IS_VAL)
-                        {
-                            Node* right_short_l = copy_subtree(tree_ptr, short_right->left_child);
-                            Node* sort_sum = NUM_NODE(short_left->value.node_value + short_right->right_child->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* sub = SUB_NODE(sort_sum, right_short_l)
-                            return SHORT_CHILD(sub);
-                        }
-                        return SUB_NODE(short_left, short_right)
-                    }
+                    return node_ptr;
                 }
-            case Mul: // OK???
+            case Mul: 
                 {
-                    if(NODE_LEFT_CHILD->type == IS_VAL && check_is_positive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO &&  // ok
-                        NODE_RIGHT_CHILD->type != IS_VAL)
+                    if(NODE_LEFT_CHILD->type == IS_VAL && check_is_positive(NODE_LEFT_CHILD->value.node_value) == IS_POSITIVE && 
+                        (fabs(NODE_LEFT_CHILD->value.node_value - 1) <= EPS))
                     {
+                        Node* right_copy = copy_subtree(tree_ptr, NODE_RIGHT_CHILD);
+                        dtor_childs(node_ptr);
+                        return right_copy;
+                    }
+                    else if(NODE_RIGHT_CHILD->type == IS_VAL && check_is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_POSITIVE && 
+                        (fabs(NODE_RIGHT_CHILD->value.node_value - 1) <= EPS))
+                    {
+                        Node* left_copy = copy_subtree(tree_ptr, NODE_LEFT_CHILD);
+                        dtor_childs(node_ptr);
+                        return left_copy;
+                    }
+                    else if(NODE_LEFT_CHILD->type == IS_VAL && check_is_positive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO)
+                    {
+                        dtor_childs(node_ptr);
                         return NUM_NODE(0)
                     }
-                    else if(NODE_RIGHT_CHILD->type == IS_VAL && check_is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO && // ok
-                        NODE_LEFT_CHILD->type != IS_VAL)
+                    else if(NODE_RIGHT_CHILD->type == IS_VAL && check_is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO)
                     {
+                        dtor_childs(node_ptr);
                         return NUM_NODE(0)
                     }
                     else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL) // ok
                     {
-                        return NUM_NODE(NODE_RIGHT_CHILD->value.node_value * NODE_LEFT_CHILD->value.node_value)
+                        Node* mul_node = NUM_NODE(NODE_RIGHT_CHILD->value.node_value * NODE_LEFT_CHILD->value.node_value)
+                        dtor_childs(node_ptr);
+                        return mul_node;
                     }
-                    else
-                    {
-                        short_left  = SHORT_CHILD(NODE_LEFT_CHILD);
-                        short_right = SHORT_CHILD(NODE_RIGHT_CHILD);
-
-                        if(short_left->type == IS_VAL && check_is_positive(short_left->value.node_value) == IS_ZERO &&  // ok
-                        short_right->type != IS_VAL)
-                        {
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            return NUM_NODE(0)
-                        }
-                        else if(short_right->type == IS_VAL && check_is_positive(short_right->value.node_value) == IS_ZERO && // ok
-                        short_left->type != IS_VAL)
-                        {
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            return NUM_NODE(0)
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_VAL) // ok
-                        {
-                            double value = short_left->value.node_value * short_right->value.node_value;
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            return NUM_NODE(value)
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Mul  // ok
-                            && short_left->right_child->type == IS_VAL)
-                        {
-                            Node* left_short_l = copy_subtree(tree_ptr, short_left->left_child);
-                            Node* sort_sum = NUM_NODE(short_right->value.node_value * short_left->right_child->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* mul = MUL_NODE(left_short_l, sort_sum)
-                            return SHORT_CHILD(mul);
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Mul  // ok
-                            && short_left->left_child->type == IS_VAL) 
-                        {
-                            Node* left_short_r = copy_subtree(tree_ptr, short_left->right_child);
-                            Node* sort_sum = NUM_NODE(short_left->left_child->value.node_value * short_right->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* mul = MUL_NODE(sort_sum, left_short_r)
-                            return SHORT_CHILD(mul);
-                        }
-                        else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Mul // ok
-                            && short_right->left_child->type == IS_VAL)
-                        {
-                            Node* right_short_r = copy_subtree(tree_ptr, short_right->right_child);
-                            Node* sort_sum = NUM_NODE(short_left->value.node_value * short_right->left_child->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* mul = MUL_NODE(right_short_r, sort_sum)
-                            return SHORT_CHILD(mul);
-                        }
-                        else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Mul  // ok
-                            && short_right->right_child->type == IS_VAL)
-                        {
-                            Node* right_short_l = copy_subtree(tree_ptr, short_right->left_child);
-                            Node* sort_sum = NUM_NODE(short_left->value.node_value * short_right->right_child->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* mul = MUL_NODE(sort_sum, right_short_l)
-                            return SHORT_CHILD(mul);
-                        }
-                        return MUL_NODE(short_left, short_right)
-                    }
+                    return node_ptr;
                 }
             case Div: // OK ???
                 {
-                    if(NODE_RIGHT_CHILD->type == IS_VAL && fabs(NODE_RIGHT_CHILD->value.node_value -1) <= EPS)
+                    if(NODE_RIGHT_CHILD->type == IS_VAL && fabs(NODE_RIGHT_CHILD->value.node_value - 1) <= EPS)
                     {
-                        return NODE_RIGHT_CHILD;
-                    }
-                    else if(NODE_RIGHT_CHILD->type == IS_VAL && fabs(NODE_RIGHT_CHILD->value.node_value - 1) <= EPS && NODE_LEFT_CHILD->type != IS_OP) // ok
-                    {
-                        return NODE_LEFT_CHILD;
+                        Node* left_node = copy_subtree(tree_ptr, NODE_LEFT_CHILD);
+                        dtor_childs(node_ptr);
+                        return left_node;
                     }
                     else if(NODE_LEFT_CHILD->type == IS_VAL && check_is_positive(NODE_LEFT_CHILD->value.node_value) == IS_ZERO && // ok
                         NODE_RIGHT_CHILD->type != IS_VAL)
                     {
+                        dtor_childs(node_ptr);
                         return NUM_NODE(0)
                     }
                     else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL && check_is_positive(NODE_RIGHT_CHILD->value.node_value) == IS_ZERO // ok
@@ -1053,89 +858,11 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr) // ok
                     }
                     else if(NODE_RIGHT_CHILD->type == IS_VAL && NODE_LEFT_CHILD->type == IS_VAL)
                     {
-                        return NUM_NODE(NODE_LEFT_CHILD->value.node_value / NODE_RIGHT_CHILD->value.node_value)
+                        Node* num_node = NUM_NODE(NODE_LEFT_CHILD->value.node_value / NODE_RIGHT_CHILD->value.node_value)
+                        dtor_childs(node_ptr);
+                        return num_node;
                     }
-                    else
-                    {
-                        short_left  = SHORT_CHILD(NODE_LEFT_CHILD);
-                        short_right = SHORT_CHILD(NODE_RIGHT_CHILD);
-
-                        if(short_right->type == IS_VAL && fabs(short_right->value.node_value - 1) <= EPS) // ok
-                        {
-                            dtor_childs(short_right);
-                            return short_left;
-                        }
-                        if(short_left->type == IS_VAL && check_is_positive(short_left->value.node_value) == IS_ZERO && // ok
-                        short_right->type != IS_VAL)
-                        {
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            return NUM_NODE(0)
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_VAL && check_is_positive(short_right->value.node_value) == IS_ZERO // ok
-                                && check_is_positive(short_left->value.node_value) == IS_ZERO)
-                        {
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            ERROR_MESSAGE(stderr, ERR_UNCERTAINTY)
-                            return nullptr;
-                        }
-                        else if(short_right->type == IS_VAL && check_is_positive(short_right->value.node_value) == IS_ZERO) // ok
-                        {
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            ERROR_MESSAGE(stderr, ERR_DIV_TO_ZERO)
-                            return nullptr;
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_VAL) // ok
-                        {
-                            double value = short_left->value.node_value / short_right->value.node_value;
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            return NUM_NODE(value)
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Div  // ok
-                            && short_left->right_child->type == IS_VAL)
-                        {
-                            Node* left_short_l = copy_subtree(tree_ptr, short_left->left_child);
-                            Node* sort_sum = NUM_NODE(short_right->value.node_value * short_left->right_child->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* div = DIV_NODE(left_short_l, sort_sum)
-                            return SHORT_CHILD(div);
-                        }
-                        else if(short_right->type == IS_VAL && short_left->type == IS_OP && short_left->value.op_number == Div  // ok
-                            && short_left->left_child->type == IS_VAL) 
-                        {
-                            Node* left_short_r = copy_subtree(tree_ptr, short_left->right_child);
-                            Node* sort_sum = NUM_NODE(short_left->left_child->value.node_value / short_right->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* div = DIV_NODE(sort_sum, left_short_r)
-                            return SHORT_CHILD(div);
-                        }
-                        else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Div // ok
-                            && short_right->left_child->type == IS_VAL)
-                        {
-                            Node* right_short_r = copy_subtree(tree_ptr, short_right->right_child);
-                            Node* sort_sum = NUM_NODE(short_left->value.node_value / short_right->left_child->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* mul = MUL_NODE(right_short_r, sort_sum)
-                            return SHORT_CHILD(mul);
-                        }
-                        else if(short_left->type == IS_VAL && short_right->type == IS_OP && short_right->value.op_number == Div  // ok
-                            && short_right->right_child->type == IS_VAL)
-                        {
-                            Node* right_short_l = copy_subtree(tree_ptr, short_right->left_child);
-                            Node* sort_sum = NUM_NODE(short_left->value.node_value * short_right->right_child->value.node_value)
-                            dtor_childs(short_left);
-                            dtor_childs(short_right);
-                            Node* div = DIV_NODE(sort_sum, right_short_l)
-                            return SHORT_CHILD(div);
-                        }
-                        return DIV_NODE(short_left, short_right)
-                    }
+                    return node_ptr;
                 }
             default:
                 ERROR_MESSAGE(stderr, ERR_UNKNOWN_OPERATOR)
@@ -1143,195 +870,164 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr) // ok
             }
         }
 
-        Node* short_arg = 0; // argument of the function
+        Node* short_arg_l = NODE_LEFT_CHILD; // argument of the function
 
         switch(node_ptr->value.op_number)
         {        
             case Sin: // ok
                 {
-                    short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
-                    if(short_arg->type == IS_VAL)
+                    if( short_arg_l->type == IS_VAL)
                     {
-                        double argument = func_Sin(short_arg->value.node_value);
+                        double argument = func_Sin( short_arg_l->value.node_value);
                         if(argument != NAN)
                         {
-                            dtor_childs(short_arg);
-                            return NUM_NODE(argument)
+                            Node* num_node = NUM_NODE(argument)
+                            dtor_childs( short_arg_l);
+                            return num_node;
                         }
                         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
                         return nullptr;
                     }
-                    else
-                    {
-                        return SIN_NODE(short_arg)
-                    }
-                    ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
-                    return nullptr;
+                    return node_ptr;
                 }
             case Cos: // ok
                 {
-                    short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
-                    if(short_arg->type == IS_VAL)
+                    if( short_arg_l->type == IS_VAL)
                     {
-                        double argument = func_Sin(short_arg->value.node_value);
+                        double argument = func_Sin( short_arg_l->value.node_value);
                         if(argument != NAN)
                         {
-                            dtor_childs(short_arg);
-                            return NUM_NODE(argument)
+                            Node* num_node = NUM_NODE(argument)
+                            dtor_childs( short_arg_l);
+                            return num_node;
                         }
                         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
                         return nullptr;
                     }
-                    else
-                    {
-                        return COS_NODE(short_arg)
-                    }
+                    return node_ptr;
                 }
             case Tan: // ok
                 {
-                    short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
-                    if(short_arg->type == IS_VAL)
+                    if( short_arg_l->type == IS_VAL)
                     {
-                        double argument = func_Tan(short_arg->value.node_value);
+                        double argument = func_Tan( short_arg_l->value.node_value);
                         if(argument != NAN)
                         {
-                            dtor_childs(short_arg);
-                            return NUM_NODE(argument)
+                            Node* num_node = NUM_NODE(argument)
+                            dtor_childs( short_arg_l);
+                            return num_node;
                         }
                         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
                         return nullptr;
                     }
-                    else
-                    {
-                        return TAN_NODE(short_arg);
-                    }
+                    return node_ptr;
                 }
             case Sqrt: // ok
                 {
-                    short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
-                    if(short_arg->type == IS_VAL)
+                    if( short_arg_l->type == IS_VAL)
                     {
-                        double argument = func_Sqrt(short_arg->value.node_value);
+                        double argument = func_Sqrt( short_arg_l->value.node_value);
                         if(argument != NAN)
                         {
-                            dtor_childs(short_arg);
-                            return NUM_NODE(argument)
+                            Node* num_node = NUM_NODE(argument)
+                            dtor_childs( short_arg_l);
+                            return num_node;
                         }
                         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
                         return nullptr;
                     }
-                    else
-                    {
-                        return SQRT_NODE(short_arg);
-                    }
+                    return node_ptr;
                 }
             case Asin: // ok
                 {
-                    short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
-                    if(short_arg->type == IS_VAL)
+                    if( short_arg_l->type == IS_VAL)
                     {
-                        double argument = func_Asin(short_arg->value.node_value);
+                        double argument = func_Asin( short_arg_l->value.node_value);
                         if(argument != NAN)
                         {
-                            dtor_childs(short_arg);
-                            return NUM_NODE(argument)
+                            Node* num_node = NUM_NODE(argument)
+                            dtor_childs( short_arg_l);
+                            return num_node;
                         }
                         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
                         return nullptr;
                     }
-                    else
-                    {
-                        return ASIN_NODE(short_arg);
-                    }
+                    return node_ptr;
                 }
             case Acos: // ok
                 {
-                    short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
-                    if(short_arg->type == IS_VAL)
+                    if( short_arg_l->type == IS_VAL)
                     {
-                        double argument = func_Acos(short_arg->value.node_value);
+                        double argument = func_Acos( short_arg_l->value.node_value);
                         if(argument != NAN)
                         {
-                            dtor_childs(short_arg);
-                            return NUM_NODE(argument)
+                            Node* num_node = NUM_NODE(argument)
+                            dtor_childs( short_arg_l);
+                            return num_node;
                         }
                         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
                         return nullptr;
                     }
-                    else
-                    {
-                        return ACOS_NODE(short_arg);
-                    }
+                    return node_ptr;
                 }
             case Log: // ok
                 {
-                    short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
-                    if(short_arg->type == IS_VAL)
+                    if( short_arg_l->type == IS_VAL)
                     {
-                        double argument = func_Log(short_arg->value.node_value);
+                        double argument = func_Log( short_arg_l->value.node_value);
                         if(argument != NAN)
                         {
-                            dtor_childs(short_arg);
-                            return NUM_NODE(argument)
+                            Node* num_node = NUM_NODE(argument)
+                            dtor_childs( short_arg_l);
+                            return num_node;
                         }
                         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
                         return nullptr;
                     }
-                    else
-                    {
-                        return LN_NODE(short_arg);
-                    }
+                    return node_ptr;
                 }
             case Cot: // ok
                 {
-                    short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
-                    if(short_arg->type == IS_VAL)
+                    if( short_arg_l->type == IS_VAL)
                     {
-                        double argument = func_Cot(short_arg->value.node_value);
+                        double argument = func_Cot( short_arg_l->value.node_value);
                         if(argument != NAN)
                         {
-                            dtor_childs(short_arg);
-                            return NUM_NODE(argument)
+                            Node* num_node = NUM_NODE(argument)
+                            dtor_childs( short_arg_l);
+                            return num_node;
                         }
                         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
                         return nullptr;
                     }
-                    else
-                    {
-                        return COT_NODE(short_arg);
-                    }
+                    return node_ptr;
                 }
             case Exp: // ok
                 {
-                    short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
-                    if(short_arg->type == IS_VAL)
+                    if( short_arg_l->type == IS_VAL)
                     {
-                        double argument = func_Exp(short_arg->value.node_value);
+                        double argument = func_Exp( short_arg_l->value.node_value);
                         if(argument != NAN)
                         {
-                            dtor_childs(short_arg);
-                            return NUM_NODE(argument)
+                            Node* num_node = NUM_NODE(argument)
+                            dtor_childs( short_arg_l);
+                            return num_node;
                         }
                         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
                         return nullptr;
                     }
-                    else
-                    {
-                        return EXP_NODE(short_arg);
-                    }
+                    return node_ptr;
                 }
             case Pow: // ok
                 {
-                    short_arg = SHORT_CHILD(NODE_LEFT_CHILD);
-                    Node* short_arg_r = SHORT_CHILD(NODE_RIGHT_CHILD);
+                    Node* short_arg_r = NODE_RIGHT_CHILD;
 
-                    if(short_arg->type == IS_VAL && short_arg_r->type == IS_VAL)
+                    if( short_arg_l->type == IS_VAL && short_arg_r->type == IS_VAL)
                     {
-                        double argument = func_Pow(short_arg->value.node_value, short_arg_r->value.node_value);
+                        double argument = func_Pow( short_arg_l->value.node_value, short_arg_r->value.node_value);
                         if(argument != NAN)
                         {
-                            dtor_childs(short_arg);
-                            dtor_childs(short_arg_r);
+                            dtor_childs(node_ptr);
                             return NUM_NODE(argument)
                         }
                         ERROR_MESSAGE(stderr, ERR_INVALID_ARGUMENT)
@@ -1343,25 +1039,25 @@ Node* shortener(Tree* tree_ptr, Node* node_ptr) // ok
                         {
                             if(fabs(short_arg_r->value.node_value - 1.0) <= EPS)
                             {
-                                dtor_childs(short_arg_r);
-                                return short_arg;
+                                Node* short_arg = copy_subtree(tree_ptr,  short_arg_l);
+                                dtor_childs(node_ptr);
+                                return  short_arg;
                             }
                             if(check_is_positive(short_arg_r->value.node_value) == IS_ZERO)
                             {
-                                dtor_childs(short_arg_r);
-                                dtor_childs(short_arg);
+                                dtor_childs(node_ptr);
                                 return NUM_NODE(1);
                             } 
                         }
-                        return POW_NODE(short_arg, short_arg_r);
+                        return node_ptr;
                     }
+                    return node_ptr;
                 }
             default:
                 printf("TYPE: %ld, TEXT: %s, OP_VAL: %ld\n", node_ptr->type, node_ptr->value.text, node_ptr->value.op_number);
                 ERROR_MESSAGE(stderr, ERR_UNKNOWN_FUNC)
                 return nullptr;
     }
-
 }
 
 char* get_string_func(size_t func_code) // ok
@@ -1723,7 +1419,6 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text) // ok
                 Node* pre_diff_l = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* diff_l     = diff_tree(tree_ptr, pre_diff_l, varib_text);
 
-
                 Node* return_node = MUL_NODE(node_ptr, diff_l)
                 err_code = add_equation_diff_latex(return_node);
                 if(err_code != RETURN_OK)
@@ -1800,7 +1495,7 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text) // ok
 
                 Node* node_copy_1 = copy_subtree(tree_ptr, node_ptr->left_child);
                 Node* node_copy_2 = copy_subtree(tree_ptr, node_ptr->left_child);
-                Node* diff_l    = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
+                Node* diff_l      = diff_tree(tree_ptr, node_ptr->left_child, varib_text);
                 
                 free(node_ptr);
                 Node* one     = NUM_NODE(1)
@@ -1910,49 +1605,62 @@ Node* diff_tree(Tree* tree_ptr, Node* node_ptr, char* varib_text) // ok
 
 int full_diff(Tree* tree_ptr) // ok
 {
-    print_header_latex();
+    Node* svd_root = tree_ptr->root;
+    // print_header_latex();
     if(tree_ptr->num_of_vars == 0)
     {
-        tree_ptr->root = diff_tree(tree_ptr, tree_ptr->root, tree_ptr->vars_arr[0].var_text);
+        tree_ptr->root = shortener(tree_ptr, diff_tree(tree_ptr, tree_ptr->root, tree_ptr->vars_arr[0].var_text));
 
-        int err_code = print_plot_latex(tree_ptr->root, tree_ptr->vars_arr[0].var_text, tree_ptr);
-        if(err_code != RETURN_OK)
-        {
-            ERROR_MESSAGE(stderr, err_code)
-            return err_code;
-        }
+        // int err_code = print_plot_latex(tree_ptr->root, tree_ptr->vars_arr[0].var_text, tree_ptr);
+        // if(err_code != RETURN_OK)
+        // {
+        //     ERROR_MESSAGE(stderr, err_code)
+        //     return err_code;
+        // }
 
-        print_footer_latex(tree_ptr->root);
+        // print_footer_latex(tree_ptr->root);
     }
     else
     {
         Node* first_diff = diff_tree(tree_ptr, copy_subtree(tree_ptr, tree_ptr->root), tree_ptr->vars_arr[0].var_text);
+        tree_ptr->root = first_diff;
+        create_graph_jpg(tree_ptr, tree_ptr->vars_arr[0].var_text);
+        first_diff = shortener(tree_ptr, first_diff);
+        tree_ptr->root = first_diff;
+        create_graph_jpg(tree_ptr, "Shortener after diff");
 
-        int err_code = print_plot_latex(first_diff, tree_ptr->vars_arr[0].var_text, tree_ptr);
-        if(err_code != RETURN_OK)
-        {
-            ERROR_MESSAGE(stderr, err_code)
-            return err_code;
-        }
+        // int err_code = print_plot_latex(first_diff, tree_ptr->vars_arr[0].var_text, tree_ptr);
+        // if(err_code != RETURN_OK)
+        // {
+        //     ERROR_MESSAGE(stderr, err_code)
+        //     return err_code;
+        // }
 
         Node* diff_next_var = nullptr;
         for(size_t cur_diff = 1; cur_diff < tree_ptr->num_of_vars; cur_diff++)
         {
+            tree_ptr->root = svd_root;
             diff_next_var = diff_tree(tree_ptr, copy_subtree(tree_ptr, tree_ptr->root), tree_ptr->vars_arr[cur_diff].var_text);
+            tree_ptr->root = diff_next_var;
+            create_graph_jpg(tree_ptr, tree_ptr->vars_arr[cur_diff].var_text);
+            diff_next_var = shortener(tree_ptr, diff_next_var);
+            tree_ptr->root = diff_next_var;
+            create_graph_jpg(tree_ptr, "Shortener after diff");
 
-            int err_code = print_plot_latex(diff_next_var, tree_ptr->vars_arr[cur_diff].var_text, tree_ptr);
-            if(err_code != RETURN_OK)
-            {
-                ERROR_MESSAGE(stderr, err_code)
-                return err_code;
-            }
+            // int err_code = print_plot_latex(diff_next_var, tree_ptr->vars_arr[cur_diff].var_text, tree_ptr);
+            // if(err_code != RETURN_OK)
+            // {
+            //     ERROR_MESSAGE(stderr, err_code)
+            //     return err_code;
+            // }
 
             first_diff = ADD_NODE(first_diff, diff_next_var);
         }
 
+        tree_ptr->root = svd_root;
         dtor_childs(tree_ptr->root);
-        tree_ptr->root = first_diff;
-        print_footer_latex(tree_ptr->root);
+        tree_ptr->root = shortener(tree_ptr, first_diff);
+        // print_footer_latex(tree_ptr->root);
     }
 }
 

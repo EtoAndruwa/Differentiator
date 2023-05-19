@@ -11,7 +11,7 @@ int main()
     create_graph_jpg(tree_ptr_1, "tree_ptr_1");
 
     full_diff(tree_ptr_1);
-    create_graph_jpg(tree_ptr_1, "tree_ptr_1 after diff");
+    create_graph_jpg(tree_ptr_1, "tree_ptr_1 final");
 
     create_html(OUTPUT_NAME);
     tree_dtor(tree_ptr_1);

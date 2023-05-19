@@ -179,7 +179,7 @@ Node* rule_V(Tree* const tree_ptr, FILE* log_ptr) // ok
     {
         var_name[var_name_pos] = STRING(POSITION);
         var_name_pos++;
-        POSITION++;
+        POSITION++; 
     }
     var_name[var_name_pos] = '\0';
     skip_spaces(tree_ptr);
